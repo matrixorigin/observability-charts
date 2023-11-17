@@ -16,8 +16,8 @@ data:
           serviceScope: "mo-ob"
           alertOwner: bruce
         annotations:
-          summary: "{{ $labels.pod }}: error sending batch on {{ $labels.node_name }}, will retry"
-          description: "{{ $labels.pod }}: error sending batch on {{ $labels.node_name }}, will retry"
+          summary: "{{ "{{" }} $labels.pod }}: error sending batch on {{ "{{" }} $labels.node_name }}, will retry"
+          description: "{{ "{{" }} $labels.pod }}: error sending batch on {{ "{{" }} $labels.node_name }}, will retry"
       - alert: PromtailErrorSendingFinal
         expr: count_over_time({app="promtail"} |= `level=error` |= `final error sending batch` [1m]) > 0
         for: 1m
@@ -27,5 +27,5 @@ data:
           serviceScope: "mo-ob"
           alertOwner: bruce
         annotations:
-          summary: "{{ $labels.pod }}: final error sending batch on {{ $labels.node_name }}"
-          description: "{{ $labels.pod }}: final error sending batch on {{ $labels.node_name }}"
+          summary: "{{ "{{" }} $labels.pod }}: final error sending batch on {{ "{{" }} $labels.node_name }}"
+          description: "{{ "{{" }} $labels.pod }}: final error sending batch on {{ "{{" }} $labels.node_name }}"
