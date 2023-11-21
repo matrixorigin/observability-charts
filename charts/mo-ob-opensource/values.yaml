@@ -1,3 +1,6 @@
+alerting:
+  namespace: "mo-ob"
+
 promtail:
   enable: true
   serviceMonitor:
@@ -79,7 +82,7 @@ loki:
       storage: 
         type: local
         local: 
-          directory: /tmp/loki/rules
+          directory: /rules
       alertmanager_url: http://mo-ob-alertmanager.mo-ob:9093
     # -- Additional query scheduler config
     storage_config:
@@ -97,7 +100,12 @@ loki:
       #   endpoint: <endpoint>
       #   access_key_id: <access_key_id>
       #   secret_access_key: <secret_access_key>
-
+  sidecar:
+    rules:
+      label: loki_rule
+      labelValue: "true"
+      folder: /rules/fake
+      searchNamespace: ALL
   write:
     # -- Number of replicas for the write
     replicas: 3
@@ -138,20 +146,6 @@ loki:
         cpu: "2000m"
 
   backend:
-    extraVolumeMounts:
-      - name: log-alerting-rules
-        mountPath: /tmp/loki/rules/fake
-    extraVolumes:
-      - name: log-alerting-rules
-        projected:
-          sources:
-          - configMap:
-              name: mo-log-alerts-empty
-          - configMap:
-              name: mo-log-alerting-rules
-          - configMap:
-              name: ob-promtail-log-rules
-
     replicas: 1
     persistence:
       enableStatefulSetAutoDeletePVC: true

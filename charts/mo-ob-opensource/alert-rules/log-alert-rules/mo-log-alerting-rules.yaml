@@ -1,0 +1,14 @@
+groups:
+- name: mo.rules
+  rules:
+  - alert: mo_report_fatal
+    expr: count_over_time({matrixorigin_io_component=~".+"} |= `"level":"FATAL"` [1m]) > 0
+    for: 0m
+    labels:
+      alertname: MOReportFatal
+      severity: "critical"
+      serviceScope: "mo-cluster"
+      alertOwner: "shuqi.qin"
+    annotations:
+      summary: "{{$labels.matrixone_cloud_main_cluster}}: {{$labels.namespace}}.{{$labels.pod}} mo report fatal"
+      description: "{{$labels.matrixone_cloud_main_cluster}}: {{$labels.namespace}}.{{$labels.pod}} mo report fatal"
