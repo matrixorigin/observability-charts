@@ -5,7 +5,7 @@ on:
     branches:
     - main
     paths:
-    - 'charts/**'
+    - 'charts/**/Chart.yaml'
   release:
     types:
     - published
@@ -35,7 +35,8 @@ jobs:
 
       - name: Run Artifact Hub lint
         run: |
-          curl -s https://api.github.com/repos/artifacthub/hub/releases/latest | grep -E 'browser_download_url' | grep linux_amd64.tar.gz\" | grep -Eo 'https://[^\"]*' | xargs wget -O - | tar -xz
+          #curl -s https://api.github.com/repos/artifacthub/hub/releases/latest | grep -E 'browser_download_url' | grep linux_amd64.tar.gz\" | grep -Eo 'https://[^\"]*' | xargs wget -O - | tar -xz
+          echo "https://github.com/artifacthub/hub/releases/download/v1.16.0/ah_1.16.0_linux_amd64.tar.gz" | xargs wget -O - | tar -xz
           ./ah lint -p charts || exit 1
           rm -f ./ah
 
