@@ -139,8 +139,6 @@ alertmanager:
       - ReadWriteOnce
     # 阿里云部署时要调整为20G，因为其最小的PV只能说20G
     size: 20Gi
-  tolerations: 
-  - operator: Exists
   # persistence:
   #   enabled: true
   #   ## Persistent Volume Storage Class

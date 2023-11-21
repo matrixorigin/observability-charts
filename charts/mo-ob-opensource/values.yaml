@@ -26,8 +26,6 @@ loki:
   enabled: true
   tableManager:
     enabled: true
-    tolerations: 
-    - operator: Exists
     # retention related issue: https://github.com/matrixone-cloud/observability/issues/86
     retention_deletes_enabled: true
     retention_period: 720h
@@ -116,8 +114,6 @@ loki:
       storageClass: null
       # -- Selector for persistent disk
       selector: null
-    tolerations: 
-    - operator: Exists
     resources: 
       requests:
         memory: "4Gi"
@@ -128,8 +124,6 @@ loki:
 
   read:
     replicas: 1
-    tolerations: 
-    - operator: Exists
     persistence:
       enableStatefulSetAutoDeletePVC: true
       size: 10Gi
@@ -159,8 +153,6 @@ loki:
               name: ob-promtail-log-rules
 
     replicas: 1
-    tolerations: 
-    - operator: Exists
     persistence:
       enableStatefulSetAutoDeletePVC: true
       size: 10Gi
@@ -178,8 +170,6 @@ loki:
   gateway:
     enabled: true
     replicas: 1
-    tolerations: 
-    - operator: Exists
     resources: 
       requests:
         memory: "250Mi"
@@ -256,8 +246,6 @@ kube-prometheus-stack:
 
 
   prometheusOperator:
-    tolerations:
-      - operator: Exists
     enabled: true
     # image:
     #   registry: registry.cn-hangzhou.aliyuncs.com
@@ -281,8 +269,6 @@ kube-prometheus-stack:
     prometheusSpec:
       ruleSelectorNilUsesHelmValues: false
       serviceMonitorSelectorNilUsesHelmValues: false
-      tolerations:
-        - operator: Exists
       # image:
       #   registry: registry.cn-hangzhou.aliyuncs.com
       #   repository: prometheus
