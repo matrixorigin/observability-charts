@@ -124,6 +124,11 @@ moRuler:
 ## ref: https://prometheus.io/docs/alerting/alertmanager/
 ##
 alertmanager:
+  service:
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/path: "/metrics"
+      prometheus.io/port: "9093"
   configmapReload:
     enabled: true
   extraArgs:

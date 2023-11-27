@@ -2,7 +2,7 @@ alerting:
   namespace: "mo-ob"
 
 promtail:
-  enable: true
+  enabled: true
   serviceMonitor:
     enabled: true
   tolerations: 
@@ -261,6 +261,7 @@ kube-prometheus-stack:
 
   prometheus:
     prometheusSpec:
+      logLevel: debug
       ruleSelectorNilUsesHelmValues: false
       serviceMonitorSelectorNilUsesHelmValues: false
       # image:
