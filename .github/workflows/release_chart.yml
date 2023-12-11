@@ -16,7 +16,7 @@ jobs:
   publish:
     permissions:
       contents: write # for helm/chart-releaser-action to push chart release and create a release
-    runs-on: amd64-tke-moc
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
