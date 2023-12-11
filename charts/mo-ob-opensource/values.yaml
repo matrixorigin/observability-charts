@@ -261,6 +261,9 @@ kube-prometheus-stack:
 
   prometheus:
     prometheusSpec:
+      externalLabels:
+        # cluster provider
+        clusterDetail: aliyun-new-dev-controlplane
       logLevel: debug
       ruleSelectorNilUsesHelmValues: false
       serviceMonitorSelectorNilUsesHelmValues: false
