@@ -6,16 +6,23 @@ on:
     types: [ opened, synchronize, reopened ]
     branches: [ main,'[0-9]+.[0-9]+.[0-9]+' ]
     paths:
-      - '**'
-      - '!charts/**'
-      - '!docs/**'
-      - '!etc/**'
-      - '!example/**'
-      - '!test/**'
-      - '!.dockerignore'
-      - '!.gitignore'
-      - '!.gitmodules'
-      - '!README.md'
+      - 'pkg/**'
+      - 'cmd/**'
+      - 'lib/**'
+      - 'test/**'
+      - 'optools/**'
+      - '.github/observability/**'
+      # 调整触发逻辑, 减少本任务触发
+      #- '**'
+      #- '!charts/**'
+      #- '!docs/**'
+      #- '!etc/**'
+      #- '!example/**'
+      #- '!test/**'
+      #- '!.dockerignore'
+      #- '!.gitignore'
+      #- '!.gitmodules'
+      #- '!README.md'
       # should test obervability when change package
       # - '!.github/**' ## 这个去不掉
       # - '!./go.mod'
@@ -28,7 +35,7 @@ concurrency:
 
 jobs:
   ut:
-    runs-on: amd64-tke-moc
+    runs-on: amd64-moc-guangzhou-medium8
     name: UT Test for MO-Agent and MO-Ruler
     steps:
       - uses: actions/checkout@v3
@@ -48,7 +55,7 @@ jobs:
           echo "apisecret=${{ secrets.S3APISECRET }}" >> $GITHUB_ENV
           echo "bucket=${{ secrets.S3BUCKET }}" >> $GITHUB_ENV
 
-      - names: Set netrc
+      - name: Set netrc
         # 为解决私有仓库拉取问题
         uses: extractions/netrc@v1
         with:
@@ -162,7 +169,7 @@ jobs:
         run: docker-compose -f "./.github/observability/docker-compose.yaml" down
 
   sca:
-    runs-on: amd64-tke-moc
+    runs-on: amd64-moc-guangzhou-medium8
     name: SCA Test on Ubuntu/x64
 
     steps:

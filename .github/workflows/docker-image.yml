@@ -19,7 +19,7 @@ on:
 
 jobs:
   docker:
-    runs-on: amd64-tke-moc
+    runs-on: amd64-moc-guangzhou-medium8
     steps:
 
       - uses: actions/checkout@v3
