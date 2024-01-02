@@ -7,6 +7,8 @@ promtail:
     enabled: true
   tolerations: 
   - operator: Exists
+  extraArgs:
+    - -config.expand-env=true
   config:
     logLevel: info
     logFormat: logfmt
@@ -24,6 +26,57 @@ promtail:
         # keep all kubernetes pod's labels
         - action: labelmap
           regex: __meta_kubernetes_pod_label_(.+)
+      extraScrapeConfigs: |
+        - job_name: host_log
+          static_configs:
+          - targets:
+              - localhost
+            labels:
+              job: host_messages
+              __path__: /var/log/host/messages
+              node_name: '${HOSTNAME}'
+          - targets:
+              - localhost
+            labels:
+              job: host_boot_log
+              __path__: /var/log/host/boot.log
+              node_name: '${HOSTNAME}'
+          - targets:
+            - localhost
+            labels:
+              job: host_btmp
+              __path__: /var/log/host/btmp
+              node_name: '${HOSTNAME}'
+          - targets:
+              - localhost
+            labels:
+              job: host_cron
+              __path__: /var/log/host/cron
+              node_name: '${HOSTNAME}'
+          - targets:
+              - localhost
+            labels:
+              job: host_maillog
+              __path__: /var/log/host/maillog
+              node_name: '${HOSTNAME}'
+          - targets:
+              - localhost
+            labels:
+              job: host_secure
+              __path__: /var/log/host/secure
+              node_name: '${HOSTNAME}'
+  # Extra volumes to be added in addition to those specified under `defaultVolumes`.
+  extraVolumes:
+  - name: local
+    hostPath:
+      # path: /var/log/messages
+      path: /var/log
+
+  # Extra volume mounts together. Corresponds to `extraVolumes`.
+  extraVolumeMounts:
+  - name: local
+    mountPath: /var/log/host
+    readOnly: true
 
 loki:
   enabled: true
