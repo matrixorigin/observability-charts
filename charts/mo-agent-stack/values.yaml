@@ -1,0 +1,1858 @@
+# Default values for mo-agent-stack.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+moAgent:
+  replicaCount: 1
+
+  image:
+    containerName: mo-agent
+    repository: matrixorigin/observability
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: agent-0.9.0-alpha.2
+
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      cpu: 200m
+      memory: 200Mi
+
+  nameOverride: ""
+  fullnameOverride: ""
+
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+
+  apiServer:
+    port: 8000
+
+  extraSecretMounts:
+    #- name: mo-secret-mount
+    #  secretName: mo-ob-secret
+    #  mountPath: /etc/secrets/mo-secret
+    #  readOnly: true
+    #  defaultMode: 0440
+
+  agentSpec:
+    # cooperate with mo.type = env & extraSecretMounts
+    secret: mo-ob-secret
+    log:
+      level: info
+      format: console
+      filename:
+      maxSize:
+      maxDays:
+      maxBackups:
+    general:
+      shortTable: false
+      retention:
+        # 默认不关闭定期删除
+        retentionDisabled: false
+        deleteInterval: "1h"
+        onceDeleteLimit: 10000
+        logRetentionPeriod: "336h"        # 保留 14天
+        metricRetentionPeriod: "336h"        # 保留 14天
+        traceRetentionPeriod: "336h"        # 保留 14天
+    server:
+      host: 0.0.0.0
+      port: 8000
+      privateKeyFile:
+      publicKeyFile:
+      tokenEffectiveTime: 2
+      certPath:
+      mode: playground
+      maxAllow: 3000
+      maxWait: 5s
+    mo:
+      # valid value in [ cfg, env, cluster ], default: cfg.
+      type: cfg
+      labels:
+        matrixone.cloud/role: observability
+      host: 127.0.0.1
+      port: 6001
+      user: dump
+      password: 111
+      connectTimeout: 15s
+      maxOpens: 5
+      maxIdles: -1
+      initPingCnt: 60
+      # default: 1 GB
+      maxAllowedPacket: 134217728
+    app:
+      uuid: 8f0e5ef6de8fe306d772fba5d29e75e8
+      account: sys
+      database: observability
+      # val in [tae, csv], default: tae
+      extension: tae
+      # val in [sql, fs], default: sql
+      exporter: sql
+      exportThreads: 128
+      exportInterval: 3s
+      bufferBytes: 2097152
+      showAccessLog: false
+      # api data handle queue size
+      queueSize : 262144 # queue mem cost : 2MB
+      # metric table name cache size
+      metricCacheSize : 4096
+      # label series id cache size
+      labelCacheSize : 200000
+      # log table name cache size
+      logCacheSize : 512
+      preCreatetableWorker : 5
+      # pre load label id limit
+      labelPreloadLimit : 200000
+      labelFlushSize: 5242880 # 5MB
+      labelFlushInterval: 6s
+      metricTablesPreCreate:
+      # prometheus metric
+      - go_gc_duration_seconds
+      - go_gc_duration_seconds_count
+      - go_gc_duration_seconds_sum
+      - go_goroutines
+      - go_info
+      - go_memstats_gc_cpu_fraction
+      - go_memstats_alloc_bytes
+      - go_memstats_alloc_bytes_total
+      - go_memstats_buck_hash_sys_bytes
+      - go_memstats_frees_total
+      - go_memstats_gc_sys_bytes
+      - go_memstats_heap_alloc_bytes
+      - go_memstats_heap_idle_bytes
+      - go_memstats_heap_inuse_bytes
+      - go_memstats_heap_objects
+      - go_memstats_heap_released_bytes
+      - go_memstats_heap_sys_bytes
+      - go_memstats_last_gc_time_seconds
+      - go_memstats_lookups_total
+      - go_memstats_mallocs_total
+      - go_memstats_mcache_inuse_bytes
+      - go_memstats_mcache_sys_bytes
+      - go_memstats_mspan_inuse_bytes
+      - go_memstats_mspan_sys_bytes
+      - go_memstats_next_gc_bytes
+      - go_memstats_other_sys_bytes
+      - go_memstats_stack_inuse_bytes
+      - go_memstats_stack_sys_bytes
+      - go_memstats_sys_bytes
+      - go_threads
+      - net_conntrack_dialer_conn_attempted_total
+      - net_conntrack_dialer_conn_closed_total
+      - net_conntrack_dialer_conn_established_total
+      - net_conntrack_dialer_conn_failed_total
+      - net_conntrack_listener_conn_accepted_total
+      - net_conntrack_listener_conn_closed_total
+      - process_cpu_seconds_total
+      - process_max_fds
+      - process_open_fds
+      - process_resident_memory_bytes
+      - process_start_time_seconds
+      - process_virtual_memory_bytes
+      - process_virtual_memory_max_bytes
+      - prometheus_agent_active_series
+      - prometheus_agent_checkpoint_creations_failed_total
+      - prometheus_agent_checkpoint_creations_total
+      - prometheus_agent_checkpoint_deletions_failed_total
+      - prometheus_agent_checkpoint_deletions_total
+      - prometheus_agent_clean_start
+      - prometheus_agent_corruptions_total
+      - prometheus_agent_data_replay_duration_seconds
+      - prometheus_agent_deleted_series
+      - prometheus_agent_exemplars_appended_total
+      - prometheus_agent_out_of_order_samples_total
+      - prometheus_agent_samples_appended_total
+      - prometheus_agent_truncate_duration_seconds_count
+      - prometheus_agent_truncate_duration_seconds_sum
+      - prometheus_api_remote_read_queries
+      - prometheus_build_info
+      - prometheus_config_last_reload_success_timestamp_seconds
+      - prometheus_config_last_reload_successful
+      - prometheus_http_request_duration_seconds_bucket
+      - prometheus_http_request_duration_seconds_count
+      - prometheus_http_request_duration_seconds_sum
+      - prometheus_http_requests_total
+      - prometheus_http_response_size_bytes_bucket
+      - prometheus_http_response_size_bytes_count
+      - prometheus_http_response_size_bytes_sum
+      - prometheus_notifications_alertmanagers_discovered
+      - prometheus_notifications_dropped_total
+      - prometheus_notifications_queue_capacity
+      - prometheus_notifications_queue_length
+      - prometheus_ready
+      - prometheus_remote_storage_bytes_total
+      - prometheus_remote_storage_enqueue_retries_total
+      - prometheus_remote_storage_exemplars_dropped_total
+      - prometheus_remote_storage_exemplars_failed_total
+      - prometheus_remote_storage_exemplars_in_total
+      - prometheus_remote_storage_exemplars_pending
+      - prometheus_remote_storage_exemplars_retried_total
+      - prometheus_remote_storage_exemplars_total
+      - prometheus_remote_storage_highest_timestamp_in_seconds
+      - prometheus_remote_storage_histograms_dropped_total
+      - prometheus_remote_storage_histograms_failed_total
+      - prometheus_remote_storage_histograms_in_total
+      - prometheus_remote_storage_histograms_pending
+      - prometheus_remote_storage_histograms_retried_total
+      - prometheus_remote_storage_histograms_total
+      - prometheus_remote_storage_max_samples_per_send
+      - prometheus_remote_storage_metadata_bytes_total
+      - prometheus_remote_storage_metadata_failed_total
+      - prometheus_remote_storage_metadata_retried_total
+      - prometheus_remote_storage_metadata_total
+      - prometheus_remote_storage_queue_highest_sent_timestamp_seconds
+      - prometheus_remote_storage_samples_dropped_total
+      - prometheus_remote_storage_samples_failed_total
+      - prometheus_remote_storage_samples_in_total
+      - prometheus_remote_storage_samples_pending
+      - prometheus_remote_storage_samples_retried_total
+      - prometheus_remote_storage_samples_total
+      - prometheus_remote_storage_sent_batch_duration_seconds_bucket
+      - prometheus_remote_storage_sent_batch_duration_seconds_count
+      - prometheus_remote_storage_sent_batch_duration_seconds_sum
+      - prometheus_remote_storage_shard_capacity
+      - prometheus_remote_storage_shards
+      - prometheus_remote_storage_shards_desired
+      - prometheus_remote_storage_shards_max
+      - prometheus_remote_storage_shards_min
+      - prometheus_remote_storage_string_interner_zero_reference_releases_total
+      - prometheus_sd_azure_failures_total
+      - prometheus_sd_consul_rpc_duration_seconds
+      - prometheus_sd_consul_rpc_duration_seconds_count
+      - prometheus_sd_consul_rpc_duration_seconds_sum
+      - prometheus_sd_consul_rpc_failures_total
+      - prometheus_sd_discovered_targets
+      - prometheus_sd_dns_lookup_failures_total
+      - prometheus_sd_dns_lookups_total
+      - prometheus_sd_failed_configs
+      - prometheus_sd_file_read_errors_total
+      - prometheus_sd_file_scan_duration_seconds
+      - prometheus_sd_file_scan_duration_seconds_count
+      - prometheus_sd_file_scan_duration_seconds_sum
+      - prometheus_sd_file_watcher_errors_total
+      - prometheus_sd_http_failures_total
+      - prometheus_sd_kubernetes_events_total
+      - prometheus_sd_kuma_fetch_duration_seconds
+      - prometheus_sd_kuma_fetch_duration_seconds_count
+      - prometheus_sd_kuma_fetch_duration_seconds_sum
+      - prometheus_sd_kuma_fetch_failures_total
+      - prometheus_sd_kuma_fetch_skipped_updates_total
+      - prometheus_sd_linode_failures_total
+      - prometheus_sd_nomad_failures_total
+      - prometheus_sd_received_updates_total
+      - prometheus_sd_updates_total
+      - prometheus_target_interval_length_seconds
+      - prometheus_target_interval_length_seconds_count
+      - prometheus_target_interval_length_seconds_sum
+      - prometheus_target_metadata_cache_bytes
+      - prometheus_target_metadata_cache_entries
+      - prometheus_target_scrape_pool_exceeded_label_limits_total
+      - prometheus_target_scrape_pool_exceeded_target_limit_total
+      - prometheus_target_scrape_pool_reloads_failed_total
+      - prometheus_target_scrape_pool_reloads_total
+      - prometheus_target_scrape_pool_sync_total
+      - prometheus_target_scrape_pool_targets
+      - prometheus_target_scrape_pools_failed_total
+      - prometheus_target_scrape_pools_total
+      - prometheus_target_scrapes_cache_flush_forced_total
+      - prometheus_target_scrapes_exceeded_body_size_limit_total
+      - prometheus_target_scrapes_exceeded_sample_limit_total
+      - prometheus_target_scrapes_exemplar_out_of_order_total
+      - prometheus_target_scrapes_sample_duplicate_timestamp_total
+      - prometheus_target_scrapes_sample_out_of_bounds_total
+      - prometheus_target_scrapes_sample_out_of_order_total
+      - prometheus_target_sync_failed_total
+      - prometheus_target_sync_length_seconds
+      - prometheus_target_sync_length_seconds_count
+      - prometheus_target_sync_length_seconds_sum
+      - prometheus_template_text_expansion_failures_total
+      - prometheus_template_text_expansions_total
+      - prometheus_treecache_watcher_goroutines
+      - prometheus_treecache_zookeeper_failures_total
+      - prometheus_tsdb_wal_completed_pages_total
+      - prometheus_tsdb_wal_fsync_duration_seconds
+      - prometheus_tsdb_wal_fsync_duration_seconds_count
+      - prometheus_tsdb_wal_fsync_duration_seconds_sum
+      - prometheus_tsdb_wal_page_flushes_total
+      - prometheus_tsdb_wal_segment_current
+      - prometheus_tsdb_wal_truncations_failed_total
+      - prometheus_tsdb_wal_truncations_total
+      - prometheus_tsdb_wal_writes_failed_total
+      - prometheus_wal_watcher_current_segment
+      - prometheus_wal_watcher_record_decode_failures_total
+      - prometheus_wal_watcher_records_read_total
+      - prometheus_wal_watcher_samples_sent_pre_tailing_total
+      - prometheus_web_federation_errors_total
+      - prometheus_web_federation_warnings_total
+      - prometheus_sd_kubernetes_http_request_duration_seconds_sum
+      - prometheus_sd_kubernetes_http_request_duration_seconds_count
+      - prometheus_sd_kubernetes_http_request_total
+      - prometheus_sd_kubernetes_workqueue_depth
+      - prometheus_sd_kubernetes_workqueue_items_total
+      - prometheus_sd_kubernetes_workqueue_latency_seconds_sum
+      - prometheus_sd_kubernetes_workqueue_latency_seconds_count
+      - prometheus_sd_kubernetes_workqueue_longest_running_processor_seconds
+      - prometheus_sd_kubernetes_workqueue_unfinished_work_seconds
+      - prometheus_sd_kubernetes_workqueue_work_duration_seconds_sum
+      - prometheus_sd_kubernetes_workqueue_work_duration_seconds_count
+      - promhttp_metric_handler_requests_in_flight
+      - promhttp_metric_handler_requests_total
+      - promhttp_metric_handler_errors_total
+      - scrape_duration_seconds
+      - scrape_samples_post_metric_relabeling
+      - scrape_samples_scraped
+      - scrape_series_added
+      - up
+      # node exporter metric table
+      - machine_cpu_cores
+      - machine_cpu_physical_cores
+      - machine_cpu_sockets
+      - machine_memory_bytes
+      - machine_nvm_avg_power_budget_watts
+      - machine_nvm_capacity
+      - machine_scrape_error
+      - node_arp_entries
+      - node_boot_time_seconds
+      - node_context_switches_total
+      - node_cpu_guest_seconds_total
+      - node_cpu_seconds_total
+      - node_disk_discard_time_seconds_total
+      - node_disk_discarded_sectors_total
+      - node_disk_discards_completed_total
+      - node_disk_discards_merged_total
+      - node_disk_flush_requests_time_seconds_total
+      - node_disk_flush_requests_total
+      - node_disk_info
+      - node_disk_io_now
+      - node_disk_io_time_seconds_total
+      - node_disk_io_time_weighted_seconds_total
+      - node_disk_read_bytes_total
+      - node_disk_read_time_seconds_total
+      - node_disk_reads_completed_total
+      - node_disk_reads_merged_total
+      - node_disk_write_time_seconds_total
+      - node_disk_writes_completed_total
+      - node_disk_writes_merged_total
+      - node_disk_written_bytes_total
+      - node_entropy_available_bits
+      - node_entropy_pool_size_bits
+      - node_exporter_build_info
+      - node_filefd_allocated
+      - node_filefd_maximum
+      - node_filesystem_avail_bytes
+      - node_filesystem_device_error
+      - node_filesystem_files
+      - node_filesystem_files_free
+      - node_filesystem_free_bytes
+      - node_filesystem_readonly
+      - node_filesystem_size_bytes
+      - node_forks_total
+      - node_intr_total
+      - node_ipvs_connections_total
+      - node_ipvs_incoming_bytes_total
+      - node_ipvs_incoming_packets_total
+      - node_ipvs_outgoing_bytes_total
+      - node_ipvs_outgoing_packets_total
+      - node_load1
+      - node_load15
+      - node_load5
+      - node_memory_Active_file_bytes
+      - node_memory_AnonPages_bytes
+      - node_memory_Active_anon_bytes
+      - node_memory_AnonHugePages_bytes
+      - node_memory_Bounce_bytes
+      - node_memory_Buffers_bytes
+      - node_memory_Active_bytes
+      - node_memory_CommitLimit_bytes
+      - node_memory_Dirty_bytes
+      - node_memory_FileHugePages_bytes
+      - node_memory_HugePages_Free
+      - node_memory_FilePmdMapped_bytes
+      - node_memory_Cached_bytes
+      - node_memory_MemAvailable_bytes
+      - node_memory_HugePages_Surp
+      - node_memory_Committed_AS_bytes
+      - node_memory_MemFree_bytes
+      - node_memory_HugePages_Rsvd
+      - node_memory_Mapped_bytes
+      - node_memory_HugePages_Total
+      - node_memory_Inactive_bytes
+      - node_memory_Percpu_bytes
+      - node_memory_MemTotal_bytes
+      - node_memory_NFS_Unstable_bytes
+      - node_memory_SReclaimable_bytes
+      - node_memory_Hugepagesize_bytes
+      - node_memory_KReclaimable_bytes
+      - node_memory_Mlocked_bytes
+      - node_memory_ShmemHugePages_bytes
+      - node_memory_Inactive_file_bytes
+      - node_memory_Hugetlb_bytes
+      - node_memory_SUnreclaim_bytes
+      - node_memory_PageTables_bytes
+      - node_memory_Shmem_bytes
+      - node_memory_Slab_bytes
+      - node_memory_SwapTotal_bytes
+      - node_memory_SwapCached_bytes
+      - node_memory_ShmemPmdMapped_bytes
+      - node_memory_Inactive_anon_bytes
+      - node_memory_SwapFree_bytes
+      - node_memory_KernelStack_bytes
+      - node_memory_VmallocUsed_bytes
+      - node_memory_Writeback_bytes
+      - node_memory_WritebackTmp_bytes
+      - node_memory_VmallocChunk_bytes
+      - node_memory_VmallocTotal_bytes
+      - node_memory_Unevictable_bytes
+      - node_netstat_icmp6_inerrors
+      - node_netstat_Icmp6_InMsgs
+      - node_netstat_Icmp_InErrors
+      - node_netstat_Icmp6_OutMsgs
+      - node_netstat_Ip6_InOctets
+      - node_netstat_Icmp_OutMsgs
+      - node_netstat_IpExt_InOctets
+      - node_netstat_Icmp_InMsgs
+      - node_netstat_Ip_Forwarding
+      - node_netstat_Ip6_OutOctets
+      - node_netstat_TcpExt_ListenDrops
+      - node_netstat_IpExt_OutOctets
+      - node_netstat_TcpExt_ListenOverflows
+      - node_netstat_TcpExt_SyncookiesRecv
+      - node_netstat_TcpExt_SyncookiesFailed
+      - node_netstat_TcpExt_SyncookiesSent
+      - node_netstat_Tcp_CurrEstab
+      - node_netstat_TcpExt_TCPSynRetrans
+      - node_netstat_TcpExt_TCPTimeouts
+      - node_netstat_Tcp_ActiveOpens
+      - node_netstat_Tcp_InErrs
+      - node_netstat_Tcp_OutRsts
+      - node_netstat_Tcp_InSegs
+      - node_netstat_Tcp_PassiveOpens
+      - node_netstat_Tcp_OutSegs
+      - node_netstat_Udp6_InDatagrams
+      - node_netstat_Udp6_InErrors
+      - node_netstat_Udp6_NoPorts
+      - node_netstat_Udp6_RcvbufErrors
+      - node_netstat_UdpLite6_InErrors
+      - node_netstat_Udp6_OutDatagrams
+      - node_netstat_Udp6_SndbufErrors
+      - node_netstat_Tcp_RetransSegs
+      - node_netstat_Udp_InErrors
+      - node_netstat_UdpLite_InErrors
+      - node_netstat_Udp_InDatagrams
+      - node_netstat_Udp_OutDatagrams
+      - node_netstat_Udp_NoPorts
+      - node_netstat_Udp_RcvbufErrors
+      - node_netstat_Udp_SndbufErrors
+      - node_network_address_assign_type
+      - node_network_carrier
+      - node_network_carrier_changes_total
+      - node_network_carrier_down_changes_total
+      - node_network_carrier_up_changes_total
+      - node_network_device_id
+      - node_network_dormant
+      - node_network_flags
+      - node_network_iface_id
+      - node_network_iface_link
+      - node_network_iface_link_mode
+      - node_network_info
+      - node_network_mtu_bytes
+      - node_network_name_assign_type
+      - node_network_net_dev_group
+      - node_network_protocol_type
+      - node_network_receive_bytes_total
+      - node_network_receive_compressed_total
+      - node_network_receive_drop_total
+      - node_network_receive_errs_total
+      - node_network_receive_fifo_total
+      - node_network_receive_frame_total
+      - node_network_receive_multicast_total
+      - node_network_receive_nohandler_total
+      - node_network_receive_packets_total
+      - node_network_speed_bytes
+      - node_network_transmit_bytes_total
+      - node_network_transmit_carrier_total
+      - node_network_transmit_colls_total
+      - node_network_transmit_compressed_total
+      - node_network_transmit_drop_total
+      - node_network_transmit_errs_total
+      - node_network_transmit_fifo_total
+      - node_network_transmit_packets_total
+      - node_network_transmit_queue_length
+      - node_network_up
+      - node_nf_conntrack_entries
+      - node_nf_conntrack_entries_limit
+      - node_nf_conntrack_stat_drop
+      - node_nf_conntrack_stat_early_drop
+      - node_nf_conntrack_stat_found
+      - node_nf_conntrack_stat_ignore
+      - node_nf_conntrack_stat_insert
+      - node_nf_conntrack_stat_insert_failed
+      - node_nf_conntrack_stat_invalid
+      - node_nf_conntrack_stat_search_restart
+      - node_procs_blocked
+      - node_procs_running
+      - node_scrape_collector_duration_seconds
+      - node_scrape_collector_success
+      - node_selinux_enabled
+      - node_sockstat_FRAG6_memory
+      - node_sockstat_FRAG_memory
+      - node_sockstat_FRAG_inuse
+      - node_sockstat_FRAG6_inuse
+      - node_sockstat_RAW_inuse
+      - node_sockstat_TCP6_inuse
+      - node_sockstat_TCP_alloc
+      - node_sockstat_TCP_mem_bytes
+      - node_sockstat_TCP_mem
+      - node_sockstat_TCP_orphan
+      - node_sockstat_RAW6_inuse
+      - node_sockstat_TCP_tw
+      - node_sockstat_TCP_inuse
+      - node_sockstat_UDPLITE_inuse
+      - node_sockstat_UDPLITE6_inuse
+      - node_sockstat_UDP_inuse
+      - node_sockstat_UDP_mem
+      - node_sockstat_UDPLITE6_inuse
+      - node_sockstat_UDP6_inuse
+      - node_sockstat_UDP_mem_bytes
+      - node_softnet_dropped_total
+      - node_softnet_processed_total
+      - node_softnet_times_squeezed_total
+      - node_textfile_scrape_error
+      - node_time_clocksource_available_info
+      - node_time_clocksource_current_info
+      - node_time_seconds
+      - node_time_zone_offset_seconds
+      - node_timex_estimated_error_seconds
+      - node_timex_frequency_adjustment_ratio
+      - node_timex_loop_time_constant
+      - node_timex_maxerror_seconds
+      - node_timex_offset_seconds
+      - node_timex_pps_calibration_total
+      - node_timex_pps_error_total
+      - node_timex_pps_frequency_hertz
+      - node_timex_pps_jitter_seconds
+      - node_timex_pps_jitter_total
+      - node_timex_pps_shift_seconds
+      - node_timex_pps_stability_exceeded_total
+      - node_timex_pps_stability_hertz
+      - node_timex_status
+      - node_timex_sync_status
+      - node_timex_tai_offset_seconds
+      - node_timex_tick_seconds
+      - node_udp_queues
+      - node_uname_info
+      - node_vmstat_oom_kill
+      - node_vmstat_pgfault
+      - node_vmstat_pgmajfault
+      - node_vmstat_pgpgin
+      - node_vmstat_pgpgout
+      - node_vmstat_pswpin
+      - node_vmstat_pswpout
+      - node_memory_directmap1g_bytes
+      - node_memory_directmap2m_bytes
+      - node_memory_directmap4k_bytes
+      - node_memory_hardwarecorrupted_bytes
+      - node_nvme_info
+      - node_schedstat_running_seconds_total
+      - node_schedstat_timeslices_total
+      - node_schedstat_waiting_seconds_total
+      - node_sockstat_sockets_used
+      - node_xfs_allocation_btree_compares_total
+      - node_xfs_allocation_btree_lookups_total
+      - node_xfs_allocation_btree_records_inserted_total
+      - node_xfs_block_map_btree_compares_total
+      - node_xfs_block_map_btree_lookups_total
+      - node_xfs_block_map_btree_records_deleted_total
+      - node_xfs_block_map_btree_records_inserted_total
+      - node_xfs_block_mapping_extent_list_compares_total
+      - node_xfs_block_mapping_extent_list_deletions_total
+      - node_xfs_block_mapping_extent_list_insertions_total
+      - node_xfs_block_mapping_extent_list_lookups_total
+      - node_xfs_block_mapping_reads_total
+      - node_xfs_block_mapping_unmaps_total
+      - node_xfs_block_mapping_writes_total
+      - node_xfs_directory_operation_create_total
+      - node_xfs_directory_operation_getdents_total
+      - node_xfs_directory_operation_lookup_total
+      - node_xfs_directory_operation_remove_total
+      - node_xfs_extent_allocation_blocks_allocated_total
+      - node_xfs_extent_allocation_blocks_freed_total
+      - node_xfs_extent_allocation_extents_allocated_total
+      - node_xfs_extent_allocation_extents_freed_total
+      - node_xfs_inode_operation_attempts_total
+      - node_xfs_inode_operation_attribute_changes_total
+      - node_xfs_inode_operation_duplicates_total
+      - node_xfs_inode_operation_found_total
+      - node_xfs_inode_operation_missed_total
+      - node_xfs_inode_operation_reclaims_total
+      - node_xfs_inode_operation_recycled_total
+      - node_xfs_read_calls_total
+      - node_xfs_vnode_active_total
+      - node_xfs_vnode_allocate_total
+      - node_xfs_vnode_get_total
+      - node_xfs_vnode_hold_total
+      - node_xfs_vnode_reclaim_total
+      - node_xfs_vnode_release_total
+      - node_xfs_vnode_remove_total
+      - node_xfs_write_calls_total
+      - node_xfs_allocation_btree_records_deleted_total
+      - node_pressure_cpu_waiting_seconds_total
+      - node_pressure_io_stalled_seconds_total
+      - node_pressure_io_waiting_seconds_total
+      - node_pressure_memory_stalled_seconds_total
+      - node_pressure_memory_waiting_seconds_total
+      # api-server
+      # - aggregator_openapi_v2_regeneration_count
+      # - aggregator_openapi_v2_regeneration_duration
+      # - aggregator_unavailable_apiservice
+      # - aggregator_unavailable_apiservice_total
+      # - apiextensions_openapi_v2_regeneration_count
+      # - apiserver_admission_controller_admission_duration_seconds_bucket
+      # - apiserver_admission_controller_admission_duration_seconds_count
+      # - apiserver_admission_controller_admission_duration_seconds_sum
+      # - apiserver_admission_step_admission_duration_seconds_bucket
+      # - apiserver_admission_step_admission_duration_seconds_count
+      # - apiserver_admission_step_admission_duration_seconds_sum
+      # - apiserver_admission_step_admission_duration_seconds_summary
+      # - apiserver_admission_step_admission_duration_seconds_summary_count
+      # - apiserver_admission_step_admission_duration_seconds_summary_sum
+      # - apiserver_admission_webhook_admission_duration_seconds_bucket
+      # - apiserver_admission_webhook_admission_duration_seconds_count
+      # - apiserver_admission_webhook_admission_duration_seconds_sum
+      # - apiserver_audit_error_total
+      # - apiserver_audit_event_total
+      # - apiserver_audit_level_total
+      # - apiserver_audit_requests_rejected_total
+      # - apiserver_client_certificate_expiration_seconds_bucket
+      # - apiserver_client_certificate_expiration_seconds_count
+      # - apiserver_client_certificate_expiration_seconds_sum
+      # - apiserver_crd_webhook_conversion_duration_seconds_bucket
+      # - apiserver_crd_webhook_conversion_duration_seconds_count
+      # - apiserver_crd_webhook_conversion_duration_seconds_sum
+      # - apiserver_current_inflight_requests
+      # - apiserver_current_inqueue_requests
+      # - apiserver_delegated_authn_request_duration_seconds_bucket
+      # - apiserver_delegated_authn_request_duration_seconds_count
+      # - apiserver_delegated_authn_request_duration_seconds_sum
+      # - apiserver_delegated_authn_request_total
+      # - apiserver_delegated_authz_request_duration_seconds_bucket
+      # - apiserver_delegated_authz_request_duration_seconds_count
+      # - apiserver_delegated_authz_request_duration_seconds_sum
+      # - apiserver_delegated_authz_request_total
+      # - apiserver_envelope_encryption_dek_cache_fill_percent
+      # - apiserver_flowcontrol_current_executing_requests
+      # - apiserver_flowcontrol_current_inqueue_requests
+      # - apiserver_flowcontrol_current_r
+      # - apiserver_flowcontrol_dispatch_r
+      # - apiserver_flowcontrol_dispatched_requests_total
+      # - apiserver_flowcontrol_latest_s
+      # - apiserver_flowcontrol_next_discounted_s_bounds
+      # - apiserver_flowcontrol_next_s_bounds
+      # - apiserver_flowcontrol_priority_level_request_count_samples_bucket
+      # - apiserver_flowcontrol_priority_level_request_count_samples_count
+      # - apiserver_flowcontrol_priority_level_request_count_samples_sum
+      # - apiserver_flowcontrol_priority_level_request_count_watermarks_bucket
+      # - apiserver_flowcontrol_priority_level_request_count_watermarks_count
+      # - apiserver_flowcontrol_priority_level_request_count_watermarks_sum
+      # - apiserver_flowcontrol_read_vs_write_request_count_samples_bucket
+      # - apiserver_flowcontrol_read_vs_write_request_count_samples_count
+      # - apiserver_flowcontrol_read_vs_write_request_count_samples_sum
+      # - apiserver_flowcontrol_read_vs_write_request_count_watermarks_bucket
+      # - apiserver_flowcontrol_read_vs_write_request_count_watermarks_count
+      # - apiserver_flowcontrol_read_vs_write_request_count_watermarks_sum
+      # - apiserver_flowcontrol_request_concurrency_in_use
+      # - apiserver_flowcontrol_request_concurrency_limit
+      # - apiserver_flowcontrol_request_execution_seconds_bucket
+      # - apiserver_flowcontrol_request_execution_seconds_count
+      # - apiserver_flowcontrol_request_execution_seconds_sum
+      # - apiserver_flowcontrol_request_queue_length_after_enqueue_bucket
+      # - apiserver_flowcontrol_request_queue_length_after_enqueue_count
+      # - apiserver_flowcontrol_request_queue_length_after_enqueue_sum
+      # - apiserver_flowcontrol_request_wait_duration_seconds_bucket
+      # - apiserver_flowcontrol_request_wait_duration_seconds_count
+      # - apiserver_flowcontrol_request_wait_duration_seconds_sum
+      # - apiserver_init_events_total
+      # - apiserver_kube_aggregator_x509_missing_san_total
+      # - apiserver_longrunning_gauge
+      # - apiserver_registered_watchers
+      # - apiserver_request_aborts_total
+      # - apiserver_request_duration_seconds_bucket
+      # - apiserver_request_duration_seconds_count
+      # - apiserver_request_duration_seconds_sum
+      # - apiserver_storage_data_key_generation_duration_seconds_bucket
+      # - apiserver_storage_data_key_generation_duration_seconds_count
+      # - apiserver_storage_data_key_generation_duration_seconds_sum
+      # - apiserver_storage_data_key_generation_failures_total
+      # - apiserver_storage_envelope_transformation_cache_misses_total
+      # - apiserver_webhooks_x509_missing_san_total
+      # - authentication_token_cache_active_fetch_count
+      # - authentication_token_cache_fetch_total
+      # - authentication_token_cache_request_duration_seconds_bucket
+      # - authentication_token_cache_request_duration_seconds_count
+      # - authentication_token_cache_request_duration_seconds_sum
+      # - authentication_token_cache_request_total
+      # # aws
+      # - aws_api_call_duration_seconds_bucket
+      # - aws_api_call_duration_seconds_count
+      # - aws_api_call_duration_seconds_sum
+      # - aws_api_call_retries_bucket
+      # - aws_api_call_retries_count
+      # - aws_api_call_retries_sum
+      # - aws_api_calls_total
+      # - aws_api_request_duration_seconds_bucket
+      # - aws_api_request_duration_seconds_count
+      # - aws_api_request_duration_seconds_sum
+      # - aws_api_requests_total
+      # - certmanager_certificate_expiration_timestamp_seconds
+      # - certmanager_certificate_ready_status
+      # - certmanager_certificate_renewal_timestamp_seconds
+      # - certmanager_clock_time_seconds
+      # - certmanager_clock_time_seconds_gauge
+      # - certmanager_controller_sync_call_count
+      # - cloudprovider_aws_api_request_duration_seconds_bucket
+      # - cloudprovider_aws_api_request_duration_seconds_count
+      # - cloudprovider_aws_api_request_duration_seconds_sum
+      # cadvisor
+      - cadvisor_version_info
+      - container_blkio_device_usage_total
+      - container_cpu_cfs_periods_total
+      - container_cpu_cfs_throttled_periods_total
+      - container_cpu_cfs_throttled_seconds_total
+      - container_cpu_load_average_10s
+      - container_cpu_system_seconds_total
+      - container_cpu_usage_seconds_total
+      - container_cpu_user_seconds_total
+      - container_file_descriptors
+      - container_fs_inodes_free
+      - container_fs_inodes_total
+      - container_fs_io_current
+      - container_fs_io_time_seconds_total
+      - container_fs_io_time_weighted_seconds_total
+      - container_fs_limit_bytes
+      - container_fs_read_seconds_total
+      - container_fs_reads_bytes_total
+      - container_fs_reads_merged_total
+      - container_fs_reads_total
+      - container_fs_sector_reads_total
+      - container_fs_sector_writes_total
+      - container_fs_usage_bytes
+      - container_fs_write_seconds_total
+      - container_fs_writes_bytes_total
+      - container_fs_writes_merged_total
+      - container_fs_writes_total
+      - container_last_seen
+      - container_memory_cache
+      - container_memory_failcnt
+      - container_memory_failures_total
+      - container_memory_mapped_file
+      - container_memory_max_usage_bytes
+      - container_memory_rss
+      - container_memory_swap
+      - container_memory_usage_bytes
+      - container_memory_working_set_bytes
+      - container_network_receive_bytes_total
+      - container_network_receive_errors_total
+      - container_network_receive_packets_dropped_total
+      - container_network_receive_packets_total
+      - container_network_transmit_bytes_total
+      - container_network_transmit_errors_total
+      - container_network_transmit_packets_dropped_total
+      - container_network_transmit_packets_total
+      - container_processes
+      - container_scrape_error
+      - container_sockets
+      - container_spec_cpu_period
+      - container_spec_cpu_quota
+      - container_spec_cpu_shares
+      - container_spec_memory_limit_bytes
+      - container_spec_memory_reservation_limit_bytes
+      - container_spec_memory_swap_limit_bytes
+      - container_start_time_seconds
+      - container_tasks_state
+      - container_threads
+      - container_threads_max
+      - container_ulimits_soft
+      # coredns
+      - coredns_build_info
+      - coredns_cache_entries
+      - coredns_cache_hits_total
+      - coredns_cache_misses_total
+      - coredns_cache_requests_total
+      - coredns_dns_request_duration_seconds_bucket
+      - coredns_dns_request_duration_seconds_count
+      - coredns_dns_request_duration_seconds_sum
+      - coredns_dns_request_size_bytes_bucket
+      - coredns_dns_request_size_bytes_count
+      - coredns_dns_request_size_bytes_sum
+      - coredns_dns_requests_total
+      - coredns_dns_response_size_bytes_bucket
+      - coredns_dns_response_size_bytes_count
+      - coredns_dns_response_size_bytes_sum
+      - coredns_dns_responses_total
+      - coredns_forward_conn_cache_hits_total
+      - coredns_forward_conn_cache_misses_total
+      - coredns_forward_healthcheck_broken_total
+      - coredns_forward_max_concurrent_rejects_total
+      - coredns_forward_request_duration_seconds_bucket
+      - coredns_forward_request_duration_seconds_count
+      - coredns_forward_request_duration_seconds_sum
+      - coredns_forward_requests_total
+      - coredns_forward_responses_total
+      - coredns_health_request_duration_seconds_bucket
+      - coredns_health_request_duration_seconds_count
+      - coredns_health_request_duration_seconds_sum
+      - coredns_health_request_failures_total
+      - coredns_hosts_reload_timestamp_seconds
+      - coredns_kubernetes_dns_programming_duration_seconds_bucket
+      - coredns_kubernetes_dns_programming_duration_seconds_count
+      - coredns_kubernetes_dns_programming_duration_seconds_sum
+      - coredns_local_localhost_requests_total
+      - coredns_panics_total
+      - coredns_plugin_enabled
+      - coredns_reload_failed_total
+      # - csi_operations_seconds_bucket
+      # - csi_operations_seconds_count
+      # - csi_operations_seconds_sum
+      # - get_token_count
+      # - get_token_fail_count
+      # # kube-state-metrics
+      - kube_configmap_annotations
+      - kube_configmap_created
+      - kube_configmap_info
+      - kube_configmap_labels
+      - kube_configmap_metadata_resource_version
+      - kube_daemonset_annotations
+      - kube_daemonset_created
+      - kube_daemonset_labels
+      - kube_daemonset_metadata_generation
+      - kube_daemonset_status_current_number_scheduled
+      - kube_daemonset_status_desired_number_scheduled
+      - kube_daemonset_status_number_available
+      - kube_daemonset_status_number_misscheduled
+      - kube_daemonset_status_number_ready
+      - kube_daemonset_status_number_unavailable
+      - kube_daemonset_status_observed_generation
+      - kube_daemonset_status_updated_number_scheduled
+      - kube_deployment_annotations
+      - kube_deployment_created
+      - kube_deployment_labels
+      - kube_deployment_metadata_generation
+      - kube_deployment_spec_paused
+      - kube_deployment_spec_replicas
+      - kube_deployment_spec_strategy_rollingupdate_max_surge
+      - kube_deployment_spec_strategy_rollingupdate_max_unavailable
+      - kube_deployment_status_condition
+      - kube_deployment_status_observed_generation
+      - kube_deployment_status_replicas
+      - kube_deployment_status_replicas_available
+      - kube_deployment_status_replicas_ready
+      - kube_deployment_status_replicas_unavailable
+      - kube_deployment_status_replicas_updated
+      - kube_endpoint_address
+      - kube_endpoint_address_available
+      - kube_endpoint_address_not_ready
+      - kube_endpoint_annotations
+      - kube_endpoint_created
+      - kube_endpoint_info
+      - kube_endpoint_labels
+      - kube_endpoint_ports
+      - kube_ingress_annotations
+      - kube_ingress_created
+      - kube_ingress_info
+      - kube_ingress_labels
+      - kube_ingress_metadata_resource_version
+      - kube_ingress_path
+      - kube_job_annotations
+      - kube_job_complete
+      - kube_job_created
+      - kube_job_info
+      - kube_job_labels
+      - kube_job_owner
+      - kube_job_spec_completions
+      - kube_job_spec_parallelism
+      - kube_job_status_active
+      - kube_job_status_completion_time
+      - kube_job_status_failed
+      - kube_job_status_start_time
+      - kube_job_status_succeeded
+      - kube_lease_owner
+      - kube_lease_renew_time
+      - kube_mutatingwebhookconfiguration_created
+      - kube_mutatingwebhookconfiguration_info
+      - kube_mutatingwebhookconfiguration_metadata_resource_version
+      - kube_namespace_annotations
+      - kube_namespace_created
+      - kube_namespace_labels
+      - kube_namespace_status_phase
+      - kube_networkpolicy_annotations
+      - kube_networkpolicy_created
+      - kube_networkpolicy_labels
+      - kube_networkpolicy_spec_egress_rules
+      - kube_networkpolicy_spec_ingress_rules
+      - kube_node_annotations
+      - kube_node_created
+      - kube_node_info
+      - kube_node_labels
+      - kube_node_spec_unschedulable
+      - kube_node_status_allocatable
+      - kube_node_status_capacity
+      - kube_node_status_condition
+      - kube_persistentvolume_annotations
+      - kube_persistentvolume_capacity_bytes
+      - kube_persistentvolume_claim_ref
+      - kube_persistentvolume_created
+      - kube_persistentvolume_info
+      - kube_persistentvolume_labels
+      - kube_persistentvolume_status_phase
+      - kube_persistentvolumeclaim_access_mode
+      - kube_persistentvolumeclaim_annotations
+      - kube_persistentvolumeclaim_created
+      - kube_persistentvolumeclaim_info
+      - kube_persistentvolumeclaim_labels
+      - kube_persistentvolumeclaim_resource_requests_storage_bytes
+      - kube_persistentvolumeclaim_status_phase
+      - kube_pod_annotations
+      - kube_pod_container_info
+      - kube_pod_container_resource_limits
+      - kube_pod_container_resource_requests
+      - kube_pod_container_state_started
+      - kube_pod_container_status_last_terminated_exitcode
+      - kube_pod_container_status_last_terminated_reason
+      - kube_pod_container_status_ready
+      - kube_pod_container_status_restarts_total
+      - kube_pod_container_status_running
+      - kube_pod_container_status_terminated
+      - kube_pod_container_status_waiting
+      - kube_pod_created
+      - kube_pod_info
+      - kube_pod_init_container_info
+      - kube_pod_init_container_resource_limits
+      - kube_pod_init_container_resource_requests
+      - kube_pod_init_container_status_ready
+      - kube_pod_init_container_status_restarts_total
+      - kube_pod_init_container_status_running
+      - kube_pod_init_container_status_terminated
+      - kube_pod_init_container_status_terminated_reason
+      - kube_pod_init_container_status_waiting
+      - kube_pod_ips
+      - kube_pod_labels
+      - kube_pod_owner
+      - kube_pod_restart_policy
+      - kube_pod_spec_volumes_persistentvolumeclaims_info
+      - kube_pod_spec_volumes_persistentvolumeclaims_readonly
+      - kube_pod_start_time
+      - kube_pod_status_phase
+      - kube_pod_status_ready
+      - kube_pod_status_reason
+      - kube_pod_status_scheduled
+      - kube_pod_status_scheduled_time
+      - kube_pod_tolerations
+      - kube_poddisruptionbudget_annotations
+      - kube_poddisruptionbudget_created
+      - kube_poddisruptionbudget_labels
+      - kube_poddisruptionbudget_status_current_healthy
+      - kube_poddisruptionbudget_status_desired_healthy
+      - kube_poddisruptionbudget_status_expected_pods
+      - kube_poddisruptionbudget_status_observed_generation
+      - kube_poddisruptionbudget_status_pod_disruptions_allowed
+      - kube_replicaset_annotations
+      - kube_replicaset_created
+      - kube_replicaset_labels
+      - kube_replicaset_metadata_generation
+      - kube_replicaset_owner
+      - kube_replicaset_spec_replicas
+      - kube_replicaset_status_fully_labeled_replicas
+      - kube_replicaset_status_observed_generation
+      - kube_replicaset_status_ready_replicas
+      - kube_replicaset_status_replicas
+      - kube_secret_annotations
+      - kube_secret_created
+      - kube_secret_info
+      - kube_secret_labels
+      - kube_secret_metadata_resource_version
+      - kube_secret_type
+      - kube_service_annotations
+      - kube_service_created
+      - kube_service_info
+      - kube_service_labels
+      - kube_service_spec_type
+      - kube_service_status_load_balancer_ingress
+      - kube_statefulset_annotations
+      - kube_statefulset_created
+      - kube_statefulset_labels
+      - kube_statefulset_metadata_generation
+      - kube_statefulset_replicas
+      - kube_statefulset_status_current_revision
+      - kube_statefulset_status_observed_generation
+      - kube_statefulset_status_replicas
+      - kube_statefulset_status_replicas_available
+      - kube_statefulset_status_replicas_current
+      - kube_statefulset_status_replicas_ready
+      - kube_statefulset_status_replicas_updated
+      - kube_statefulset_status_update_revision
+      - kube_storageclass_annotations
+      - kube_storageclass_created
+      - kube_storageclass_info
+      - kube_storageclass_labels
+      - kube_validatingwebhookconfiguration_created
+      - kube_validatingwebhookconfiguration_info
+      - kube_validatingwebhookconfiguration_metadata_resource_version
+      - kube_volumeattachment_created
+      - kube_volumeattachment_info
+      - kube_volumeattachment_labels
+      - kube_volumeattachment_spec_source_persistentvolume
+      - kube_volumeattachment_status_attached
+      - kube_volumeattachment_status_attachment_metadata
+      - kube_certificatesigningrequest_annotations
+      - kube_certificatesigningrequest_labels
+      - kube_certificatesigningrequest_created
+      - kube_certificatesigningrequest_condition
+      - kube_certificatesigningrequest_cert_length
+      # - controller_runtime_active_workers
+      # - controller_runtime_max_concurrent_reconciles
+      # - controller_runtime_reconcile_errors_total
+      # - controller_runtime_reconcile_time_seconds_bucket
+      # - controller_runtime_reconcile_time_seconds_count
+      # - controller_runtime_reconcile_time_seconds_sum
+      # - controller_runtime_reconcile_total
+      # - controller_runtime_webhook_latency_seconds_bucket
+      # - controller_runtime_webhook_latency_seconds_count
+      # - controller_runtime_webhook_latency_seconds_sum
+      # - controller_runtime_webhook_requests_in_flight
+      # - controller_runtime_webhook_requests_total
+      # # kubelet
+      # - kubelet_certificate_manager_server_rotation_seconds_bucket
+      # - kubelet_certificate_manager_server_rotation_seconds_count
+      # - kubelet_certificate_manager_server_rotation_seconds_sum
+      # - kubelet_certificate_manager_server_ttl_seconds
+      # - kubelet_cgroup_manager_duration_seconds_bucket
+      # - kubelet_cgroup_manager_duration_seconds_count
+      # - kubelet_cgroup_manager_duration_seconds_sum
+      # - kubelet_container_log_filesystem_used_bytes
+      # - kubelet_containers_per_pod_count_bucket
+      # - kubelet_containers_per_pod_count_count
+      # - kubelet_containers_per_pod_count_sum
+      # - kubelet_docker_operations_duration_seconds_bucket
+      # - kubelet_docker_operations_duration_seconds_count
+      # - kubelet_docker_operations_duration_seconds_sum
+      # - kubelet_docker_operations_errors_total
+      # - kubelet_docker_operations_total
+      # - kubelet_http_inflight_requests
+      # - kubelet_http_requests_duration_seconds_bucket
+      # - kubelet_http_requests_duration_seconds_count
+      # - kubelet_http_requests_duration_seconds_sum
+      # - kubelet_http_requests_total
+      # - kubelet_managed_ephemeral_containers
+      # - kubelet_network_plugin_operations_duration_seconds_bucket
+      # - kubelet_network_plugin_operations_duration_seconds_count
+      # - kubelet_network_plugin_operations_duration_seconds_sum
+      # - kubelet_network_plugin_operations_errors_total
+      # - kubelet_network_plugin_operations_total
+      # - kubelet_node_name
+      # - kubelet_pleg_discard_events
+      # - kubelet_pleg_last_seen_seconds
+      # - kubelet_pleg_relist_duration_seconds_bucket
+      # - kubelet_pleg_relist_duration_seconds_count
+      # - kubelet_pleg_relist_duration_seconds_sum
+      # - kubelet_pleg_relist_interval_seconds_bucket
+      # - kubelet_pleg_relist_interval_seconds_count
+      # - kubelet_pleg_relist_interval_seconds_sum
+      # - kubelet_pod_start_duration_seconds_bucket
+      # - kubelet_pod_start_duration_seconds_count
+      # - kubelet_pod_start_duration_seconds_sum
+      # - kubelet_pod_worker_duration_seconds_bucket
+      # - kubelet_pod_worker_duration_seconds_count
+      # - kubelet_pod_worker_duration_seconds_sum
+      # - kubelet_pod_worker_start_duration_seconds_bucket
+      # - kubelet_pod_worker_start_duration_seconds_count
+      # - kubelet_pod_worker_start_duration_seconds_sum
+      # - kubelet_run_podsandbox_duration_seconds_bucket
+      # - kubelet_run_podsandbox_duration_seconds_count
+      # - kubelet_run_podsandbox_duration_seconds_sum
+      # - kubelet_running_containers
+      # - kubelet_running_pods
+      # - kubelet_runtime_operations_duration_seconds_bucket
+      # - kubelet_runtime_operations_duration_seconds_count
+      # - kubelet_runtime_operations_duration_seconds_sum
+      # - kubelet_runtime_operations_errors_total
+      # - kubelet_runtime_operations_total
+      # - kubelet_server_expiration_renew_errors
+      # - kubelet_started_containers_errors_total
+      # - kubelet_started_containers_total
+      # - kubelet_started_pods_errors_total
+      # - kubelet_started_pods_total
+      # - kubelet_volume_stats_available_bytes
+      # - kubelet_volume_stats_capacity_bytes
+      # - kubelet_volume_stats_inodes
+      # - kubelet_volume_stats_inodes_free
+      # - kubelet_volume_stats_inodes_used
+      # - kubelet_volume_stats_used_bytes
+      # - kubernetes_build_info
+
+
+## Default value https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus/values.yaml
+##
+prometheus:
+  enabled: true
+  global:
+    ## How frequently to scrape targets by default
+    ##
+    scrape_interval: 1m
+    ## How long until a scrape request times out
+    ##
+    scrape_timeout: 10s
+    ## How frequently to evaluate rules
+    ##
+    evaluation_interval: 1m
+  replicaCount: 1
+  alertmanager:
+    enabled: false
+
+  prometheus-pushgateway:
+    enabled: false
+
+  kube-state-metrics:
+    enabled: true
+
+  prometheus-node-exporter:
+    enabled: true
+    extraArgs:
+    - --collector.disable-defaults
+    - --collector.arp
+    - --collector.conntrack
+    - --collector.cpu
+    - --collector.diskstats
+    - --collector.filefd
+    - --collector.loadavg
+    - --collector.meminfo
+    - --collector.netstat
+    - --collector.nvme
+    - --collector.pressure
+    - --collector.schedstat
+    - --collector.sockstat
+    - --collector.softnet
+    - --collector.stat
+    - --collector.udp_queues
+    - --collector.vmstat
+    - --collector.xfs
+    - --collector.uname
+    - --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|var/lib/docker/.+|var/lib/kubelet/.+)($|/)
+    - --collector.filesystem.fs-types-exclude=^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$
+
+  server:
+    defaultFlagsOverride:
+      [
+        "--enable-feature=agent",
+        "--storage.agent.retention.max-time=30m",
+        "--storage.agent.path=/prometheus",
+        # "--config.file=/etc/prometheus/config_out/prometheus.env.yaml",
+        "--config.file=/etc/config/prometheus.yml",
+        "--web.enable-lifecycle",
+      ]
+    extraFlags:
+      #if use param "defaultFlagsOverride", this config will be ignored in cmd-line.
+      - web.enable-lifecycle
+    remoteWrite: 
+      - url: "http://mo-agent-service:8000/v1/metrics"
+
+  # 这里需要将rule置空，否则报错
+  serverFiles:
+    prometheus.yml:
+      rule_files: []
+      scrape_configs:
+        - job_name: prometheus
+          static_configs:
+            - targets:
+              - localhost:9090
+
+        ## ignore job kubernetes-apiservers before v1.0.0
+        #- job_name: 'kubernetes-apiservers'
+
+        - job_name: 'kubernetes-nodes'
+
+          # Default to scraping over https. If required, just disable this or change to
+          # `http`.
+          scheme: https
+
+          # This TLS & bearer token file config is used to connect to the actual scrape
+          # endpoints for cluster components. This is separate to discovery auth
+          # configuration because discovery & scraping are two separate concerns in
+          # Prometheus. The discovery auth config is automatic if Prometheus runs inside
+          # the cluster. Otherwise, more config options have to be provided within the
+          # <kubernetes_sd_config>.
+          tls_config:
+            ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            # If your node certificates are self-signed or use a different CA to the
+            # master CA, then disable certificate verification below. Note that
+            # certificate verification is an integral part of a secure infrastructure
+            # so this should only be disabled in a controlled environment. You can
+            # disable certificate verification by uncommenting the line below.
+            #
+            insecure_skip_verify: true
+          bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+          kubernetes_sd_configs:
+            - role: node
+
+          relabel_configs:
+            - action: labelmap
+              regex: __meta_kubernetes_node_label_(.+)
+            - target_label: __address__
+              replacement: kubernetes.default.svc:443
+            - source_labels: [__meta_kubernetes_node_name]
+              regex: (.+)
+              target_label: __metrics_path__
+              replacement: /api/v1/nodes/$1/proxy/metrics
+
+
+        - job_name: 'kubernetes-nodes-cadvisor'
+
+          # Default to scraping over https. If required, just disable this or change to
+          # `http`.
+          scheme: https
+
+          # This TLS & bearer token file config is used to connect to the actual scrape
+          # endpoints for cluster components. This is separate to discovery auth
+          # configuration because discovery & scraping are two separate concerns in
+          # Prometheus. The discovery auth config is automatic if Prometheus runs inside
+          # the cluster. Otherwise, more config options have to be provided within the
+          # <kubernetes_sd_config>.
+          tls_config:
+            ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            # If your node certificates are self-signed or use a different CA to the
+            # master CA, then disable certificate verification below. Note that
+            # certificate verification is an integral part of a secure infrastructure
+            # so this should only be disabled in a controlled environment. You can
+            # disable certificate verification by uncommenting the line below.
+            #
+            insecure_skip_verify: true
+          bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+          kubernetes_sd_configs:
+            - role: node
+
+          # This configuration will work only on kubelet 1.7.3+
+          # As the scrape endpoints for cAdvisor have changed
+          # if you are using older version you need to change the replacement to
+          # replacement: /api/v1/nodes/$1:4194/proxy/metrics
+          # more info here https://github.com/coreos/prometheus-operator/issues/633
+          relabel_configs:
+            - action: labelmap
+              regex: __meta_kubernetes_node_label_(.+)
+            - target_label: __address__
+              replacement: kubernetes.default.svc:443
+            - source_labels: [__meta_kubernetes_node_name]
+              regex: (.+)
+              target_label: __metrics_path__
+              replacement: /api/v1/nodes/$1/proxy/metrics/cadvisor
+
+        # Scrape config for service endpoints.
+        #
+        # The relabeling allows the actual service scrape endpoint to be configured
+        # via the following annotations:
+        #
+        # * `prometheus.io/scrape`: Only scrape services that have a value of
+        # `true`, except if `prometheus.io/scrape-slow` is set to `true` as well.
+        # * `prometheus.io/scheme`: If the metrics endpoint is secured then you will need
+        # to set this to `https` & most likely set the `tls_config` of the scrape config.
+        # * `prometheus.io/path`: If the metrics path is not `/metrics` override this.
+        # * `prometheus.io/port`: If the metrics are exposed on a different port to the
+        # service then set this appropriately.
+        # * `prometheus.io/param_<parameter>`: If the metrics endpoint uses parameters
+        # then you can set any parameter
+        - job_name: 'kubernetes-service-endpoints'
+          honor_labels: true
+
+          kubernetes_sd_configs:
+            - role: endpoints
+
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+              action: keep
+              regex: true
+            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape_slow]
+              action: drop
+              regex: true
+            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+              action: replace
+              target_label: __scheme__
+              regex: (https?)
+            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+              action: replace
+              target_label: __metrics_path__
+              regex: (.+)
+            - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+              action: replace
+              target_label: __address__
+              regex: (.+?)(?::\d+)?;(\d+)
+              replacement: $1:$2
+            - action: labelmap
+              regex: __meta_kubernetes_service_annotation_prometheus_io_param_(.+)
+              replacement: __param_$1
+            - action: labelmap
+              regex: __meta_kubernetes_service_label_(.+)
+            - source_labels: [__meta_kubernetes_namespace]
+              action: replace
+              target_label: namespace
+            - source_labels: [__meta_kubernetes_service_name]
+              action: replace
+              target_label: service
+            - source_labels: [__meta_kubernetes_pod_node_name]
+              action: replace
+              target_label: node
+
+        # Scrape config for slow service endpoints; same as above, but with a larger
+        # timeout and a larger interval
+        #
+        # The relabeling allows the actual service scrape endpoint to be configured
+        # via the following annotations:
+        #
+        # * `prometheus.io/scrape-slow`: Only scrape services that have a value of `true`
+        # * `prometheus.io/scheme`: If the metrics endpoint is secured then you will need
+        # to set this to `https` & most likely set the `tls_config` of the scrape config.
+        # * `prometheus.io/path`: If the metrics path is not `/metrics` override this.
+        # * `prometheus.io/port`: If the metrics are exposed on a different port to the
+        # service then set this appropriately.
+        # * `prometheus.io/param_<parameter>`: If the metrics endpoint uses parameters
+        # then you can set any parameter
+        - job_name: 'kubernetes-service-endpoints-slow'
+          honor_labels: true
+
+          scrape_interval: 5m
+          scrape_timeout: 30s
+
+          kubernetes_sd_configs:
+            - role: endpoints
+
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape_slow]
+              action: keep
+              regex: true
+            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+              action: replace
+              target_label: __scheme__
+              regex: (https?)
+            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+              action: replace
+              target_label: __metrics_path__
+              regex: (.+)
+            - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+              action: replace
+              target_label: __address__
+              regex: (.+?)(?::\d+)?;(\d+)
+              replacement: $1:$2
+            - action: labelmap
+              regex: __meta_kubernetes_service_annotation_prometheus_io_param_(.+)
+              replacement: __param_$1
+            - action: labelmap
+              regex: __meta_kubernetes_service_label_(.+)
+            - source_labels: [__meta_kubernetes_namespace]
+              action: replace
+              target_label: namespace
+            - source_labels: [__meta_kubernetes_service_name]
+              action: replace
+              target_label: service
+            - source_labels: [__meta_kubernetes_pod_node_name]
+              action: replace
+              target_label: node
+
+        - job_name: 'prometheus-pushgateway'
+          honor_labels: true
+
+          kubernetes_sd_configs:
+            - role: service
+
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_probe]
+              action: keep
+              regex: pushgateway
+
+        # Example scrape config for probing services via the Blackbox Exporter.
+        #
+        # The relabeling allows the actual service scrape endpoint to be configured
+        # via the following annotations:
+        #
+        # * `prometheus.io/probe`: Only probe services that have a value of `true`
+        - job_name: 'kubernetes-services'
+          honor_labels: true
+
+          metrics_path: /probe
+          params:
+            module: [http_2xx]
+
+          kubernetes_sd_configs:
+            - role: service
+
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_probe]
+              action: keep
+              regex: true
+            - source_labels: [__address__]
+              target_label: __param_target
+            - target_label: __address__
+              replacement: blackbox
+            - source_labels: [__param_target]
+              target_label: instance
+            - action: labelmap
+              regex: __meta_kubernetes_service_label_(.+)
+            - source_labels: [__meta_kubernetes_namespace]
+              target_label: namespace
+            - source_labels: [__meta_kubernetes_service_name]
+              target_label: service
+
+        # Example scrape config for pods
+        #
+        # The relabeling allows the actual pod scrape endpoint to be configured via the
+        # following annotations:
+        #
+        # * `prometheus.io/scrape`: Only scrape pods that have a value of `true`,
+        # except if `prometheus.io/scrape-slow` is set to `true` as well.
+        # * `prometheus.io/scheme`: If the metrics endpoint is secured then you will need
+        # to set this to `https` & most likely set the `tls_config` of the scrape config.
+        # * `prometheus.io/path`: If the metrics path is not `/metrics` override this.
+        # * `prometheus.io/port`: Scrape the pod on the indicated port instead of the default of `9102`.
+        - job_name: 'kubernetes-pods'
+          honor_labels: true
+
+          kubernetes_sd_configs:
+            - role: pod
+
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+              action: keep
+              regex: true
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape_slow]
+              action: drop
+              regex: true
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scheme]
+              action: replace
+              regex: (https?)
+              target_label: __scheme__
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+              action: replace
+              target_label: __metrics_path__
+              regex: (.+)
+            - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+              action: replace
+              regex: (.+?)(?::\d+)?;(\d+)
+              replacement: $1:$2
+              target_label: __address__
+            - action: labelmap
+              regex: __meta_kubernetes_pod_annotation_prometheus_io_param_(.+)
+              replacement: __param_$1
+            - action: labelmap
+              regex: __meta_kubernetes_pod_label_(.+)
+            - source_labels: [__meta_kubernetes_namespace]
+              action: replace
+              target_label: namespace
+            - source_labels: [__meta_kubernetes_pod_name]
+              action: replace
+              target_label: pod
+            - source_labels: [__meta_kubernetes_pod_phase]
+              regex: Pending|Succeeded|Failed|Completed
+              action: drop
+
+        # Example Scrape config for pods which should be scraped slower. An useful example
+        # would be stackriver-exporter which queries an API on every scrape of the pod
+        #
+        # The relabeling allows the actual pod scrape endpoint to be configured via the
+        # following annotations:
+        #
+        # * `prometheus.io/scrape-slow`: Only scrape pods that have a value of `true`
+        # * `prometheus.io/scheme`: If the metrics endpoint is secured then you will need
+        # to set this to `https` & most likely set the `tls_config` of the scrape config.
+        # * `prometheus.io/path`: If the metrics path is not `/metrics` override this.
+        # * `prometheus.io/port`: Scrape the pod on the indicated port instead of the default of `9102`.
+        - job_name: 'kubernetes-pods-slow'
+          honor_labels: true
+
+          scrape_interval: 5m
+          scrape_timeout: 30s
+
+          kubernetes_sd_configs:
+            - role: pod
+
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape_slow]
+              action: keep
+              regex: true
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scheme]
+              action: replace
+              regex: (https?)
+              target_label: __scheme__
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+              action: replace
+              target_label: __metrics_path__
+              regex: (.+)
+            - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+              action: replace
+              regex: (.+?)(?::\d+)?;(\d+)
+              replacement: $1:$2
+              target_label: __address__
+            - action: labelmap
+              regex: __meta_kubernetes_pod_annotation_prometheus_io_param_(.+)
+              replacement: __param_$1
+            - action: labelmap
+              regex: __meta_kubernetes_pod_label_(.+)
+            - source_labels: [__meta_kubernetes_namespace]
+              action: replace
+              target_label: namespace
+            - source_labels: [__meta_kubernetes_pod_name]
+              action: replace
+              target_label: pod
+            - source_labels: [__meta_kubernetes_pod_phase]
+              regex: Pending|Succeeded|Failed|Completed
+              action: drop
+
+        - job_name: "mocloud-application"
+          honor_labels: true
+          kubernetes_sd_configs:
+            - role: endpoints
+          relabel_configs:
+            - action: keep
+              regex: "mo-cloud"
+              source_labels:
+              - __meta_kubernetes_namespace
+            - action: replace
+              regex: (https?)
+              source_labels:
+              - __meta_kubernetes_service_annotation_prometheus_io_scheme
+              target_label: __scheme__
+            - action: replace
+              regex: (.+)
+              source_labels:
+              - __meta_kubernetes_service_annotation_prometheus_io_path
+              target_label: __metrics_path__
+            - action: replace
+              regex: (.+?)(?::\d+)?;(\d+)
+              replacement: $1:$2
+              source_labels:
+              - __address__
+              - __meta_kubernetes_service_annotation_prometheus_io_port
+              target_label: __address__
+            - action: labelmap
+              regex: __meta_kubernetes_service_annotation_prometheus_io_param_(.+)
+              replacement: __param_$1
+            - action: labelmap
+              regex: __meta_kubernetes_service_label_(.+)
+            - action: replace
+              source_labels:
+              - __meta_kubernetes_namespace
+              target_label: namespace
+            - action: replace
+              source_labels:
+              - __meta_kubernetes_service_name
+              target_label: service
+            - action: replace
+              source_labels:
+              - __meta_kubernetes_pod_node_name
+              target_label: node
+
+        - job_name: "moob-application"
+          honor_labels: true
+          kubernetes_sd_configs:
+            - role: endpoints
+          relabel_configs:
+            - action: keep
+              regex: "mo-ob"
+              source_labels:
+              - __meta_kubernetes_namespace
+            - source_labels:
+              - __meta_kubernetes_endpoints_label_need_metrics
+              action: keep
+              regex: true
+            - action: labelmap
+              regex: __meta_kubernetes_service_label_(.+)
+            - action: replace
+              source_labels:
+              - __meta_kubernetes_namespace
+              target_label: namespace
+            - action: replace
+              source_labels:
+              - __meta_kubernetes_service_name
+              target_label: service
+            - action: replace
+              source_labels:
+              - __meta_kubernetes_pod_node_name
+              target_label: node
+            - action: replace
+              source_labels: [__meta_kubernetes_pod_name]
+              target_label: pod
+
+  # adds additional scrape configs to prometheus.yml
+  # must be a string so you have to add a | after extraScrapeConfigs:
+  # example adds prometheus-blackbox-exporter scrape config
+  extraScrapeConfigs:
+    # - job_name: 'prometheus-blackbox-exporter'
+    #   metrics_path: /probe
+    #   params:
+    #     module: [http_2xx]
+    #   static_configs:
+    #     - targets:
+    #       - https://example.com
+    #   relabel_configs:
+    #     - source_labels: [__address__]
+    #       target_label: __param_target
+    #     - source_labels: [__param_target]
+    #       target_label: instance
+    #     - target_label: __address__
+    #       replacement: prometheus-blackbox-exporter:9115
+
+
+## Extend default values from https://github.com/fluent/helm-charts/blob/main/charts/fluent-bit/values.yaml
+##
+fluent-bit:
+  enabled: true
+
+  # Default values for fluent-bit.
+
+  # kind -- DaemonSet or Deployment
+  kind: DaemonSet
+
+  image:
+    repository: cr.fluentbit.io/fluent/fluent-bit
+    # Overrides the image tag whose default is {{ .Chart.AppVersion }}
+    tag: 2.0.8-debug
+    pullPolicy: Always
+
+  logLevel: info
+
+  tolerations:
+    - operator: Exists
+
+  ## https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/configuration-file
+  config:
+    service: |
+      [SERVICE]
+          Daemon Off
+          Flush {{ .Values.flush }}
+          Log_Level {{ .Values.logLevel }}
+          Parsers_File parsers.conf
+          Parsers_File custom_parsers.conf
+          HTTP_Server On
+          HTTP_Listen 0.0.0.0
+          HTTP_Port {{ .Values.metricsPort }}
+          Health_Check On
+
+    ## https://docs.fluentbit.io/manual/pipeline/inputs
+    inputs: |
+      # Whitelist Mode
+      [INPUT]
+          Name tail
+          Path             /var/log/containers/*_cos_*.log,/var/log/containers/*_cos-system_*.log, /var/log/containers/*_mo-cloud_*.log, /var/log/containers/*_mo-system_*.log
+          multiline.parser docker, cri, go 
+          Tag kube.*
+          Mem_Buf_Limit 5MB
+          Skip_Long_Lines Off
+          Refresh_Interval  10
+      [INPUT]
+          Name tail
+          Path             /var/log/containers/*mo-log*.log,/var/log/containers/*mo-dn*.log,/var/log/containers/*mo-cn*.log
+          multiline.parser docker, cri, go 
+          Tag kube.*
+          Mem_Buf_Limit 5MB
+          Skip_Long_Lines Off
+          Refresh_Interval  10
+      [INPUT]
+          Name tail
+          Path             /var/log/containers/*mo-agent-deployment*.log
+          multiline.parser docker, cri, go 
+          Tag kube.*
+          Mem_Buf_Limit 5MB
+          Skip_Long_Lines Off
+          Refresh_Interval  10
+      # host-log
+      [INPUT]
+          Name                tail
+          Tag                 host.dmesg
+          Path                /var/log/dmesg
+          Parser              syslog
+          Mem_Buf_Limit       5MB
+          Skip_Long_Lines     On
+          Refresh_Interval    10
+      [INPUT]
+          Name                tail
+          Tag                 host.messages
+          Path                /var/log/messages
+          Parser              syslog
+          Mem_Buf_Limit       5MB
+          Skip_Long_Lines     On
+          Refresh_Interval    10
+      [INPUT]
+          Name                tail
+          Tag                 host.secure
+          Path                /var/log/secure
+          Parser              syslog
+          # DB                  /var/fluent-bit/state/flb_secure.db
+          Mem_Buf_Limit       5MB
+          Skip_Long_Lines     On
+          Refresh_Interval    10
+
+    ## https://docs.fluentbit.io/manual/pipeline/filters
+    filters: |
+      # filter for k8s
+      [FILTER]
+          Name kubernetes
+          Match kube.*
+          Merge_Log On
+          Keep_Log Off
+          K8S-Logging.Parser On
+          K8S-Logging.Exclude On
+      # pick below "wildcard" field to parse, others move to "extra"
+      [FILTER]
+          Name nest
+          Match kube.*
+          Operation nest
+          Wildcard log
+          Wildcard msg
+          Wildcard time
+          Wildcard status
+          Wildcard stacktrace
+          Wildcard kubernetes
+          Wildcard level
+          Nested_under moob_fluentbit_extra
+      [FILTER]
+          Name nest
+          Match kube.*
+          Operation nest
+          Wildcard *
+          Nest_under extra
+      [FILTER]
+          Name nest
+          Match kube.*
+          Operation lift
+          Nested_under extra
+          Add_prefix Lifted_
+      [FILTER]
+          Name nest
+          Match kube.*
+          Operation lift
+          Nested_under Lifted_moob_fluentbit_extra
+      [FILTER]
+          name nest
+          Match kube.*
+          Operation lift
+      [FILTER]
+          Name nest
+          Match kube.*
+          Operation nest
+          Wildcard Lifted_*
+          Nested_under extra
+          Remove_prefix Lifted_
+      [FILTER]
+          Name nest
+          Match kube.*
+          Operation lift
+          Nested_under kubernetes
+          Add_prefix k8s_
+      [FILTER]
+          Name                modify
+          Match               kube.*
+          Copy                k8s_namespace_name          service_name
+          Copy                k8s_container_name             app_name
+      [FILTER]
+          Name nest
+          Match kube.*
+          Operation nest
+          Wildcard k8s_*
+          Nested_under kubernetes
+          Remove_prefix k8s_
+      # filter for syslog
+      [FILTER]
+          Name                modify
+          Match               dataplane.systemd.*
+          Rename              _HOSTNAME                   hostname
+          Add                 service_name                dataplane_systemd
+          Copy                _SYSTEMD_UNIT               app_name
+          Rename              _SYSTEMD_UNIT               systemd_unit
+          Rename              MESSAGE                     message
+          Remove_regex        ^((?!hostname|systemd_unit|service_name|app_name|message).)*$
+
+      [FILTER]
+          Name                modify
+          Match               host.dmesg
+          Add   service_name  syslog
+          Add   app_name      dmesg
+
+      [FILTER]
+          Name                modify
+          Match               host.messages
+          Add   service_name  syslog
+          Add   app_name      messages
+      [FILTER]
+          Name                modify
+          Match               host.secure
+          Add   service_name  syslog
+          Add   app_name      secure
+
+    ## https://docs.fluentbit.io/manual/pipeline/outputs
+    outputs: |
+      [OUTPUT]
+          Name  http
+          Match *
+          Host  mo-agent-service.mo-ob
+          Port  8000
+          URI   /v1/logs
+          Format json
+      [OUTPUT]
+          Name stdout
+          Match *
+          # Format json
+          Json_date_key timestamp
+          Json_date_format iso8601
+
+    ## https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/upstream-servers
+    ## This configuration is deprecated, please use `extraFiles` instead.
+    upstream: {}
+
+    ## https://docs.fluentbit.io/manual/pipeline/parsers
+    customParsers: |
+      [PARSER]
+          Name docker_no_time
+          Format json
+          Time_Keep Off
+          Time_Key time
+          Time_Format %Y-%m-%dT%H:%M:%S.%L
+      [PARSER]
+          Name                syslog
+          Format              regex
+          Regex               ^(?<time>[^ ]* {1,2}[^ ]* [^ ]*) (?<host>[^ ]*) (?<ident>[a-zA-Z0-9_\/\.\-]*)(?:\[(?<pid>[0-9]+)\])?(?:[^\:]*\:)? *(?<message>.*)$
+          Time_Key            time
+          Time_Format         %b %d %H:%M:%S
+      [PARSER]
+          Name                container_firstline
+          Format              regex
+          Regex               (?<log>(?<="log":")\S(?!\.).*?)(?<!\\)".*(?<stream>(?<="stream":").*?)".*(?<time>\d{4}-\d{1,2}-\d{1,2}T\d{2}:\d{2}:\d{2}\.\w*).*(?=})
+          Time_Key            time
+          Time_Format         %Y-%m-%dT%H:%M:%S.%LZ
+
+## 部署cadvisor
+cadvisor:
+  enabled: false
+  kind: DaemonSet
+  tolerations:
+    - operator: Exists
+  container:
+    port: 8080
+    additionalArgs:
+      - --housekeeping_interval=10s                       # kubernetes default args
+      - --max_housekeeping_interval=15s
+      - --event_storage_event_limit=default=0
+      - --event_storage_age_limit=default=0
+      - --disable_metrics=percpu,process,sched,tcp,udp    # enable only diskIO, cpu, memory, network, disk
+      - --docker_only
+    hostPaths:
+      - name: rootfs
+        path: "/"
+        mount: "/rootfs"
+      - name: varrun
+        path: "/var/run"
+      - name: sys
+        path: "/sys"
+      - name: docker
+        path: "/var/lib/docker"
+      - name: disk
+        path: "/dev/disk"
+

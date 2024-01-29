@@ -1,0 +1,24 @@
+groups:
+  - name: mo-cloud.matrix-worker
+    rules:
+    # Alert for any instance's daily CUUsage is approaching payment (closely or exceeded).
+    - alert: UnitClusterCUNoUpdate
+      expr: unit_cluster_cu_calculation_no_update{cluster="local-endpoint.freetier-01:6001"} > 0
+      labels:
+        alertOwner: DanielZhang
+        serviceScope: mo-cloud
+        alertname: UnitClusterCUNoUpdate
+        severity: "critical"
+      annotations:
+        summary: "{{$labels.cluster}}: cu calculation no update"
+        description: "{{$labels.cluster}}: cu calculation no update "
+    - alert: UnitClusterStorageNoUpdate
+      expr: unit_cluster_storage_calculation_no_update{cluster="local-endpoint.freetier-01:6001"} > 0
+      labels:
+        alertOwner: DanielZhang
+        alertname: UnitClusterStorageNoUpdate
+        serviceScope: mo-cloud
+        severity: "critical"
+      annotations:
+        summary: "{{$labels.cluster}}: storage calculation no update"
+        description: "{{$labels.cluster}}: storage calculation no update "

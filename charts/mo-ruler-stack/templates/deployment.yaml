@@ -1,0 +1,104 @@
+{{ if .Values.moRuler.enabled }} 
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mo-ruler-deployment
+  labels:
+    app: mo-ruler
+spec:
+  replicas: {{ .Values.moRuler.replicaCount }}
+  selector:
+    matchLabels:
+      app: mo-ruler
+  template:
+    metadata:
+      labels:
+        app: mo-ruler
+    spec:
+      serviceAccountName: {{ .Release.Name }}
+      containers:
+      - name: {{ .Values.moRuler.image.containerName }}
+        image: "{{ .Values.moRuler.image.repository }}:{{ .Values.moRuler.image.tag }}"
+        imagePullPolicy: {{ .Values.moRuler.image.pullPolicy }}
+        resources:
+{{ toYaml .Values.moRuler.resources | indent 10 }}
+        ports:
+        - containerPort: {{ .Values.moRuler.apiServer.port }}
+        env:
+        {{- if eq .Values.moRuler.rulerSpec.ruler.mo.type "env" }}
+        - name: MO_HOST
+          valueFrom:
+            secretKeyRef:
+              name: {{ $.Values.moRuler.rulerSpec.secret }}
+              key: MO_HOST
+              optional: false
+        - name: MO_PORT
+          valueFrom:
+            secretKeyRef:
+              name: {{ $.Values.moRuler.rulerSpec.secret }}
+              key: MO_PORT
+              optional: false
+        - name: MO_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ $.Values.moRuler.rulerSpec.secret }}
+              key: MO_USER
+              optional: false
+        - name: MO_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ $.Values.moRuler.rulerSpec.secret }}
+              key: MO_PASSWORD
+              optional: false
+        {{- end }}
+
+        volumeMounts:
+          - name: ruler-config
+            mountPath: /service.yaml
+            subPath: service.yaml
+
+          - name: ruler-prometheus-config
+            mountPath: /ruler-prometheus.yml
+            subPath: ruler-prometheus.yml
+
+          - name: alert-rules
+            mountPath: /rules
+
+          {{- range $.Values.moRuler.extraSecretMounts }}
+          - name: {{ .name }}
+            mountPath: {{ .mountPath }}
+            readOnly: {{ .readOnly }}
+          {{- end }}
+
+      volumes:
+      - name: ruler-config
+        configMap:
+          name: mo-ruler-config-map
+          items:
+          - key: mo-ruler.yaml
+            path: service.yaml
+      
+      - name: ruler-prometheus-config
+        configMap:
+          name: mo-ruler-config-map
+          items:
+          - key: ruler-prometheus.yml
+            path: ruler-prometheus.yml
+        
+      - name: alert-rules
+        configMap:
+          name: rules-config-map
+          # items:
+          # - key: test_rule.yaml
+          #   path: test_rule.yaml
+
+      {{- if $.Values.moRuler.extraSecretMounts }}
+      {{- range $.Values.moRuler.extraSecretMounts }}
+      - name: {{ .name }}
+        secret:
+          secretName: {{ .secretName }}
+          defaultMode: {{ .defaultMode }}
+      {{- end }}
+      {{- end }}
+{{ end }}

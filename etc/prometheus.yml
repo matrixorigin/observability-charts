@@ -1,0 +1,16 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 30s
+
+
+rule_files:
+  - "./etc/rules/*.yaml"
+  - "./etc/rules/*.yml"
+
+alerting:
+  alertmanagers:
+    - scheme: http
+      static_configs:
+        - targets:
+            - "localhost:9093"
+

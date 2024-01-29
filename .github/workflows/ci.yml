@@ -1,0 +1,193 @@
+# Default workflow
+name: MO Observability CI
+
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+    branches: [ main,'[0-9]+.[0-9]+.[0-9]+' ]
+    paths:
+      - '**'
+      - '!charts/**'
+      - '!docs/**'
+      - '!etc/**'
+      - '!example/**'
+      - '!test/**'
+      - '!.dockerignore'
+      - '!.gitignore'
+      - '!.gitmodules'
+      - '!README.md'
+      # should test obervability when change package
+      # - '!.github/**' ## 这个去不掉
+      # - '!./go.mod'
+      # - '!./go.sum'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.event.pull_request.head.repo.full_name}}/${{ github.event.pull_request.head.ref }}/${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  ut:
+    runs-on: amd64-tke-moc
+    name: UT Test for MO-Agent and MO-Ruler
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: '3'
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Set up Go
+        uses: ./.github/actions/setup_env
+
+      - name: Set env
+        run: |
+          echo "endpoint=${{ secrets.S3ENDPOINT }}" >> $GITHUB_ENV
+          echo "region=${{ secrets.S3REGION }}" >> $GITHUB_ENV
+          echo "apikey=${{ secrets.S3APIKEY }}" >> $GITHUB_ENV
+          echo "apisecret=${{ secrets.S3APISECRET }}" >> $GITHUB_ENV
+          echo "bucket=${{ secrets.S3BUCKET }}" >> $GITHUB_ENV
+
+      - names: Set netrc
+        # 为解决私有仓库拉取问题
+        uses: extractions/netrc@v1
+        with:
+          machine: github.com
+          username: ${{ secrets.ACTOR }}
+          password: ${{ secrets.TOKEN_ACTION }}
+
+      #- name: Configure git
+      #  # 为解决私有仓库拉取问题
+      #  env:
+      #    TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      #  run: git config --global url."https://${TOKEN}:@github.com/".insteadOf "https://github.com/"
+
+      - name: Unit Testing
+        run: |
+          cd $GITHUB_WORKSPACE && make clean
+          make ut
+
+  observability-test:
+    runs-on: amd64-tke-dind
+    name: Observability Test
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: '3'
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Set up Go
+        uses: ./.github/actions/setup_env
+
+      - name: parse smtp secrets from github
+        env:
+          CI_SMTP_USER: ${{ secrets.CI_SMTP_USER }}
+          CI_SMTP_HOST: ${{ secrets.CI_SMTP_HOST }}
+          CI_SMTP_PASSWORD: ${{ secrets.CI_SMTP_PASSWORD }}
+        run : go run ./.github/observability/script/generate_smtp.go
+
+      - uses: extractions/netrc@v1
+        with:
+          machine: github.com
+          username: ${{ secrets.ACTOR }}
+          password: ${{ secrets.TOKEN_ACTION }}
+
+      - name: Build mo-agent By Action
+        uses: docker/build-push-action@v4
+        with:
+          build-args: |
+            GITHUB_ACCESS_TOKEN=${{ secrets.TOKEN_ACTION }}
+          file: ./build/mo-agent/Dockerfile
+          context: .
+          platforms: linux/amd64
+          push: false
+          tags: matrixorigin/observability:mo-agent-local
+
+      - name: Build mo-ruler By Action
+        uses: docker/build-push-action@v4
+        with:
+          build-args: |
+            GITHUB_ACCESS_TOKEN=${{ secrets.TOKEN_ACTION }}
+          file: ./build/mo-ruler/Dockerfile
+          context: .
+          platforms: linux/amd64
+          push: false
+          tags: matrixorigin/observability:mo-ruler-local
+
+      - name: Start docker-compose containers
+        run: docker-compose -f "./.github/observability/docker-compose.yaml" up -d --build
+
+      #  调试 ssh
+      # - name: Setup upterm session
+      #   uses: lhotari/action-upterm@v1
+
+      - name: test observability
+        run: make observability-test
+
+      - name: promql query test
+        run: make promql-test
+
+
+      - name: test prom scrape example
+        run: go run ./.github/observability/script/mock-server.go
+
+      - name: etl data list
+        run: find ~/mo-data/etl
+
+      - name: generate upload files
+        if: ${{ always() }}
+        continue-on-error: true
+        run: |
+          mkdir -p ${{ github.workspace }}/upload
+          docker logs mo-ruler > ${{ github.workspace }}/upload/mo-ruler.log 2>&1
+          docker logs mo-agent > ${{ github.workspace }}/upload/mo-agent.log 2>&1
+          docker logs fluent-bit > ${{ github.workspace }}/upload/fluent-bit.log 2>&1
+          docker logs prometheus-agent > ${{ github.workspace }}/upload/prometheus-agent.log 2>&1
+          docker logs alertmanager > ${{ github.workspace }}/upload/alertmanager.log 2>&1
+          docker logs matrixone > ${{ github.workspace }}/upload/matrixone.log 2>&1
+          sudo tar -czvf ${{ github.workspace }}/upload/etl.tar.gz ~/mo-data/etl
+
+      - uses: actions/upload-artifact@v3
+        if: ${{ failure() || cancelled()}}
+        continue-on-error: true
+        with:
+          name: observability_test_reports
+          path: |
+            ${{ github.workspace }}/upload
+          retention-days: 7
+
+      - name: Stop containers
+        if: always()
+        run: docker-compose -f "./.github/observability/docker-compose.yaml" down
+
+  sca:
+    runs-on: amd64-tke-moc
+    name: SCA Test on Ubuntu/x64
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: '3'
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Set up Go
+        uses: ./.github/actions/setup_env
+
+      - uses: extractions/netrc@v1
+        with:
+          machine: github.com
+          username: ${{ secrets.ACTOR }}
+          password: ${{ secrets.TOKEN_ACTION }}
+
+      - name: Prepare ENV
+        run: |
+          cd $GITHUB_WORKSPACE && make clean && make build
+          make install-static-check-tools
+
+      - name: Static Code Analysis
+        run: |
+          cd $GITHUB_WORKSPACE
+          make static-check
+

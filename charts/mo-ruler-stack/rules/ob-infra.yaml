@@ -1,0 +1,15 @@
+groups:
+- name: mo-ob.general
+  rules: 
+  - alert: PromtailDroppEntries
+    # filter by job to avoid duplicate metrics
+    expr: rate(promtail_dropped_entries_total[1m]) > 0
+    for: 0m
+    labels:
+      alertname: PromtailDroppEntries
+      severity: "warning"
+      serviceScope: mo-ob
+      alertOwner: bruce
+    annotations:
+      summary: "{{$labels.pod}}/{{$labels.instance}}: promtail drop logs because of {{$labels.reason}}"
+      description: "{{$labels.pod}}/{{$labels.instance}}: promtail drop logs because of {{$labels.reason}}"

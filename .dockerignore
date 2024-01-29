@@ -1,0 +1,6 @@
+*.sh
+*.log*
+bin
+*.o
+*.a
+tmpdir

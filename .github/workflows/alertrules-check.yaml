@@ -1,0 +1,33 @@
+name: Alert Rules Check
+
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+    branches: [ main,'[0-9]+.[0-9]+.[0-9]+' ]
+    path:
+      - 'charts/mo-ruler-stack/rules/**'
+  workflow_dispatch:
+
+
+jobs:
+  alertmanager-test:
+    runs-on: amd64-tke-moc
+    name: Alert Rules Check And Unit Test
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: ./.github/actions/setup_env
+
+      - name: Prometheus Tools Check Rules and Unit Test
+        run: |
+          wget --no-verbose https://github.com/prometheus/prometheus/releases/download/v2.46.0/prometheus-2.46.0.linux-amd64.tar.gz
+          tar -xzvf prometheus-2.46.0.linux-amd64.tar.gz && cd prometheus-2.46.0.linux-amd64
+          touch ../charts/mo-ruler-stack/rules/empty.yml
+          touch ../charts/mo-ruler-stack/rules/empty.yaml
+          ./promtool check rules ../charts/mo-ruler-stack/rules/*.yml
+          ./promtool check rules ../charts/mo-ruler-stack/rules/*.yaml
+          ./promtool test rules ../test/rule-check/*.yml
+          ./promtool test rules ../test/rule-check/*.yaml
+
+
+

@@ -1,0 +1,73 @@
+loki-stack:
+  loki:
+    enabled: true
+    isDefault: true
+    config:
+      storage_config:
+        boltdb_shipper:
+          active_index_directory: /data/loki/boltdb-shipper-active
+          cache_location: /data/loki/boltdb-shipper-cache
+          cache_ttl: 24h         # Can be increased for faster performance over longer query periods, uses more disk space
+          shared_store: s3
+        aws:
+          bucketnames: <bucket-name>
+          s3forcepathstyle: true
+          # s3 适用于aws或者阿里云
+          s3: s3://access_key:secret_access_key@custom_endpoint/bucket_name
+        configs:
+        - from: YYYY-MM-DD
+          store: boltdb-shipper
+          object_store: s3
+          schema: v11
+          index:
+            prefix: index_
+            period: 24h
+      chunk_store_config:
+        max_look_back_period: 0s
+      compactor:
+        working_directory: /data/loki/boltdb-shipper-compactor
+        shared_store: s3
+      table_manager:
+        retention_deletes_enabled: true
+        retention_period: 720h
+
+  promtail:
+    enabled: true
+    config:
+      logLevel: debug
+      serverPort: 3101
+      clients:
+        - url: http://{{ .Release.Name }}-loki:3100/loki/api/v1/push
+
+kube-prometheus-stack:
+  alertmanager:
+    enabled: false
+  grafana:
+    enabled: false
+    ## ForceDeployDatasources Create datasource configmap even if grafana deployment has been disabled
+    forceDeployDatasources: true
+  nodeExporter:
+    enabled: true
+  prometheus:
+    prometheusSpec:
+      # image:
+      #   registry: registry.cn-hangzhou.aliyuncs.com
+      #   repository: prometheus
+      #   tag: v2.42.0
+      #   sha: ""
+      # [必要]根据部署的云厂商选择存储配置
+      storageSpec:
+        ## Using PersistentVolumeClaim
+        ##
+        volumeClaimTemplate:
+          spec:
+            # aws使用gp3存储
+            storageClassName: "gp3"
+            # alicloud使用以下sc
+            # storageClassName: "alicloud-ssd-ack-dev"
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 20Gi
+
+

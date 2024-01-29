@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 1m
+
+scrape_configs:      
+  - job_name: 'service-local'
+    static_configs:
+      # 在本地环境暴露相应端口让 prometheus 进行采集
+      # 或者自行在 docker-compose 中添加组件进行测试
+      - targets:
+        - 'host.docker.internal:<local-port>'

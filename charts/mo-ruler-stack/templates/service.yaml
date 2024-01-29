@@ -1,0 +1,25 @@
+{{ if .Values.moRuler.enabled }}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mo-ruler-service
+  labels:
+    app: mo-ruler
+    need_metrics: "true"
+spec:
+  type: {{ .Values.moRuler.service.type }}
+  selector:
+    app: mo-ruler
+  ports:
+    - name: http
+      port: {{ .Values.moRuler.service.port }}
+      targetPort: {{ .Values.moRuler.service.targetPort }}
+      protocol: TCP
+    # - name: https
+    #   port: {{ .Values.moRuler.service.port }}
+    #   targetPort: {{ .Values.moRuler.service.targetPort }}
+    #   protocol: TCP
+
+{{ end }}
+

@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mo-agent-config-map
+data:
+  mo-agent.yaml: |-
+    log:
+      level: {{ .Values.moAgent.agentSpec.log.level }}
+      format: {{ .Values.moAgent.agentSpec.log.format }}
+      filename: {{ .Values.moAgent.agentSpec.log.filename }}
+      maxSize: {{ .Values.moAgent.agentSpec.log.maxSize }}
+      maxDays: {{ .Values.moAgent.agentSpec.log.maxDays }}
+      maxBackups: {{ .Values.moAgent.agentSpec.log.maxBackups }}
+      
+    general:
+      shortTable: {{ .Values.moAgent.agentSpec.general.shortTable }}
+      retention:
+        retentionDisabled: {{ .Values.moAgent.agentSpec.general.retention.retentionDisabled }}
+        deleteInterval: {{ .Values.moAgent.agentSpec.general.retention.deleteInterval }}
+        onceDeleteLimit: {{ .Values.moAgent.agentSpec.general.retention.onceDeleteLimit }}
+        logRetentionPeriod: {{ .Values.moAgent.agentSpec.general.retention.logRetentionPeriod }}        
+        metricRetentionPeriod: {{ .Values.moAgent.agentSpec.general.retention.metricRetentionPeriod }}
+        traceRetentionPeriod: {{ .Values.moAgent.agentSpec.general.retention.traceRetentionPeriod }}     
+    agent: 
+      server:
+        host: {{ .Values.moAgent.agentSpec.server.host }}
+        port: {{ .Values.moAgent.agentSpec.server.port }}
+        privateKeyFile: {{ .Values.moAgent.agentSpec.server.privateKeyFile }}
+        publicKeyFile: {{ .Values.moAgent.agentSpec.server.publicKeyFile }}
+        tokenEffectiveTime: {{ .Values.moAgent.agentSpec.server.tokenEffectiveTime }}
+        certPath: {{ .Values.moAgent.agentSpec.server.certPath }}
+        mode: {{ .Values.moAgent.agentSpec.server.mode }}
+        maxAllow: {{ .Values.moAgent.agentSpec.server.maxAllow }}
+        maxWait: {{ .Values.moAgent.agentSpec.server.maxWait }}
+
+      mo:
+        type: {{ .Values.moAgent.agentSpec.mo.type }}
+        labels: {{- range $k, $v := .Values.moAgent.agentSpec.mo.labels }}
+          - {{ $k }}={{ $v }}{{- end}}
+        host: {{ .Values.moAgent.agentSpec.mo.host }}
+        port: {{ .Values.moAgent.agentSpec.mo.port }}
+        user: {{ .Values.moAgent.agentSpec.mo.user }}
+        password: {{ .Values.moAgent.agentSpec.mo.password }}
+        connectTimeout: {{ .Values.moAgent.agentSpec.mo.connectTimeout }}
+        maxOpens: {{ .Values.moAgent.agentSpec.mo.maxOpens }}
+        maxIdles: {{ .Values.moAgent.agentSpec.mo.maxIdles }}
+        initPingCnt: {{ .Values.moAgent.agentSpec.mo.initPingCnt }}
+      
+      app:
+        uuid: {{ .Values.moAgent.agentSpec.app.uuid }}
+        account: {{ .Values.moAgent.agentSpec.app.account }}
+        database: {{ .Values.moAgent.agentSpec.app.database }}
+        extension: {{ .Values.moAgent.agentSpec.app.extension }}
+        exporter: {{ .Values.moAgent.agentSpec.app.exporter }}
+        exportThreads: {{ .Values.moAgent.agentSpec.app.exportThreads }}
+        exportInterval: {{ .Values.moAgent.agentSpec.app.exportInterval }}
+        bufferBytes: {{ .Values.moAgent.agentSpec.app.bufferBytes }}
+        showAccessLog: {{ .Values.moAgent.agentSpec.app.showAccessLog }}
+        queueSize : {{ .Values.moAgent.agentSpec.app.queueSize }}
+        metricCacheSize : {{ .Values.moAgent.agentSpec.app.metricCacheSize }}
+        labelCacheSize : {{ .Values.moAgent.agentSpec.app.labelCacheSize }}
+        logCacheSize : {{ .Values.moAgent.agentSpec.app.logCacheSize }}
+        preCreatetableWorker : {{ .Values.moAgent.agentSpec.app.preCreatetableWorker }}
+        labelPreloadLimit : {{ .Values.moAgent.agentSpec.app.labelPreloadLimit }}
+        labelFlushSize: {{ .Values.moAgent.agentSpec.app.labelFlushSize }}
+        labelFlushInterval: {{ .Values.moAgent.agentSpec.app.labelFlushInterval }}
+        metricTablesPreCreate: {{- range .Values.moAgent.agentSpec.app.metricTablesPreCreate }}
+        - {{.}}{{- end }}

@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mo-agent-deployment
+  labels:
+    app: mo-agent
+spec:
+  replicas: {{ .Values.moAgent.replicaCount }}
+  selector:
+    matchLabels:
+      app: mo-agent
+  template:
+    metadata:
+      labels:
+        app: mo-agent
+    spec:
+      serviceAccountName: {{ .Release.Name }}
+      containers:
+      - name: {{ .Values.moAgent.image.containerName }}
+        image: "{{ .Values.moAgent.image.repository }}:{{ .Values.moAgent.image.tag }}"
+        imagePullPolicy: {{ .Values.moAgent.image.pullPolicy }}
+        resources:
+{{ toYaml .Values.moAgent.resources | indent 10 }}
+        ports:
+        - containerPort: {{ .Values.moAgent.apiServer.port }}
+        env:
+        {{- if eq $.Values.moAgent.agentSpec.mo.type "env" }}
+        - name: MO_HOST
+          valueFrom:
+            secretKeyRef:
+              name: {{ $.Values.moAgent.agentSpec.secret }}
+              key: MO_HOST
+              optional: false
+        - name: MO_PORT
+          valueFrom:
+            secretKeyRef:
+              name: {{ $.Values.moAgent.agentSpec.secret }}
+              key: MO_PORT
+              optional: false
+        - name: MO_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ $.Values.moAgent.agentSpec.secret }}
+              key: MO_USER
+              optional: false
+        - name: MO_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ $.Values.moAgent.agentSpec.secret }}
+              key: MO_PASSWORD
+              optional: false
+        {{- end }}
+        volumeMounts:
+          - name: agent-config
+            mountPath: /service.yaml
+            subPath: service.yaml
+          {{- range $.Values.moAgent.extraSecretMounts }}
+          - name: {{ .name }}
+            mountPath: {{ .mountPath }}
+            readOnly: {{ .readOnly }}
+          {{- end }}
+
+
+      volumes:
+      - name: agent-config
+        configMap:
+          name: mo-agent-config-map
+          items:
+            - key: mo-agent.yaml
+              path: service.yaml
+      {{- range $.Values.moAgent.extraSecretMounts }}
+      - name: {{ .name }}
+        secret:
+          secretName: {{ .secretName }}
+          defaultMode: {{ .defaultMode }}
+      {{- end }}

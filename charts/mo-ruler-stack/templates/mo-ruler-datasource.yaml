@@ -1,0 +1,23 @@
+{{ if .Values.moRuler.enabled }} 
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mo-ruler-datasource
+  labels:
+    app: mo-ruler-stack
+    app.kubernetes.io/instance: mo-ruler
+    app.kubernetes.io/part-of: grafana
+    grafana_datasource: "1"
+data:
+  mo-ruler-datasource.yaml: |-
+    apiVersion: 1
+    datasources:
+    - name: unit-metrics
+      type: prometheus
+      url: http://mo-ruler-service:9199
+      access: proxy
+      jsonData:
+        timeInterval: 120s
+
+{{ end }}

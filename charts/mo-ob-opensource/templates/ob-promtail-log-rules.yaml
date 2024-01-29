@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ob-promtail-log-rules
+data:
+  ob-promtail-log-rules.yaml: |
+    groups:
+    - name: promtail.rules
+      rules:
+      - alert: PromtailErrorSendingRetry
+        expr: count_over_time({app="promtail"} |= `level=warn` |= `error sending batch, will retry` [1m])) > 0
+        for: 1m
+        labels:
+          alertname: PromtailErrorSendingRetry
+          severity: "info"
+          serviceScope: "mo-ob"
+          alertOwner: bruce
+        annotations:
+          summary: "{{ $labels.pod }}: error sending batch on {{ $labels.node_name }}, will retry"
+          description: "{{ $labels.pod }}: error sending batch on {{ $labels.node_name }}, will retry"
+      - alert: PromtailErrorSendingFinal
+        expr: count_over_time({app="promtail"} |= `level=error` |= `final error sending batch` [1m]) > 0
+        for: 1m
+        labels:
+          alertname: PromtailErrorSendingFinal
+          severity: "warning"
+          serviceScope: "mo-ob"
+          alertOwner: bruce
+        annotations:
+          summary: "{{ $labels.pod }}: final error sending batch on {{ $labels.node_name }}"
+          description: "{{ $labels.pod }}: final error sending batch on {{ $labels.node_name }}"

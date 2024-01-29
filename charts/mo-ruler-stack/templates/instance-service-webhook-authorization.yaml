@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: instance-service-webhook-authorization
+data:
+  instance-service: >-
+    {{.Values.secretValue.instance_service_webhook_authorization}}
+type: Opaque

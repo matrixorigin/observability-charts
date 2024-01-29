@@ -1,0 +1,3 @@
+rule_files:
+  - ../../charts/mo-ruler-stack/rules/*.yaml
+  - ../../charts/mo-ruler-stack/rules/*.yml

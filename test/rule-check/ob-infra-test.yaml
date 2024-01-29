@@ -1,0 +1,35 @@
+rule_files:
+  - ../../charts/mo-ruler-stack/rules/*.yaml
+  - ../../charts/mo-ruler-stack/rules/*.yml
+
+# 每次计算的时间间隔
+evaluation_interval: 1m
+
+tests:
+
+  # Test 1: test MonthlyCUUsageCloseOrExceeded and DailyCUUsageCloseOrExceeded
+  - interval: 1m
+    # Series data.
+    input_series:
+      - series: promtail_dropped_entries_total{instance="172.20.0.233:3101", namespace="mo-ob", pod="mo-ob-opensource-controlplane-promtail-rfdhj", reason="ingester_error"}
+        values: "0 1 2 3 4 5"
+    # Unit test for alerting rules.
+    alert_rule_test:
+      # 这个是总的运行时间，根据上面的evaluation_interval和interval调整
+      # 注意，要确保series的数量
+      - eval_time: 5m
+        alertname: PromtailDroppEntries
+        exp_alerts:
+          # Alert 1.
+          - exp_labels:
+              alertOwner: bruce          
+              alertname: PromtailDroppEntries
+              severity: "warning"
+              serviceScope: mo-ob
+              instance: "172.20.0.233:3101"
+              namespace: "mo-ob"
+              pod: "mo-ob-opensource-controlplane-promtail-rfdhj"
+              reason: "ingester_error"
+            exp_annotations:
+              summary: "mo-ob-opensource-controlplane-promtail-rfdhj/172.20.0.233:3101: promtail drop logs because of ingester_error"
+              description: "mo-ob-opensource-controlplane-promtail-rfdhj/172.20.0.233:3101: promtail drop logs because of ingester_error"

@@ -1,0 +1,23 @@
+{{- if .Values.grafana.enabled }}
+{{- $files := .Files.Glob "grafana/dashboards/*.json" }}
+{{- if $files }}
+apiVersion: v1
+kind: ConfigMapList
+items:
+{{- range $path, $fileContents := $files }}
+{{- $dashboardName := regexReplaceAll "(^.*/)(.*/)(.*)\\.json$" $path "${3}" }}
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: {{ printf "%s-%s" (include "mo-ruler-stack.fullname" $) $dashboardName | trunc 63 | trimSuffix "-" }}
+    namespace: {{ template "mo-ruler-stack-grafana.namespace" $ }}
+    labels:
+      {{- if $.Values.grafana.sidecar.dashboards.label }}
+      {{ $.Values.grafana.sidecar.dashboards.label }}: {{ ternary $.Values.grafana.sidecar.dashboards.labelValue "1" (not (empty $.Values.grafana.sidecar.dashboards.labelValue)) | quote }}
+      {{- end }}
+      app: {{ template "mo-ruler-stack.name" $ }}-grafana
+  data:
+    {{ printf "%s.json" $dashboardName }}: {{ $.Files.Get $path | toJson }}
+{{- end }}
+{{- end }}
+{{- end }}

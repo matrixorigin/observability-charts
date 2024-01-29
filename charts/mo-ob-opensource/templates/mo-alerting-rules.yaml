@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: List
+metadata:
+  name: mo-ob-prometheus-rules
+  namespace: {{ .Release.Namespace }}
+items:
+{{ $root := . }}
+{{- range $path, $_ := .Files.Glob "rules/*" }}
+  - apiVersion: monitoring.coreos.com/v1
+    kind: PrometheusRule
+    metadata:
+      name: {{ regexReplaceAll "\\W+" $path  "-" }}.rules
+      namespace: {{ $.Release.Namespace }}
+      labels:
+        release: {{ $.Release.Name }}
+        app: kube-prometheus-stack
+        app.kubernetes.io/name: {{ $.Release.Name }}
+        helm.sh/chart: {{ $.Release.Name }}
+        app.kubernetes.io/instance: {{ $.Release.Name }}
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/part-of: kube-prometheus-stack
+        heritage: Helm
+    spec:
+    {{ $root.Files.Get $path | nindent 6 }}
+{{- end }}

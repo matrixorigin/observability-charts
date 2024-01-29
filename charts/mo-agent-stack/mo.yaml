@@ -1,0 +1,29 @@
+moAgent:
+  replicaCount: 1
+  image:
+    containerName: mo-agent
+    repository: matrixorigin/observability
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "agent-0.9.0-alpha.2"
+  agentSpec:
+    mo:
+      type: cfg
+      labels:
+        matrixone.cloud/role: observability
+      host: 127.0.0.1
+      port: 6001
+      user: dump
+      password: 111
+
+prometheus:
+  enabled: true
+
+fluent-bit:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: cr.fluentbit.io/fluent/fluent-bit
+    # Overrides the image tag whose default is {{ .Chart.AppVersion }}
+    tag: 2.0.8-debug
+    pullPolicy: Always

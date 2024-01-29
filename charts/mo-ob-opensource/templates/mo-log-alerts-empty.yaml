@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mo-log-alerts-empty
+data:
+  mo-log-alerts-empty.yaml: |
+    groups:
+    - name: moob.empty.rules

@@ -1,0 +1,115 @@
+groups:
+  - name: mo-cloud.instance.payment
+    rules:
+      # Alert for any instance's daily CUUsage is approaching payment (closely or exceeded).
+      - alert: DailyCUUsageCloseOrExceeded
+        expr: controlplane_instance_daily_cu{payment="paid", quota_status=~"close|exceeded"} > 0
+        labels:
+          alertOwner: DanielZhang
+          alertname: CUUsage
+          alerttype: usage
+          usageType: daily
+          serviceScope: mo-cloud
+          instanceid: "{{$labels.id}}"
+          severity: "critical"
+        annotations:
+          summary: "{{$labels.name}}: Daily CU usage approaching payment {{$labels.quota_status}}"
+          description: "{{$labels.name}}: Daily CU usage is above 90% (current value is: {{ $value }})"
+      # Alert for any instance's monthly CUUsage is approaching payment (closely).
+      - alert: MonthlyCUUsageCloseOrExceeded
+        expr: controlplane_instance_monthly_cu{payment="paid", quota_status=~"close|exceeded"} > 0
+        labels:
+          alertOwner: DanielZhang
+          alertname: CUUsage
+          alerttype: usage
+          usageType: monthly
+          serviceScope: mo-cloud
+          instanceid: "{{$labels.id}}"
+          severity: "critical"
+        annotations:
+          summary: "{{$labels.name}}: Monthly CU usage approaching payment {{$labels.quota_status}}"
+          description: "{{$labels.name}}: Monthly CU usage is above 90% (current value is: {{ $value }})"
+      # Alert for any instance's CU increase > x M in 10 minutes.
+      - alert: CUUsageRate
+        expr: sum by(id,provider) (increase(controlplane_instance_daily_cu{payment="paid"}[10m])) > 10000000
+        labels:
+          alertOwner: DanielZhang
+          alertname: CUUsageRate
+          alerttype: rate
+          serviceScope: mo-cloud
+          instanceid: "{{$labels.id}}"
+          severity: "warning"
+        annotations:
+          usage: "{{ $value }}"
+          duration: "10"
+          threshold: "100000000"
+          summary: "{{$labels.name}}: CU Increase in 10mins greatly"
+          description: "{{$labels.name}}: CU Increase in 10 mins is above 1000000 (current value is: {{ $value }})"
+      # Alert for any instance's creaton time >120 sceonds.
+      - alert: CreationTimeoutUnpaid
+        expr: controlplane_instance_creation_duration_seconds{payment="free"} > 120
+        labels:
+          alertOwner: DanielZhang
+          serviceScope: mo-cloud
+          alertname: CreationTimeout
+          alerttype: timeout
+          instanceid: "{{$labels.id}}"
+          severity: critical
+        annotations:
+          summary: "{{$labels.name}}: Unpaid Instance Creation Timeout"
+          description: "{{$labels.name}}: Unpaid Instance Creation time is above 120s (current value is: {{ $value }})"
+
+      - alert: CreationTimeoutPaid
+        expr: controlplane_instance_creation_duration_seconds{payment="paid"} > 600
+        labels:
+          alertOwner: DanielZhang
+          serviceScope: mo-cloud
+          alertname: CreationTimeout
+          alerttype: timeout
+          instanceid: "{{$labels.id}}"
+          severity: critical
+        annotations:
+          summary: "{{$labels.name}}: Paid Instance Creation Timeout"
+          description: "{{$labels.name}}: Paid instance creation time is above 600s (current value is: {{ $value }})"
+
+      # Alert for any instance's update time >120 sceonds.
+      - alert: UpdateTimeout
+        expr: controlplane_instance_update_duration_seconds > 120
+        labels:
+          alertOwner: DanielZhang
+          alertname: UpdateTimeout
+          serviceScope: mo-cloud
+          alerttype: timeout
+          instanceid: "{{$labels.id}}"
+          severity: critical
+        annotations:
+          summary: "{{$labels.name}}: Update Timeout"
+          description: "{{$labels.name}}: Update time is above 120s (current value is: {{ $value }})"
+
+      # Alert for any instance's recovery time >120 sceonds.
+      - alert: RecoveryTimeout
+        expr: controlplane_instance_recovery_duration_seconds > 120
+        labels:
+          alertOwner: DanielZhang
+          alertname: RecoveryTimeout
+          alerttype: timeout
+          serviceScope: mo-cloud
+          instanceid: "{{$labels.id}}"
+          severity: critical
+        annotations:
+          summary: "{{$labels.name}}: Recovery Timeout"
+          description: "{{$labels.name}}: Recovery time is above 120s (current value is: {{ $value }})"
+
+      # Alert for any instance's termination time >120 sceonds.
+      - alert: TerminationTimeout
+        expr: controlplane_instance_termination_duration_seconds > 120
+        labels:
+          alertOwner: DanielZhang
+          alertname: TerminationTimeout
+          alerttype: timeout
+          serviceScope: mo-cloud
+          instanceid: "{{$labels.id}}"
+          severity: critical
+        annotations:
+          summary: "{{$labels.name}}: Termination Timeout"
+          description: "{{$labels.name}}: Termination time is above 120s (current value is: {{ $value }})"

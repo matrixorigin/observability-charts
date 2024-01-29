@@ -1,0 +1,73 @@
+{{ if .Values.moRuler.enabled }} 
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mo-ruler-config-map
+data:
+  mo-ruler.yaml: |-
+    log:
+      level: {{ .Values.moRuler.rulerSpec.log.level }}
+      format: {{ .Values.moRuler.rulerSpec.log.format }}
+      filename: {{ .Values.moRuler.rulerSpec.log.filename }}
+      maxSize: {{ .Values.moRuler.rulerSpec.log.maxSize }}
+      maxDays: {{ .Values.moRuler.rulerSpec.log.maxDays }}
+      maxBackups: {{ .Values.moRuler.rulerSpec.log.maxBackups }}
+    ruler:
+      rule:
+        ruleType: {{ .Values.moRuler.rulerSpec.ruler.rule.ruleType }}
+        notificationQueueCapacity: {{ .Values.moRuler.rulerSpec.ruler.rule.notificationQueueCapacity }}
+        outageTolerance: {{ .Values.moRuler.rulerSpec.ruler.rule.outageTolerance }}
+        forGracePeriod: {{ .Values.moRuler.rulerSpec.ruler.rule.forGracePeriod }}
+        resendDelay: {{ .Values.moRuler.rulerSpec.ruler.rule.resendDelay }}
+        metricConfigPath: {{ .Values.moRuler.rulerSpec.ruler.rule.metricConfigPath }}
+      mo:
+        type: {{ .Values.moRuler.rulerSpec.ruler.mo.type }}
+        labels: {{- range $k, $v := .Values.moRuler.rulerSpec.ruler.mo.labels }}
+          - {{ $k }}={{ $v }}{{- end}}
+        host: {{ .Values.moRuler.rulerSpec.ruler.mo.host }}
+        port: {{ .Values.moRuler.rulerSpec.ruler.mo.port }}
+        user: {{ .Values.moRuler.rulerSpec.ruler.mo.user }}
+        password: {{ .Values.moRuler.rulerSpec.ruler.mo.password }}
+        connectTimeout: {{ .Values.moRuler.rulerSpec.ruler.mo.connectTimeout }}
+        maxOpens: {{ .Values.moRuler.rulerSpec.ruler.mo.maxOpens }}
+        maxIdles: {{ .Values.moRuler.rulerSpec.ruler.mo.maxIdles }}
+        initPingCnt: {{ .Values.moRuler.rulerSpec.ruler.mo.initPingCnt }}
+      query:
+        maxQueryTimeout: {{ .Values.moRuler.rulerSpec.ruler.query.maxQueryTimeout }}
+        subQueryStepInterval: {{ .Values.moRuler.rulerSpec.ruler.query.subQueryStepInterval }}
+        lookBackDelta: {{ .Values.moRuler.rulerSpec.ruler.query.lookBackDelta }}
+        maxSamples: {{ .Values.moRuler.rulerSpec.ruler.query.maxSamples }}
+        maxPointsPerTs: {{ .Values.moRuler.rulerSpec.ruler.query.maxPointsPerTs }}
+        account: {{ .Values.moRuler.rulerSpec.ruler.query.account }}
+        database: {{ .Values.moRuler.rulerSpec.ruler.query.database }}
+      apiServer:
+        lookBackDelta: {{ .Values.moRuler.rulerSpec.ruler.apiServer.lookBackDelta }}
+        listenAddress: {{ .Values.moRuler.rulerSpec.ruler.apiServer.listenAddress }}
+        readTimeout: {{ .Values.moRuler.rulerSpec.ruler.apiServer.readTimeout }}
+        maxConnections: {{ .Values.moRuler.rulerSpec.ruler.apiServer.maxConnections }}
+        routePrefix: {{ .Values.moRuler.rulerSpec.ruler.apiServer.routePrefix }}
+        consoleTemplatesPath: {{ .Values.moRuler.rulerSpec.ruler.apiServer.consoleTemplatesPath }}
+        consoleLibrariesPath: {{ .Values.moRuler.rulerSpec.ruler.apiServer.consoleLibrariesPath }}
+        enableLifecycle: {{ .Values.moRuler.rulerSpec.ruler.apiServer.enableLifecycle }}
+        pageTitle: {{ .Values.moRuler.rulerSpec.ruler.apiServer.pageTitle }}
+        appName: {{ .Values.moRuler.rulerSpec.ruler.apiServer.appName }}
+  ruler-prometheus.yml: |-
+    global:
+      evaluation_interval: {{ .Values.moRuler.rulerSpec.global.evaluation_interval }}
+
+    rule_files:
+      {{- range .Values.moRuler.rulerSpec.rule_files }}
+      - {{ . | quote }}
+      {{- end }}
+
+    alerting:
+      alertmanagers:
+        - scheme: {{ .Values.moRuler.rulerSpec.alerting.alertingEndpoint.scheme }}
+          static_configs:
+            - targets:
+                {{- range .Values.moRuler.rulerSpec.alerting.alertingEndpoint.targets }}
+                - {{ . | quote }}
+                {{- end }}
+
+{{ end }}

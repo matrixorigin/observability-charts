@@ -1,0 +1,27 @@
+global:
+  resolve_timeout: 5m
+  smtp_from: <YOUR_SMTP_FROM>
+  smtp_smarthost: <YOUR_SMTP_HOST>
+  smtp_auth_username: <YOUR_SMTP_USER>
+  smtp_auth_password: <YOUR_SMTP_PASSWORD>
+  smtp_require_tls: false
+  # smtp_hello: 'qq.com'
+route:
+  group_by: ['alertname']
+  group_wait: 10s 
+  group_interval: 10s
+  repeat_interval: 5m
+  receiver: 'email'
+receivers:
+- name: 'email'
+  email_configs:
+  - to: 'lianghongyi@matrixorigin.cn'
+    send_resolved: true
+
+inhibit_rules:
+  # - source_match:
+  #     severity: 'critical'
+  #   target_match:
+  #     severity: 'warning'
+  #   equal: ['alertname', 'dev', 'instance']
+

@@ -1,0 +1,7 @@
+# 用作 grafana 加载 prometheus 数据源，请勿修改
+datasources:
+- name: Prometheus
+  access: proxy
+  type: prometheus
+  url: http://prometheus:9090
+  isDefault: true

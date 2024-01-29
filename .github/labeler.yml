@@ -1,0 +1,26 @@
+# Add 'label1' to any changes within 'example' folder or any subfolders
+#label1:
+#- example/**
+
+# Add 'change-charts' to any file changes within 'charts' folder
+change-charts:
+- charts/**
+
+documentation:
+- LICENSE
+- README.md
+- docs/**
+
+alert:
+- charts/mo-ruler-stack/rules/**
+- charts/mo-ruler-stack/alert-template/**
+- docs/alerts/**
+
+dashboard:
+- docs/scrape/**
+- docs/dashboards/**
+- charts/mo-ruler-stack/grafana/dashboards/**
+
+cicd:
+- .github/**
+- optools/**

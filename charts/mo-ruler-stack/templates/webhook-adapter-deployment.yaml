@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager-webhook-adapter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alertmanager-webhook-adapter
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: alertmanager-webhook-adapter
+    spec:
+      containers:
+      - name: webhook
+        image: ez4bruce3280/alertmanager-webhook-adapter:v1.1.7
+        command:
+        - /alertmanager-webhook-adapter
+        - --listen-address=:8090
+        - --signature=MO-OB
+        - --tmpl-lang=zh
+        - --tmpl-dir=/alert-templates/
+        - --debug=true
+        env:
+        - name: TZ
+          value: Asia/Shanghai
+        resources:
+          requests:
+            memory: 50Mi
+            cpu: 100m
+          limits:
+            memory: 250Mi
+            cpu: 500m
+        volumeMounts:
+          - name: alert-templates
+            mountPath: /alert-templates
+      volumes:
+      - name: alert-templates
+        configMap:
+          name: alert-template-config-map
+      restartPolicy: Always

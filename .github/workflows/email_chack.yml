@@ -1,0 +1,68 @@
+# Default workflow
+name: MO Observability Email Check (monthly)
+
+on:
+  schedule:
+    - cron: "30 1 1 * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.event.pull_request.head.repo.full_name}}/${{ github.event.pull_request.head.ref }}/${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  observability-test:
+    runs-on: amd64-tke-dind
+    name: Observability Test
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: '3'
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: parse smtp secrets from github
+        env:
+          CI_SMTP_USER: ${{ secrets.CI_SMTP_USER }}
+          CI_SMTP_HOST: ${{ secrets.CI_SMTP_HOST }}
+          CI_SMTP_PASSWORD: ${{ secrets.CI_SMTP_PASSWORD }}
+        run : go run ./.github/observability/script/generate_smtp.go
+
+      - name: Build mo-agent By Action
+        uses: docker/build-push-action@v4
+        with:
+          build-args: |
+            GITHUB_ACCESS_TOKEN=${{ secrets.TOKEN_ACTION }}
+          file: ./build/mo-agent/Dockerfile
+          context: .
+          platforms: linux/amd64
+          push: false
+          tags: matrixorigin/observability:mo-agent-local
+
+      - name: Build mo-ruler By Action
+        uses: docker/build-push-action@v4
+        with:
+          build-args: |
+            GITHUB_ACCESS_TOKEN=${{ secrets.TOKEN_ACTION }}
+          file: ./build/mo-ruler/Dockerfile
+          context: .
+          platforms: linux/amd64
+          push: false
+          tags: matrixorigin/observability:mo-ruler-local
+
+      - name: Start docker-compose containers
+        run: docker-compose -f "./.github/observability/docker-compose.yaml" up -d --build
+
+      - name: Set up Go
+        uses: ./.github/actions/setup_env
+
+      - name: test observability
+        run: make observability-test
+
+      # 调试 ssh
+      # - name: Setup upterm session
+      #   uses: lhotari/action-upterm@v1
+
+      - name: Stop containers
+        if: always()
+        run: docker-compose -f "./.github/observability/docker-compose.yaml" down

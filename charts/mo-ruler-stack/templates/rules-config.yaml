@@ -1,0 +1,10 @@
+{{ if .Values.moRuler.enabled }} 
+
+apiVersion: v1
+data:
+{{ (.Files.Glob "rules/*").AsConfig | indent 2 }}
+kind: ConfigMap
+metadata:
+  name: rules-config-map
+
+{{ end }}

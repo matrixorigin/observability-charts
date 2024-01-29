@@ -1,0 +1,29 @@
+grafana:
+  enabled: true
+
+
+alertmanager:
+  enabled: true
+  fullnameOverride: "mo-ob-alertmanager"
+
+
+moRuler:
+  # if deploy in control-plane, set to false
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: matrixone-cloud/observability
+    tag: mo-ruler-local
+    pullPolicy: IfNotPresent
+  
+  rulerSpec:
+    secret: mo-ob-secret
+    ruler:
+      mo:
+        type: cfg
+        labels:
+          matrixone.cloud/role: observability
+        host: matrixone.xiezexiong
+        port: 6001
+        user: dump
+        password: 111

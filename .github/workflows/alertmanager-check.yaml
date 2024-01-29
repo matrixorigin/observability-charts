@@ -1,0 +1,66 @@
+name: Alertmanager Config Check
+
+on:
+  workflow_dispatch:
+    inputs:
+      file_path:
+        description: "Alerting Rule's file path"
+        required: true
+        default: 'charts/mo-ruler-stack/rules/*.yaml'
+        type: string
+      email_to:
+        description: "Email Receiver to receiver alert email, default is "
+        required: true
+        default: 'null'
+        type: string
+
+jobs:
+  alertmanager-test:
+    runs-on: amd64-tke-dind
+    name: Alertmanager Config Test
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: ./.github/actions/setup_env
+
+      - name: start minikube
+        uses: medyagh/setup-minikube@master
+
+      - name: Setup Env and Start Alertmanager in minikube
+        env:
+          EMAIL_TO: ${{ inputs.email_to }}
+          CI_SMTP_PASSWORD: ${{ secrets.CI_SMTP_PASSWORD }}
+        run: |
+          sudo apt-get install prometheus-alertmanager
+          helm dependency build charts/mo-ruler-stack
+          python3 ./.github/observability/check-alertmanager/setup_env_and_start.py
+          kubectl get all -n mo-ob
+          kubectl port-forward service/mo-ob-alertmanager 9099:9093 -n mo-ob &
+          kubectl describe pods mo-ob-alertmanager-0 -n mo-ob
+          kubectl get events --output json
+
+      - name: Load Alerting Rules and Send to Alertmanager
+        env:
+          RULES_FILE_PATH: ${{ inputs.file_path }}
+        run : |
+          go run ./.github/observability/check-alertmanager/send-dummy-alert.go
+
+      - name: CURL Command
+        if: ${{ always() }}
+        continue-on-error: true
+        run: |
+          mkdir -p ${{ github.workspace }}/upload
+          kubectl logs echo-server-0 -n mo-ob > ${{ github.workspace }}/upload/echo-server.log 2>&1
+          kubectl logs mo-ob-alertmanager-0 -n mo-ob > ${{ github.workspace }}/upload/alertmanager.log 2>&1
+          cat ${{ github.workspace }}/upload/echo-server.log
+
+      - uses: actions/upload-artifact@v3
+        if: ${{ failure() || cancelled()}}
+        continue-on-error: true
+        with:
+          name: alertmanager_test_reports
+          path: |
+            ${{ github.workspace }}/upload
+          retention-days: 7
+
+

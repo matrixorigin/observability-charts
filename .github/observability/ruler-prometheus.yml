@@ -1,0 +1,16 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 30s
+
+rule_files:
+  - "/rules/*.yaml"
+  - "/rules/*.yml"
+
+alerting:
+  alertmanagers:
+    # if alertmanager tls if off, use http
+    - scheme: http
+      static_configs:
+        - targets:
+            - "alertmanager:9093"
+

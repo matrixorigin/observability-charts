@@ -1,0 +1,52 @@
+rule_files:
+  - ../../charts/mo-ruler-stack/rules/*.yaml
+  - ../../charts/mo-ruler-stack/rules/*.yml
+
+# 每次计算的时间间隔
+evaluation_interval: 1m
+
+tests:
+
+  # Test 1: test MonthlyCUUsageCloseOrExceeded and DailyCUUsageCloseOrExceeded
+  - interval: 1m
+    # Series data.
+    input_series:
+      - series: unit_cluster_cu_calculation_no_update{cluster="local-endpoint.freetier-01:6001", instance="172.20.0.42:8080", job="kubernetes-endpoints"}
+        values: "0 0 0 0 1"
+      - series: unit_cluster_storage_calculation_no_update{cluster="local-endpoint.freetier-01:6001", instance="172.20.0.42:8080", job="kubernetes-endpoints"}
+        values: "0 0 0 0 1"        
+    # Unit test for alerting rules.
+    alert_rule_test:
+      # 这个是总的运行时间，根据上面的evaluation_interval和interval调整
+      # 注意，要确保series的数量
+      - eval_time: 5m
+        alertname: UnitClusterCUNoUpdate
+        exp_alerts:
+          # Alert 1.
+          - exp_labels:
+              alertOwner: DanielZhang          
+              alertname: UnitClusterCUNoUpdate
+              severity: "critical"
+              serviceScope: mo-cloud
+              cluster: "local-endpoint.freetier-01:6001"
+              instance: "172.20.0.42:8080"
+              job: "kubernetes-endpoints"
+            exp_annotations:
+              summary: "local-endpoint.freetier-01:6001: cu calculation no update"
+              description: "local-endpoint.freetier-01:6001: cu calculation no update "
+      - eval_time: 5m
+        alertname: UnitClusterStorageNoUpdate
+        exp_alerts:
+          # Alert 1.
+          - exp_labels:
+              alertOwner: DanielZhang          
+              alertname: UnitClusterStorageNoUpdate
+              severity: "critical"
+              serviceScope: mo-cloud
+              cluster: "local-endpoint.freetier-01:6001"
+              instance: "172.20.0.42:8080"
+              job: "kubernetes-endpoints"
+            exp_annotations:
+              summary: "local-endpoint.freetier-01:6001: storage calculation no update"
+              description: "local-endpoint.freetier-01:6001: storage calculation no update "
+          

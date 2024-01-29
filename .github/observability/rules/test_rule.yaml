@@ -1,0 +1,17 @@
+groups:
+- name: test-ci
+  rules:
+  - alert: JustATestRE
+    expr: up{instance=~"local.*", job="prometheus"} == 1
+    for: 1m
+    labels:
+      severity: info
+    annotations:
+      summary: Just a test RE
+  # - alert: JustATestNRE
+  #   expr: up{instance!~"local.*", job="demo"} == 1
+  #   for: 1m
+  #   labels:
+  #     severity: info
+  #   annotations:
+  #     summary: Just a test NRE

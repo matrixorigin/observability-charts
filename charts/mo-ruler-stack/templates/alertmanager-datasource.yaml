@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mo-alertmanager-datasource
+  labels:
+    app: alertmanager
+    app.kubernetes.io/instance: mo-alertmanager
+    app.kubernetes.io/part-of: grafana
+    grafana_datasource: "1"
+data:
+  alertmanager-datasource.yaml: |-
+    apiVersion: 1
+    datasources:
+    - name: MO-Alertmanager
+      type: alertmanager
+      url: http://mo-ob-alertmanager:9093
+      access: proxy
+      jsonData:
+        # Valid options for implementation include mimir, cortex and prometheus
+        implementation: prometheus
+        # Whether or not Grafana should send alert instances to this Alertmanager
+        handleGrafanaManagedAlerts: false
+      # optionally
+      # basicAuth: true
+      # basicAuthUser: my_user
+      # secureJsonData:
+      #   basicAuthPassword: test_password

@@ -1,0 +1,97 @@
+name: Build Docker Image (agent/ruler)
+
+on:
+  workflow_dispatch:
+    inputs:
+      app:
+        description: 'Build observability component'
+        required: false
+        default: 'both'
+        type: choice
+        options:
+        - both
+        - agent
+        - ruler
+      tag:
+        description: 'Tag for the image, use branch name if empty'
+        required: false
+        type: string
+
+jobs:
+  docker:
+    runs-on: amd64-tke-moc
+    steps:
+
+      - uses: actions/checkout@v3
+
+      - name: "Get tag name"
+        id: "tag_step"
+        run: |
+          export tag=${{ inputs.tag }}
+          if [[ $tag == "" ]]; then
+            tag=$(git rev-parse --abbrev-ref HEAD | sed 's/[^a-zA-Z0-9._-]/-/g')
+            echo "Tag input is empty, use branch name: [$tag]"
+          else
+            echo "use tag name: [$tag]"
+          fi
+          echo "tag=$tag" >> $GITHUB_OUTPUT
+
+      - name: Print Current Image Tags
+        run: |
+          echo "Current Last 30 Tags:"
+          wget -q -O - "https://hub.docker.com/v2/namespaces/matrixorigin/repositories/observability/tags?page_size=30" | grep -o '"name": *"[^"]*' | grep -o '[^"]*$'
+
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            matrixorigin/observability
+          tags: |
+            type=ref,event=branch,prefix=${{ inputs.app }}-
+            type=sha,prefix=${{ inputs.app }}-
+            type=semver,pattern={{version}},prefix=${{ inputs.app }}-
+            type=semver,pattern={{major}}.{{minor}},prefix=${{ inputs.app }}-
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Agent
+        uses: docker/build-push-action@v4
+        if:  "${{ (inputs.app == 'both') || (inputs.app == 'agent') }}"
+        with:
+          # 解决私有仓库拉取问题
+          build-args: |
+            GITHUB_ACCESS_TOKEN=${{ secrets.TOKEN_ACTION }}
+          file: ./build/mo-agent/Dockerfile
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: matrixorigin/observability:agent-${{steps.tag_step.outputs.tag}}
+
+      - name: Build and Push Ruler
+        uses: docker/build-push-action@v4
+        if:  "${{ (inputs.app == 'both') || (inputs.app == 'ruler') }}"
+        with:
+          # 解决私有仓库拉取问题
+          build-args: |
+            GITHUB_ACCESS_TOKEN=${{ secrets.TOKEN_ACTION }}
+          file: ./build/mo-ruler/Dockerfile
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: matrixorigin/observability:ruler-${{steps.tag_step.outputs.tag}}
+      - name: Print Latest Image Tags
+        run: |
+          echo "Latest Last 30 Tags:"
+          wget -q -O - "https://hub.docker.com/v2/namespaces/matrixorigin/repositories/observability/tags?page_size=30" | grep -o '"name": *"[^"]*' | grep -o '[^"]*$'

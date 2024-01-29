@@ -1,0 +1,273 @@
+# unit test for instance-service's alerting rules
+
+rule_files:
+  - ../../charts/mo-ruler-stack/rules/*.yaml
+  - ../../charts/mo-ruler-stack/rules/*.yml
+
+# 每次计算的时间间隔
+evaluation_interval: 1m
+
+tests:
+
+  # Test 1: test MonthlyCUUsageCloseOrExceeded and DailyCUUsageCloseOrExceeded
+  - interval: 1m
+    # Series data.
+    input_series:
+      - series: controlplane_instance_monthly_cu{id="instance-id-1",name="paid1",payment="paid",quota_status="normal",provider="aws"} 
+        values: "1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"
+      - series: controlplane_instance_monthly_cu{id="instance-id-2",name="paid2",payment="paid",quota_status="close",provider="aws"}
+        values: "1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"
+      - series: controlplane_instance_monthly_cu{id="instance-id-3",name="paid3",payment="paid",quota_status="exceeded",provider="aws"}
+        values: "1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"
+      - series: controlplane_instance_daily_cu{id="instance-id-4",name="paid4",payment="paid",quota_status="normal",provider="aws"}
+        values: "1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"
+      - series: controlplane_instance_daily_cu{id="instance-id-5",name="paid5",payment="paid",quota_status="close",provider="aws"}
+        values: "1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"
+      - series: controlplane_instance_daily_cu{id="instance-id-6",name="paid6",payment="paid",quota_status="exceeded",provider="aws"}
+        values: "1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"
+      # - series: controlplane_instance_daily_cu{app="instanceworker", id="107e30a0-6523-4fcb-b881-c830b79e6ce0", instance="10.0.108.22:8070", job="mocloud-application", name="Instance_1", namespace="mo-cloud", node="ip-10-0-97-214.us-west-2.compute.internal", payment="free", provider="aws", quota_status="normal", service="instanceservice"}
+
+    # Unit test for alerting rules.
+    alert_rule_test:
+      # 这个是总的运行时间，根据上面的evaluation_interval和interval调整
+      # 注意，要确保series的数量
+      - eval_time: 15m
+        alertname: MonthlyCUUsageCloseOrExceeded
+        exp_alerts:
+          # Alert 1.
+          - exp_labels:
+              alertOwner: DanielZhang
+              provider: aws
+              alertname: CUUsage
+              serviceScope: mo-cloud
+              alerttype: usage
+              usageType: monthly
+              id: "instance-id-2"
+              instanceid: "instance-id-2"
+              name: paid2
+              payment: "paid"
+              quota_status: "close"
+              severity: "critical"
+            exp_annotations:
+              summary: "paid2: Monthly CU usage approaching payment close"
+              description: "paid2: Monthly CU usage is above 90% (current value is: 1)"
+          - exp_labels:
+              alertOwner: DanielZhang
+              provider: aws
+              alertname: CUUsage
+              alerttype: usage
+              serviceScope: mo-cloud
+              usageType: monthly
+              id: "instance-id-3"
+              instanceid: "instance-id-3"
+              name: paid3
+              payment: "paid"
+              quota_status: "exceeded"
+              severity: "critical"
+            exp_annotations:
+              summary: "paid3: Monthly CU usage approaching payment exceeded"
+              description: "paid3: Monthly CU usage is above 90% (current value is: 1)"
+      - eval_time: 15m
+        alertname: DailyCUUsageCloseOrExceeded
+        exp_alerts:
+          # Alert 1.
+          - exp_labels:
+              alertOwner: DanielZhang
+              provider: aws
+              alertname: CUUsage
+              alerttype: usage
+              serviceScope: mo-cloud
+              usageType: daily
+              id: "instance-id-5"
+              instanceid: "instance-id-5"
+              name: paid5
+              payment: "paid"
+              quota_status: "close"
+              severity: "critical"
+            exp_annotations:
+              summary: "paid5: Daily CU usage approaching payment close"
+              description: "paid5: Daily CU usage is above 90% (current value is: 1)"
+          - exp_labels:
+              alertOwner: DanielZhang          
+              provider: aws
+              alertname: CUUsage
+              alerttype: usage
+              usageType: daily
+              serviceScope: mo-cloud
+              id: "instance-id-6"
+              instanceid: "instance-id-6"
+              name: paid6
+              payment: "paid"
+              quota_status: "exceeded"
+              severity: "critical"
+            exp_annotations:
+              summary: "paid6: Daily CU usage approaching payment exceeded"
+              description: "paid6: Daily CU usage is above 90% (current value is: 1)"
+
+  
+  # Test 2: test CUUsageRate
+  - interval: 1m
+    # Series data.
+    input_series:
+      - series: controlplane_instance_daily_cu{id="instance-id-4",name="paid4",payment="paid",quota_status="normal",provider="aws"}
+        values: "1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"
+      - series: controlplane_instance_daily_cu{id="instance-id-5",name="paid5",payment="paid",quota_status="close",provider="aws"}
+        values: "0 0 0 0 0 0 0 0 0 0 100000000 100000000 100000000"
+      - series: controlplane_instance_daily_cu{id="instance-id-6",name="paid6",payment="paid",quota_status="exceeded",provider="aws"}
+        values: "100000000 100000000 100000000 100000000 100000000 100000000 100000000 100000000 100000000 100000000 100000000 300000000 300000000 "
+
+    # Unit test for alerting rules.
+    alert_rule_test:
+      - eval_time: 12m
+        alertname: CUUsageRate
+        exp_alerts:
+          # Alert 1.
+          - exp_labels:
+              alertOwner: DanielZhang          
+              provider: aws
+              alertname: CUUsageRate
+              alerttype: rate
+              id: "instance-id-5"
+              instanceid: "instance-id-5"
+              severity: "warning"
+              serviceScope: mo-cloud
+            exp_annotations:
+              usage: "1e+08"
+              duration: "10"
+              threshold: "100000000"
+              summary: ": CU Increase in 10mins greatly"
+              description: ": CU Increase in 10 mins is above 1000000 (current value is: 1e+08)"
+          - exp_labels:
+              alertOwner: DanielZhang          
+              provider: aws
+              alertname: CUUsageRate
+              alerttype: rate
+              id: "instance-id-6"
+              instanceid: "instance-id-6"
+              severity: "warning"
+              serviceScope: mo-cloud
+            exp_annotations:
+              usage: "2e+08"
+              duration: "10"
+              threshold: "100000000"
+              summary: ": CU Increase in 10mins greatly"
+              description: ": CU Increase in 10 mins is above 1000000 (current value is: 2e+08)"
+    # 根据上面的时间序列，测试相关的PromQL表达式
+    promql_expr_test:
+      # Unit test 1.
+      # more info of increase function: https://blog.csdn.net/qq_36648860/article/details/115768087
+      - expr: sum by(id) (increase(controlplane_instance_daily_cu{payment="paid"}[10m]))
+        eval_time: 12m
+        exp_samples:
+          # Sample 1.
+          - labels: '{id="instance-id-4"}'
+            value: 0
+          - labels: '{id="instance-id-5"}'
+            value: 100000000
+          # Sample 2.
+          - labels: '{id="instance-id-6"}'
+            value: 200000000
+
+  # Test 3: test Creation/Update/Recovery/Termination Timeout 
+  - interval: 1m
+    # Series data.
+    input_series:
+      - series: controlplane_instance_creation_duration_seconds{id="instance-id-1",name="paid1",provider="aws",payment="free"} 
+        values: "1 1 1 1 1 1 1 1 1 1 1 1 1 1 130"
+      - series: controlplane_instance_creation_duration_seconds{id="instance-id-1",name="paid1",provider="aws",payment="paid"} 
+        values: "1 1 1 1 1 1 1 1 1 1 1 1 1 1 610"
+      - series: controlplane_instance_update_duration_seconds{id="instance-id-2",name="paid2",provider="aws"}
+        values: "1 1 1 1 1 1 1 1 1 1 1 1 1 1 140"
+      - series: controlplane_instance_termination_duration_seconds{id="instance-id-3",name="paid3",provider="aws"}
+        values: "1 1 1 1 1 1 1 1 1 1 1 1 1 1 150"
+      - series: controlplane_instance_recovery_duration_seconds{id="instance-id-4",name="paid4",provider="aws"}
+        values: "1 1 1 1 1 1 1 1 1 1 1 1 1 1 160"
+
+    # Unit test for alerting rules.
+    alert_rule_test:
+      # 这个是总的运行时间，根据上面的evaluation_interval和interval调整
+      # 注意，要确保series的数量
+      - eval_time: 15m
+        alertname: CreationTimeoutUnpaid
+        exp_alerts:
+          # Alert 1.
+          - exp_labels:
+              alertOwner: DanielZhang          
+              provider: aws
+              alertname: CreationTimeout
+              alerttype: timeout
+              id: "instance-id-1"
+              name: paid1
+              payment: "free"
+              serviceScope: mo-cloud
+              instanceid: "instance-id-1"
+              severity: critical
+            exp_annotations:
+              summary: "paid1: Unpaid Instance Creation Timeout"
+              description: "paid1: Unpaid Instance Creation time is above 120s (current value is: 130)"
+      - eval_time: 15m
+        alertname: CreationTimeoutPaid
+        exp_alerts:
+          # Alert 1.
+          - exp_labels:
+              alertOwner: DanielZhang          
+              provider: aws
+              alertname: CreationTimeout
+              alerttype: timeout
+              serviceScope: mo-cloud
+              id: "instance-id-1"
+              name: paid1
+              payment: "paid"
+              instanceid: "instance-id-1"
+              severity: critical
+            exp_annotations:
+              summary: "paid1: Paid Instance Creation Timeout"
+              description: "paid1: Paid instance creation time is above 600s (current value is: 610)"
+      - eval_time: 15m
+        alertname: UpdateTimeout
+        exp_alerts:
+          - exp_labels: 
+              alertOwner: DanielZhang          
+              provider: aws
+              alertname: UpdateTimeout
+              alerttype: timeout
+              serviceScope: mo-cloud
+              id: "instance-id-2"
+              name: paid2
+              instanceid: "instance-id-2"
+              severity: critical
+            exp_annotations:
+              summary: "paid2: Update Timeout"
+              description: "paid2: Update time is above 120s (current value is: 140)"
+      - eval_time: 15m
+        alertname: TerminationTimeout
+        exp_alerts:
+          - exp_labels:
+              alertOwner: DanielZhang          
+              provider: aws
+              alertname: TerminationTimeout
+              alerttype: timeout
+              id: "instance-id-3"
+              serviceScope: mo-cloud
+              name: paid3
+              instanceid: "instance-id-3"
+              severity: critical
+            exp_annotations:
+              summary: "paid3: Termination Timeout"
+              description: "paid3: Termination time is above 120s (current value is: 150)"
+      - eval_time: 15m
+        alertname: RecoveryTimeout
+        exp_alerts:
+          - exp_labels:
+              alertOwner: DanielZhang          
+              provider: aws
+              alertname: RecoveryTimeout
+              alerttype: timeout
+              serviceScope: mo-cloud
+              id: "instance-id-4"
+              name: paid4
+              instanceid: "instance-id-4"
+              severity: critical
+            exp_annotations:
+              summary: "paid4: Recovery Timeout"
+              description: "paid4: Recovery time is above 120s (current value is: 160)"

@@ -1,0 +1,16 @@
+# default owner for stuff that is not explicitly set for ownership
+
+# default
+* @xzxiong
+
+# pkg
+/pkg @xzxiong
+
+# alert file
+charts/mo-ruler-stack/rules/instance-service.yaml @DanielZhangQD
+charts/mo-ruler-stack/rules/matrix-worker.yaml @DanielZhangQD
+charts/mo-ruler-stack/rules/infra.yaml @aylei
+
+# dashboard
+charts/mo-ruler-stack/grafana/dashboards/moc-instance-service.json @DanielZhangQD
+charts/mo-ruler-stack/grafana/dashboards/mo-cluster-detail-namespaced.json @aylei

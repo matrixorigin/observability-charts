@@ -1,0 +1,141 @@
+version: '3.8'
+
+networks:
+  monitoring:
+    driver: bridge
+    
+# volumes:
+#   mo-data: {}
+
+services:
+  fluent-bit:
+    image: fluent/fluent-bit:latest
+    container_name: fluent-bit
+    volumes:
+      - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+    depends_on:
+      - mo-agent
+    networks:
+      - monitoring
+    
+  prometheus-agent:
+    image: prom/prometheus:v2.41.0
+    container_name: prometheus-agent
+    restart: "no"
+    volumes:
+      - ./agent-prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--enable-feature=agent'
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    expose:
+      - 9090
+    depends_on:
+      - mo-agent
+    networks:
+      - monitoring
+  
+  matrixone:
+    ## date: 2023-09-07
+    image: matrixorigin/matrixone:nightly-449399ba
+    container_name: matrixone
+    restart: "no"
+    volumes:
+      - ~/mo-data:/mo-data
+    ports:
+      - "6001:6001" 
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  mo-agent:
+    image: matrixorigin/observability:mo-agent-local
+    container_name: mo-agent
+    restart: "no"
+    volumes:
+      - ~/mo-data:/mo-data
+      - ./mo-agent.yaml:/service.yaml
+    ports:
+      - "8321:8000"
+    depends_on:
+      matrixone:
+        condition: service_started
+    networks:
+      - monitoring
+  
+  mo-ruler:
+    image: matrixorigin/observability:mo-ruler-local
+    container_name: mo-ruler
+    restart: always
+    volumes:
+      - ~/mo-data:/mo-data
+      - ./mo-ruler.yaml:/service.yaml
+      - ./ruler-prometheus.yml:/prometheus.yml 
+      - ./rules:/rules
+    ports:
+      - "9199:9199" 
+    depends_on:
+      mo-agent: 
+        condition: service_started
+      matrixone:
+        condition: service_started
+      alertmanager: 
+        condition: service_started
+    networks:
+      - monitoring
+  
+  alertmanager:
+    image: prom/alertmanager:v0.25.0
+    container_name: alertmanager
+    restart: "no"
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    ports:
+      - "9093:9093" 
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+      - "--web.external-url=http://127.0.0.1:9093"
+    networks:
+      - monitoring
+
+  # grafana:
+  #   image: grafana/grafana:9.3.2-ubuntu
+  #   container_name: grafana
+  #   restart: "no"
+  #   ports:
+  #     - "3000:3000" 
+  #   networks:
+  #     - monitoring
+
+  # mock-receiver:
+  #   image: ez4bruce3280/mock-receiver:dev-v1
+  #   container_name: mock-receiver
+  #   restart: "no"
+  #   expose:
+  #     - 6123
+  #   networks:
+  #     - monitoring
+
+  # node-exporter:
+  #   image: prom/node-exporter:v1.5.0
+  #   container_name: node-exporter
+  #   restart: "no"
+  #   volumes:
+  #     - /proc:/host/proc
+  #     - /sys:/host/sys
+  #     - /:/rootfs
+  #   command:
+  #     - '--path.procfs=/host/proc'
+  #     - '--path.rootfs=/rootfs'
+  #     - '--path.sysfs=/host/sys'
+  #     - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+  #   expose:
+  #     - 9100
+  #   networks:
+  #     - monitoring

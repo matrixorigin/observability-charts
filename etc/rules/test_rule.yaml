@@ -1,0 +1,10 @@
+groups:
+- name: test-prom
+  rules:
+  - alert: PrometheusUp
+    expr: up{instance="localhost:9090", job="prometheus"} == 1
+    for: 2m
+    labels:
+      severity: info
+    annotations:
+      summary: Prometheus is Up

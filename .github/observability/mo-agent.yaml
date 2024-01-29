@@ -1,0 +1,69 @@
+log:
+  level: debug
+  format: console
+  filename:
+  maxSize:
+  maxDays:
+  maxBackups:
+
+general:
+  shortTable: false
+
+agent:
+  server:
+    host: localhost
+    port: 8000
+    privateKeyFile:
+    publicKeyFile:
+    tokenEffectiveTime: 2
+    certPath:
+    mode: playground 
+
+  fs:
+    name: ETL
+    backend: DISK-ETL
+    dataDir: "mo-data/etl"
+    s3:
+      endpoint: s3.us-west-2.amazonaws.com
+      bucket: bucket_name
+      keyPrefix:
+
+  mo:
+    host: matrixone
+    port: 6001
+    user: dump
+    password: 111
+    connectTimeout: 15s
+    maxOpens: 5
+    maxIdles: -1
+    initPingCnt: 60
+    # default: 1 GB
+    maxAllowedPacket: 134217728
+
+  app:
+    uuid: 8f0e5ef6de8fe306d772fba5d29e75e8
+    account: sys
+    database: observability
+    # val in [tae, csv], default: tae
+    extension: tae
+    # val in [sql, fs], default: sql
+    exporter: sql
+    exportThreads: 32
+    exportInterval: 3s
+    bufferBytes: 2097152
+    showAccessLog: true
+    # api data handle queue size
+    queueSize : 262144 # queue mem cost : 2MB
+    # metric table name cache size
+    metricCacheSize : 4096
+    # label series id cache size
+    labelCacheSize : 200000
+    # log table name cache size
+    logCacheSize : 512
+    preCreatetableWorker : 5
+    # pre load label id limit
+    labelPreloadLimit : 200000
+    labelFlushSize: 2097152
+    labelFlushInterval: 3s
+    metricTablesPreCreate: 
+   

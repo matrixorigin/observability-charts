@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: echo-server
+  labels:
+    app: echo-server
+spec:
+  serviceName: "echo-server"
+  replicas: 1 # specify number of pods that should be running
+  selector:
+    matchLabels:
+      app: echo-server
+  template:
+    metadata:
+      labels:
+        app: echo-server
+    spec:
+      containers:
+      - name: echo-server
+        image: matrixorigin/observability:echo-server-v1.0
+        ports:
+        - containerPort: 3246

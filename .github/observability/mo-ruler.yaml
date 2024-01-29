@@ -1,0 +1,45 @@
+log:
+  level: debug
+  format: console
+  filename:
+  maxSize:
+  maxDays:
+  maxBackups:
+ruler:
+  rule:
+    ruleType: metric
+    notificationQueueCapacity: 10000
+    outageTolerance: 1h
+    forGracePeriod: 10m
+    resendDelay: 1m
+    metricConfigPath: /prometheus.yml
+  mo:
+    host: matrixone
+    port: 6001
+    user: dump
+    password: 111
+    database: observability
+    metricTable: metrics
+    account: sys
+    connectTimeout: 5s
+    maxOpens: 5
+    maxIdles: -1
+    initPingCnt: 10
+  query:
+    maxQueryTimeout: 2m
+    subQueryStepInterval: 1m
+    lookBackDelta: 5m
+    maxSamples: 50000000
+    maxPointsPerTs: 11000
+    enableMOFilepath: false
+  apiServer:
+    lookBackDelta: 5m
+    listenAddress: 0.0.0.0:9199
+    readTimeout: 5m
+    maxConnections: 512
+    routePrefix: /
+    consoleTemplatesPath: consoles
+    consoleLibrariesPath: console_libraries
+    enableLifecycle: false
+    pageTitle: MO-Ruler Server
+    appName: MO-Ruler

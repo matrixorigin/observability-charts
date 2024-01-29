@@ -1,0 +1,50 @@
+name: Chart Publish
+
+on:
+  push:
+    branches:
+    - main
+    paths:
+    - 'charts/**'
+  release:
+    types:
+    - published
+
+permissions: read-all
+
+jobs:
+  publish:
+    permissions:
+      contents: write # for helm/chart-releaser-action to push chart release and create a release
+    runs-on: amd64-tke-moc
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # tag=v3.1.0
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Copy rules file for ob-opensource
+        run: |
+          cp -r ./charts/mo-ruler-stack/rules ./charts/mo-ob-opensource/rules
+
+      - name: Run Artifact Hub lint
+        run: |
+          curl -s https://api.github.com/repos/artifacthub/hub/releases/latest | grep -E 'browser_download_url' | grep linux_amd64.tar.gz\" | grep -Eo 'https://[^\"]*' | xargs wget -O - | tar -xz
+          ./ah lint -p charts || exit 1
+          rm -f ./ah
+
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.5.0
+        with:
+          charts_dir: charts
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          ## PS: multi charts NEED diff release tag
+          CR_RELEASE_NAME_TEMPLATE: "chart-{{ .Name }}-{{ .Version }}"
+          CR_SKIP_EXISTING: true

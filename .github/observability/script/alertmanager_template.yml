@@ -1,0 +1,20 @@
+global:
+  resolve_timeout: 5m
+  smtp_from: {{ .CI_SMTP_USER }}
+  smtp_smarthost: {{ .CI_SMTP_HOST }}
+  smtp_auth_username: {{ .CI_SMTP_USER }}
+  smtp_auth_password: {{ .CI_SMTP_PASSWORD }}
+  smtp_require_tls: false
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 10s  
+  repeat_interval: 1d 
+  receiver: 'default'
+receivers:
+- name: 'default'
+  email_configs:
+    - to: 'lianghongyi@matrixorigin.cn'
+      # send_resolved: true
+
+

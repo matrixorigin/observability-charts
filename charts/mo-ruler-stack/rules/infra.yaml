@@ -1,0 +1,19 @@
+groups:
+- name: mo-cloud.general
+  rules: []
+#  - alert: CNCrash
+#    expr: # need log query
+#    labels:
+#      alertOwner: aylei
+#      severity: "critical"
+#    annotations:
+#      summary: "{{$labels.pod}} crashed"
+#  - alert: PodCrashLoop
+#    # filter by job to avoid duplicate metrics
+#    expr: sum(increase(kube_pod_container_status_restarts_total{job="kube-state-metrics"}[30m])) by (pod) > 2
+#    for: 5m
+#    labels:
+#      severity: "warning"
+#      serviceScope: mo-cloud
+#    annotations:
+#      summary: "{{$labels.pod}}: Pod restarted {{ $value }} times for last 30 minutes"
