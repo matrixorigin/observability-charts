@@ -13,7 +13,7 @@ jobs:
   release_check:
     permissions:
       contents: write # for helm/chart-releaser-action to push chart release and create a release
-    runs-on: amd64-moc-guangzhou-medium8
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
