@@ -1,0 +1,193 @@
+mo-ob-opensource:
+  enabled: true
+
+  promtail:
+    enabled: true
+    resources:
+      limits:
+        cpu: "200m"
+        memory: "200Mi"
+      requests:
+        cpu: "10m"
+        memory: "20Mi"
+  loki:
+    enabled: true
+    tableManager:
+      enabled: true
+      # retention related issue: https://github.com/matrixone-cloud/observability/issues/86
+      retention_deletes_enabled: true
+      retention_period: 720h
+    loki:
+      commonConfig:
+        replication_factor: 1
+      storage:
+        bucketNames:
+          chunks: ""
+        type: s3
+        s3:
+          # s3: null
+          endpoint: 
+          # region: us-west-2
+          secretAccessKey:
+          accessKeyId:
+          s3ForcePathStyle: false
+          insecure: false
+      schemaConfig:
+        configs:
+          - from: "2024-01-01"
+            index:
+              period: 24h
+              prefix: index_
+            object_store: s3
+            schema: v12
+            store: tsdb
+      rulerConfig:
+
+    write:
+      # -- Number of replicas for the write
+      replicas: 1
+      persistence:
+        enableStatefulSetAutoDeletePVC: false
+        size: 10Gi
+        storageClass: 
+      resources:
+        requests:
+          memory: "1Gi"
+          cpu: "250m"
+        limits:
+          memory: "1Gi"
+          cpu: "1000m"
+
+    read:
+      replicas: 1
+      persistence:
+        enableStatefulSetAutoDeletePVC: true
+        size: 10Gi
+        storageClass: 
+      resources:
+        requests:
+          memory: "3Gi"
+          cpu: "250m"
+        limits:
+          memory: "3Gi"
+          cpu: "1000m"
+
+    backend:
+      replicas: 1
+      persistence:
+        enableStatefulSetAutoDeletePVC: true
+        size: 10Gi
+        storageClass: 
+      resources:
+        requests:
+          memory: "250Mi"
+          cpu: "200m"
+        limits:
+          memory: "250Mi"
+          cpu: "200m"
+
+    # Configuration for the gateway
+    gateway:
+      enabled: true
+      replicas: 1
+      resources:
+        requests:
+          memory: "250Mi"
+          cpu: "250m"
+        limits:
+          memory: "1Gi"
+          cpu: "1000m"
+
+  kube-prometheus-stack:
+    enabled: true
+    
+    prometheus-node-exporter: 
+      enabled: true
+      resources: 
+        limits: 
+          cpu:    "200m"
+          memory: "100Mi"
+        requests: 
+          cpu:    "10m"
+          memory: "20Mi"
+    
+    prometheusOperator:
+      resources:
+        limits:
+          cpu: "200m"
+          memory: "400Mi"
+        requests:
+          cpu: "100m"
+          memory: "400Mi"
+    
+    prometheus:
+      prometheusSpec:
+        retention: 21d
+        externalLabels:
+          clusterDetail: mo-ob-private-cluster
+        resources:
+          limits:
+            cpu: 1000m
+            memory: "2Gi"
+          requests:
+            cpu: 1000m
+            memory: "2Gi"
+        # [必要]根据部署的云厂商选择存储配置
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: ""
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 40Gi
+    
+    kube-state-metrics:
+      enabled: true
+      prometheus:
+        monitor:
+          enabled: ture
+
+mo-ruler-stack:
+  enabled: true
+  moRuler:
+    enabled: false
+  alertmanager:
+    enabled: false
+
+  grafana:
+    replicas: 1
+    enabled: true
+    resources: 
+      limits: 
+        cpu:    "500m"
+        memory: "1Gi"
+      requests: 
+        cpu:    "200m"
+        memory: "1Gi"
+    
+    persistence: 
+      enabled:          true
+      type:             "statefulset"
+      storageClassName: ""
+      size:             "5Gi"
+    
+    # static passwd
+    adminUser: admin
+    adminPassword: admin
+    admin:
+      existingSecret: ""
+    
+      grafana.ini:
+      auth.generic_oauth:
+        enabled: false
+    
+    service:
+      enabled: true
+      type: ClusterIP
+      port: 80
+      targetPort: 3000
+      labels: {}
+      portName: service
+      # Adds the appProtocol field to the service. This allows to work with istio protocol selection. Ex: "http" or "tcp"
+      appProtocol: ""
