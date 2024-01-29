@@ -11,7 +11,7 @@ on:
 
 jobs:
   alertmanager-test:
-    runs-on: amd64-moc-guangzhou-medium8
+    runs-on: ubuntu-latest
     name: Alert Rules Check And Unit Test
     steps:
       - uses: actions/checkout@v3

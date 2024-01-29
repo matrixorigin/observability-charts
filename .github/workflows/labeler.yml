@@ -7,7 +7,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    runs-on: amd64-moc-guangzhou-medium8
+    runs-on: ubuntu-latest
     steps:
     - name: Add Label by files changed
       # more details in https://github.com/actions/labeler
