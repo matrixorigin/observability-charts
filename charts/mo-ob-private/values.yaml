@@ -2,6 +2,10 @@ mo-ob-opensource:
   enabled: true
 
   promtail:
+    # image: 
+    #   registry:   "registry.cn-hangzhou.aliyuncs.com/ack-cos"
+    #   repository: "promtail"
+    #   tag:        "2.8.4"
     enabled: true
     resources:
       limits:
@@ -11,6 +15,12 @@ mo-ob-opensource:
         cpu: "10m"
         memory: "20Mi"
   loki:
+    # sidecar: 
+    #   image: 
+    #     repository: "registry.cn-hangzhou.aliyuncs.com/ack-cos/k8s-sidecar"
+    # image: 
+    #   registry:   "registry.cn-hangzhou.aliyuncs.com/ack-cos"
+    #   repository: "loki"
     enabled: true
     tableManager:
       enabled: true
@@ -102,6 +112,9 @@ mo-ob-opensource:
     enabled: true
     
     prometheus-node-exporter: 
+      # image: 
+      #   registry:   "registry.cn-hangzhou.aliyuncs.com/ack-cos"
+      #   repository: "node-exporter"
       enabled: true
       resources: 
         limits: 
@@ -112,6 +125,17 @@ mo-ob-opensource:
           memory: "20Mi"
     
     prometheusOperator:
+      # image: 
+      #   registry:   "registry.cn-hangzhou.aliyuncs.com/ack-cos"
+      #   repository: "prometheus-operator"
+      # prometheusConfigReloader: 
+      #   image: 
+      #     registry:   "registry.cn-hangzhou.aliyuncs.com/ack-cos"
+      #     repository: "prometheus-config-reloader"
+      admissionWebhooks: 
+        enabled: false
+        patch: 
+          enabled: false
       resources:
         limits:
           cpu: "200m"
@@ -122,6 +146,9 @@ mo-ob-opensource:
     
     prometheus:
       prometheusSpec:
+        # image: 
+        #   registry:   "registry.cn-hangzhou.aliyuncs.com/ack-cos"
+        #   repository: "prometheus"
         retention: 21d
         externalLabels:
           clusterDetail: mo-ob-private-cluster
@@ -144,6 +171,9 @@ mo-ob-opensource:
     
     kube-state-metrics:
       enabled: true
+      # image: 
+      #   registry:   "registry.cn-hangzhou.aliyuncs.com/ack-cos"
+      #   repository: "kube-state-metrics"
       prometheus:
         monitor:
           enabled: ture
@@ -156,6 +186,8 @@ mo-ruler-stack:
     enabled: false
 
   grafana:
+    # image: 
+    #   repository: "registry.cn-hangzhou.aliyuncs.com/ack-cos/grafana"
     replicas: 1
     enabled: true
     resources: 
