@@ -190,10 +190,10 @@ mo-ruler-stack:
     #   repository: "registry.cn-hangzhou.aliyuncs.com/ack-cos/grafana"
     # initChownData: 
     #   image: 
-    #     "repository": pulumi.String("registry.cn-hangzhou.aliyuncs.com/ack-cos/busybox"
+    #     "repository": "registry.cn-hangzhou.aliyuncs.com/ack-cos/busybox"
     # sidecar: 
     #   image: 
-    #     repository: pulumi.String("registry.cn-hangzhou.aliyuncs.com/ack-cos/k8s-sidecar"
+    #     repository: "registry.cn-hangzhou.aliyuncs.com/ack-cos/k8s-sidecar"
       
     replicas: 1
     enabled: true
