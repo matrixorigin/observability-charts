@@ -1,4 +1,4 @@
-{{- if .Values.grafana.enabled }}
+{{- if (and .Values.grafana.enabled .Values.dashboards.enabled ) }}
 {{- $files := .Files.Glob "grafana/dashboards/*.json" }}
 {{- if $files }}
 apiVersion: v1
