@@ -17,7 +17,14 @@ mo-ob-opensource:
       # retention related issue: https://github.com/matrixone-cloud/observability/issues/86
       retention_deletes_enabled: true
       retention_period: 720h
+    # loki monolithic mode
+    # singleBinary:
+    #   replicas: 2
     loki:
+      # disable log alert in paivate env
+      rulerConfig: 
+        storage: 
+          type: ""  
       commonConfig:
         replication_factor: 1
       storage:
@@ -41,8 +48,6 @@ mo-ob-opensource:
             object_store: s3
             schema: v12
             store: tsdb
-      rulerConfig:
-
     write:
       # -- Number of replicas for the write
       replicas: 1
