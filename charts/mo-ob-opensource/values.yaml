@@ -1,6 +1,13 @@
 alerting:
   namespace: "mo-ob"
 
+# swith for generate alertrules which defined in `rules` folder
+# - cooperate with template templates/mo-alerting-rules.yaml
+# swith for generate alertrules which defined in `alert-rules/log-alert-rules` folder
+# - cooperate with template templates/log-alert-rules.yaml
+alertrules:
+  enabled: false
+
 promtail:
   enabled: true
   serviceMonitor:
