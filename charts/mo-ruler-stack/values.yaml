@@ -17,6 +17,16 @@ secretSeed:
   ## param for templates/grafana/grafana-admin-secret.yaml
   grafana: YXNkZl9wYXNzd29y
 
+# swith for generate dashboards which defined in `grafana` folder
+# cooperate with template templates/grafana/dashboards-configmap.yaml
+dashboards:
+  enabled: false
+
+# swith for generate dashboards which defined in `rules` folder
+# cooperate with template templates/rules-config.yaml
+alertrules:
+  enabled: false
+
 moRuler:
   replicaCount: 1
   enabled: false

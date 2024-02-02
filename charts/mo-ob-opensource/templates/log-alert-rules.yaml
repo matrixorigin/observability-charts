@@ -1,3 +1,4 @@
+{{- if .Values.alertrules.enabled }}
 ## cooperate with {folder_to_char}/alert-rules/log-alert-rules/*.yaml
 {{- $files := .Files.Glob "alert-rules/log-alert-rules/*.yaml" }}
 {{- if $files }}
@@ -18,3 +19,4 @@ items:
    {{ printf "%s.yaml" $alertFileName }}: {{ $.Files.Get $path | toYaml | indent 2}}
 {{- end }}
 {{- end }}
+{{- end }} # end if enabled

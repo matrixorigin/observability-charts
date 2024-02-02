@@ -1,3 +1,4 @@
+{{- if .Values.alertrules.enabled }}
 apiVersion: v1
 kind: List
 metadata:
@@ -22,4 +23,5 @@ items:
         heritage: Helm
     spec:
     {{ $root.Files.Get $path | nindent 6 }}
+{{- end }}
 {{- end }}
