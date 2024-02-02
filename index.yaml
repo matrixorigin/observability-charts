@@ -3,6 +3,29 @@ entries:
   mo-ob-opensource:
   - apiVersion: v2
     appVersion: 0.9.0
+    created: "2024-02-02T08:29:29.430770278Z"
+    dependencies:
+    - condition: kube-prometheus-stack.enabled
+      name: kube-prometheus-stack
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 45.9.1
+    - condition: loki.enabled
+      name: loki
+      repository: https://grafana.github.io/helm-charts
+      version: 5.36.3
+    - condition: promtail.enabled
+      name: promtail
+      repository: https://grafana.github.io/helm-charts
+      version: 6.15.1
+    description: mo-ob-opensource's Helm chart for Kubernetes
+    digest: 0ff41e518d734448c56460cf032370c022da85f25d979219bec4b30c6e596952
+    name: mo-ob-opensource
+    type: application
+    urls:
+    - https://github.com/matrixone-cloud/observability-charts/releases/download/chart-mo-ob-opensource-1.0.1/mo-ob-opensource-1.0.1.tgz
+    version: 1.0.1
+  - apiVersion: v2
+    appVersion: 0.9.0
     created: "2024-01-29T04:12:39.830683714Z"
     dependencies:
     - condition: kube-prometheus-stack.enabled
@@ -135,6 +158,25 @@ entries:
   mo-ruler-stack:
   - apiVersion: v2
     appVersion: 0.9.0
+    created: "2024-02-02T08:29:29.626228203Z"
+    dependencies:
+    - condition: alertmanager.enabled
+      name: alertmanager
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 1.2.0
+    - condition: grafana.enabled
+      name: grafana
+      repository: https://grafana.github.io/helm-charts
+      version: 6.60.4
+    description: mo-ruler's Helm chart for Kubernetes
+    digest: 972b5a1ebbc3f7b2926a9cc6b58626c7b78773703e9795b359c364736fbf264c
+    name: mo-ruler-stack
+    type: application
+    urls:
+    - https://github.com/matrixone-cloud/observability-charts/releases/download/chart-mo-ruler-stack-1.0.1/mo-ruler-stack-1.0.1.tgz
+    version: 1.0.1
+  - apiVersion: v2
+    appVersion: 0.9.0
     created: "2024-01-29T04:08:29.801071335Z"
     dependencies:
     - condition: alertmanager.enabled
@@ -171,4 +213,4 @@ entries:
     urls:
     - https://github.com/matrixone-cloud/observability-charts/releases/download/chart-mo-ruler-stack-1.0.0-alpha.12/mo-ruler-stack-1.0.0-alpha.12.tgz
     version: 1.0.0-alpha.12
-generated: "2024-01-31T02:54:23.30967668Z"
+generated: "2024-02-02T08:29:29.62626924Z"
