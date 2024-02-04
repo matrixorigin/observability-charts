@@ -1,5 +1,36 @@
 apiVersion: v1
 entries:
+  loki:
+  - apiVersion: v2
+    appVersion: 2.9.2
+    created: "2024-02-04T11:31:28.089548756Z"
+    dependencies:
+    - alias: minio
+      condition: minio.enabled
+      name: minio
+      repository: https://charts.min.io/
+      version: 4.0.12
+    - alias: grafana-agent-operator
+      condition: monitoring.selfMonitoring.grafanaAgent.installOperator
+      name: grafana-agent-operator
+      repository: https://grafana.github.io/helm-charts
+      version: 0.2.16
+    description: Helm chart for Grafana Loki in simple, scalable mode
+    digest: 4d3a72976b1cabfe9477b25e0d17b9b6564316833ac2ff636a7fdaca0b33048e
+    home: https://grafana.github.io/helm-charts
+    icon: https://grafana.com/docs/loki/latest/logo_and_name.png
+    maintainers:
+    - name: trevorwhitney
+    - name: jeschkies
+    name: loki
+    sources:
+    - https://github.com/grafana/loki
+    - https://grafana.com/oss/loki/
+    - https://grafana.com/docs/loki/latest/
+    type: application
+    urls:
+    - https://github.com/matrixone-cloud/observability-charts/releases/download/chart-loki-5.36.3/loki-5.36.3.tgz
+    version: 5.36.3
   mo-ob-opensource:
   - apiVersion: v2
     appVersion: 0.9.0
@@ -138,6 +169,25 @@ entries:
     version: 1.0.0-alpha.1
   - apiVersion: v2
     appVersion: 0.9.0
+    created: "2024-02-04T11:31:28.315062901Z"
+    dependencies:
+    - condition: mo-ob-opensource.enabled
+      name: mo-ob-opensource
+      repository: https://matrixone-cloud.github.io/observability-charts
+      version: 1.0.0-alpha.16
+    - condition: mo-ruler-stack.enabled
+      name: mo-ruler-stack
+      repository: https://matrixone-cloud.github.io/observability-charts
+      version: 1.0.0-alpha.13
+    description: mo-ob-private's Helm chart for Kubernetes
+    digest: 16dc166c69f5219b6d2deccf5bf80c4114e009abdde14a4a6fa7d82e5e40eafd
+    name: mo-ob-private
+    type: application
+    urls:
+    - https://github.com/matrixone-cloud/observability-charts/releases/download/chart-mo-ob-private-1.0.0-alpha.1/mo-ob-private-1.0.0-alpha.1.tgz
+    version: 1.0.0-alpha.1
+  - apiVersion: v2
+    appVersion: 0.9.0
     created: "2024-01-29T08:20:50.290454875Z"
     dependencies:
     - condition: mo-ob-opensource.enabled
@@ -213,4 +263,4 @@ entries:
     urls:
     - https://github.com/matrixone-cloud/observability-charts/releases/download/chart-mo-ruler-stack-1.0.0-alpha.12/mo-ruler-stack-1.0.0-alpha.12.tgz
     version: 1.0.0-alpha.12
-generated: "2024-02-02T08:29:29.62626924Z"
+generated: "2024-02-04T11:31:28.315104949Z"
