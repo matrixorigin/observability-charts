@@ -8,9 +8,8 @@ dependencies:
 - condition: mo-ob-opensource.enabled
   name: mo-ob-opensource
   repository: https://matrixone-cloud.github.io/observability-charts
-  version: 1.0.0-alpha.16
+  version: 1.0.1-private
 - condition: mo-ruler-stack.enabled
   name: mo-ruler-stack
   repository: https://matrixone-cloud.github.io/observability-charts
-  version: 1.0.0-alpha.13
-
+  version: 1.0.1
