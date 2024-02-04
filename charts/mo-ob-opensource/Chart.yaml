@@ -2,7 +2,7 @@ apiVersion: v2
 name: mo-ob-opensource
 description: mo-ob-opensource's Helm chart for Kubernetes
 type: application
-version: 1.0.1
+version: 1.0.1-private
 appVersion: 0.9.0
 dependencies:
 - condition: kube-prometheus-stack.enabled
@@ -11,7 +11,7 @@ dependencies:
   version: 45.9.1
 - condition: loki.enabled
   name: loki
-  repository: https://grafana.github.io/helm-charts
+  repository: https://matrixone-cloud.github.io/observability-charts
   version: 5.36.3
 - condition: promtail.enabled
   name: promtail
