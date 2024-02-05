@@ -31,7 +31,7 @@ mo-ob-opensource:
     # singleBinary:
     #   replicas: 2
     loki:
-      # disable log alert in paivate env
+      # disable log alert in private env
       rulerConfig: 
         storage: 
           type: ""  
@@ -43,7 +43,7 @@ mo-ob-opensource:
         type: s3
         s3:
           # s3: null
-          endpoint: 
+          endpoint:
           # region: us-west-2
           secretAccessKey:
           accessKeyId:
@@ -59,7 +59,7 @@ mo-ob-opensource:
             schema: v12
             store: tsdb
     write:
-      # -- Number of replicas for the write
+      # -- Number of replicas for the write components
       replicas: 1
       persistence:
         enableStatefulSetAutoDeletePVC: false
@@ -148,10 +148,19 @@ mo-ob-opensource:
         requests:
           cpu: "100m"
           memory: "400Mi"
-    
+
+    kube-state-metrics:
+      enabled: true
+      # image:
+      #   registry:   "registry.cn-hangzhou.aliyuncs.com/ack-cos"
+      #   repository: "kube-state-metrics"
+      prometheus:
+        monitor:
+          enabled: ture
+
     prometheus:
       prometheusSpec:
-        # image: 
+        # image:
         #   registry:   "registry.cn-hangzhou.aliyuncs.com/ack-cos"
         #   repository: "prometheus"
         retention: 21d
@@ -173,15 +182,9 @@ mo-ob-opensource:
               resources:
                 requests:
                   storage: 40Gi
-    
-    kube-state-metrics:
-      enabled: true
-      # image: 
-      #   registry:   "registry.cn-hangzhou.aliyuncs.com/ack-cos"
-      #   repository: "kube-state-metrics"
-      prometheus:
-        monitor:
-          enabled: ture
+        ## private specified collect policies.
+        #####################################################
+        #additionalScrapeConfigs: []
 
 mo-ruler-stack:
   enabled: true
