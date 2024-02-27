@@ -187,7 +187,6 @@ mo-ruler-stack:
   enabled: true
   moRuler:
     enabled: false
-
   alertmanager:
     enabled: false
 
