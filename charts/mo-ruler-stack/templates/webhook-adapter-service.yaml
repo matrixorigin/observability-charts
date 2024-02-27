@@ -1,3 +1,5 @@
+{{ if .Values.alertmanagerWebhookAdapter.enabled }} 
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -10,3 +12,5 @@ spec:
   selector:
     app: alertmanager-webhook-adapter
   sessionAffinity: None
+
+{{ end }}

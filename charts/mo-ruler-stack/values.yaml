@@ -127,6 +127,13 @@ moRuler:
         pageTitle: MO-Ruler Server
         appName: MO-Ruler
 
+# webhook adapter for alertmanger to send alert to wecom
+alertmanagerWebhookAdapter:
+  enabled: true
+  image:
+    repository: ez4bruce3280/alertmanager-webhook-adapter
+    tag: v1.1.7
+
 ## alertmanager sub-chart configurable values
 ## Please see https://github.com/prometheus-community/helm-charts/tree/main/charts/alertmanager
 ##
