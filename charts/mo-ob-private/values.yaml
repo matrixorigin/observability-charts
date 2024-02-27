@@ -187,6 +187,14 @@ mo-ruler-stack:
   enabled: true
   moRuler:
     enabled: false
+
+  # webhook adapter for alertmanger to send alert to wecom
+  alertmanagerWebhookAdapter:
+    enabled: false
+    image:
+      repository: ez4bruce3280/alertmanager-webhook-adapter
+      tag: v1.1.7
+
   alertmanager:
     enabled: false
 
