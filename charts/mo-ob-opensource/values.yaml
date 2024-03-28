@@ -365,6 +365,9 @@ kube-prometheus-stack:
               regex: "mo-cloud|cos"
               source_labels:
               - __meta_kubernetes_namespace
+            - action: drop
+              source_labels: [__meta_kubernetes_pod_name, __meta_kubernetes_pod]
+              regex: frps
             - action: labelmap
               regex: __meta_kubernetes_pod_label_(.+)
             - source_labels: [__meta_kubernetes_pod_name]
