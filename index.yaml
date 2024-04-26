@@ -173,6 +173,25 @@ entries:
   mo-ob-private:
   - apiVersion: v2
     appVersion: 0.9.0
+    created: "2024-04-26T10:26:37.019930328Z"
+    dependencies:
+    - condition: mo-ob-opensource.enabled
+      name: mo-ob-opensource
+      repository: https://matrixone-cloud.github.io/observability-charts
+      version: 1.0.0-alpha.16
+    - condition: mo-ruler-stack.enabled
+      name: mo-ruler-stack
+      repository: https://matrixone-cloud.github.io/observability-charts
+      version: 1.0.2
+    description: mo-ob-private's Helm chart for Kubernetes
+    digest: ca32955a4caea01ffb587fa3d5f0f94fe75a4ab162acd38e2a3947b295d3f092
+    name: mo-ob-private
+    type: application
+    urls:
+    - https://github.com/matrixone-cloud/observability-charts/releases/download/chart-mo-ob-private-1.0.0-alpha.3/mo-ob-private-1.0.0-alpha.3.tgz
+    version: 1.0.0-alpha.3
+  - apiVersion: v2
+    appVersion: 0.9.0
     created: "2024-02-27T08:29:06.613451153Z"
     dependencies:
     - condition: mo-ob-opensource.enabled
@@ -343,4 +362,4 @@ entries:
     urls:
     - https://github.com/matrixone-cloud/observability-charts/releases/download/chart-mo-ruler-stack-1.0.0-alpha.12/mo-ruler-stack-1.0.0-alpha.12.tgz
     version: 1.0.0-alpha.12
-generated: "2024-04-26T07:52:30.700974765Z"
+generated: "2024-04-26T10:26:37.019981874Z"
