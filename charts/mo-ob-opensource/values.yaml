@@ -135,6 +135,13 @@ loki:
     # -- Check https://grafana.com/docs/loki/latest/configuration/#schema_config for more info on how to configure schemas
     schemaConfig: 
       configs:
+      - from: 2024-04-01
+        object_store: s3
+        store: tsdb
+        schema: v13
+        index:
+          prefix: index_
+          period: 24h
     # -- Check https://grafana.com/docs/loki/latest/configuration/#ruler for more info on configuring ruler
     rulerConfig: 
       evaluation_interval: 1m
