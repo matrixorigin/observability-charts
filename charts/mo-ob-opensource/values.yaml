@@ -145,21 +145,22 @@ loki:
           directory: /rules
       alertmanager_url: http://mo-ob-alertmanager.mo-ob:9093
     # -- Additional query scheduler config
-    storage_config:
-      boltdb_shipper: 
-        active_index_directory: /var/loki/data/loki/boltdb-shipper-active
-        cache_location: /var/loki/data/loki/boltdb-shipper-cache
-        cache_ttl: 24h         # Can be increased for faster performance over longer query periods, uses more disk space
-        shared_store: s3
-      tsdb_shipper:
-        active_index_directory: /var/loki/data/loki/tsdb-index
-        cache_location: /var/loki/data/loki/tsdb-cache
-        shared_store: s3
-      # alibabacloud:
-      #   bucket: <bucket>
-      #   endpoint: <endpoint>
-      #   access_key_id: <access_key_id>
-      #   secret_access_key: <secret_access_key>
+    ### use default config, old config not work in loki 3.0.0
+    #storage_config:
+    #  boltdb_shipper:
+    #    active_index_directory: /var/loki/data/loki/boltdb-shipper-active
+    #    cache_location: /var/loki/data/loki/boltdb-shipper-cache
+    #    cache_ttl: 24h         # Can be increased for faster performance over longer query periods, uses more disk space
+    #    shared_store: s3
+    #  tsdb_shipper:
+    #    active_index_directory: /var/loki/data/loki/tsdb-index
+    #    cache_location: /var/loki/data/loki/tsdb-cache
+    #    shared_store: s3
+    #  # alibabacloud:
+    #  #   bucket: <bucket>
+    #  #   endpoint: <endpoint>
+    #  #   access_key_id: <access_key_id>
+    #  #   secret_access_key: <secret_access_key>
   sidecar:
     rules:
       label: loki_rule
