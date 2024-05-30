@@ -532,6 +532,30 @@ kube-prometheus-stack:
             - action: replace
               source_labels: [__meta_kubernetes_pod_name]
               target_label: pod
+        
+        - job_name: "matrixone-cn-pods"
+          honor_labels: true
+          kubernetes_sd_configs:
+            - role: pod
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+              action: keep
+              regex: "true"
+            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+              action: replace
+              target_label: __metrics_path__
+              regex: (.+)
+            - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+              action: replace
+              target_label: __address__
+              regex: (.+?)(?::\d+)?;(\d+)
+              replacement: $1:$2
+            - action: labelmap
+              regex: __meta_kubernetes_pod_label_(.+)
+            - source_labels: [__meta_kubernetes_pod_name]
+              action: replace
+              target_label: pod
+
       alertingEndpoints:
         - name: "mo-ob-alertmanager"
           # 如果跨ns，需要修改
