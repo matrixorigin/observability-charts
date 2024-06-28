@@ -133,6 +133,9 @@ alertmanagerWebhookAdapter:
   image:
     repository: ez4bruce3280/alertmanager-webhook-adapter
     tag: v1.1.7
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
 
 ## alertmanager sub-chart configurable values
 ## Please see https://github.com/prometheus-community/helm-charts/tree/main/charts/alertmanager
