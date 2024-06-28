@@ -24,7 +24,7 @@
     "editable": true,
     "fiscalYearStartMonth": 0,
     "graphTooltip": 0,
-    "id": 22,
+    "id": 595,
     "links": [],
     "liveNow": false,
     "panels": [
@@ -92,7 +92,7 @@
           "alertThreshold": true
         },
         "percentage": false,
-        "pluginVersion": "9.3.8",
+        "pluginVersion": "10.1.4",
         "pointradius": 5,
         "points": false,
         "renderer": "flot",
@@ -504,7 +504,7 @@
           "alertThreshold": true
         },
         "percentage": false,
-        "pluginVersion": "9.3.8",
+        "pluginVersion": "10.1.4",
         "pointradius": 5,
         "points": false,
         "renderer": "flot",
@@ -580,6 +580,122 @@
         }
       },
       {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "$datasource"
+        },
+        "fill": 10,
+        "fillGradient": 0,
+        "gridPos": {
+          "h": 7,
+          "w": 24,
+          "x": 0,
+          "y": 24
+        },
+        "hiddenSeries": false,
+        "id": 9,
+        "interval": "1m",
+        "legend": {
+          "alignAsTable": true,
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "rightSide": true,
+          "show": true,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 0,
+        "links": [],
+        "nullPointMode": "null as zero",
+        "options": {
+          "alertThreshold": true
+        },
+        "percentage": false,
+        "pluginVersion": "10.1.4",
+        "pointradius": 5,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [
+          {
+            "alias": "max capacity",
+            "color": "#F2495C",
+            "dashes": true,
+            "fill": 0,
+            "hiddenSeries": true,
+            "hideTooltip": true,
+            "legend": true,
+            "linewidth": 2,
+            "stack": false
+          }
+        ],
+        "spaceLength": 10,
+        "stack": true,
+        "steppedLine": false,
+        "targets": [
+          {
+            "datasource": {
+              "uid": "$datasource"
+            },
+            "expr": "sum(kube_node_status_capacity{cluster=\"$cluster\", node=~\"$node\", resource=\"memory\"})",
+            "format": "time_series",
+            "intervalFactor": 2,
+            "legendFormat": "max capacity",
+            "refId": "A",
+            "step": 10
+          },
+          {
+            "datasource": {
+              "uid": "$datasource"
+            },
+            "editorMode": "code",
+            "expr": "sum(container_memory_rss{cluster=\"$cluster\", node=~\"$node\", container!=\"\"}) by (pod)",
+            "format": "time_series",
+            "intervalFactor": 2,
+            "legendFormat": "{{pod}}",
+            "range": true,
+            "refId": "B",
+            "step": 10
+          }
+        ],
+        "thresholds": [],
+        "timeRegions": [],
+        "title": "Memory Usage (RSS)",
+        "tooltip": {
+          "shared": false,
+          "sort": 2,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "mode": "time",
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "format": "bytes",
+            "logBase": 1,
+            "min": 0,
+            "show": true
+          },
+          {
+            "format": "short",
+            "logBase": 1,
+            "show": false
+          }
+        ],
+        "yaxis": {
+          "align": false
+        }
+      },
+      {
         "collapsed": false,
         "datasource": {
           "type": "prometheus",
@@ -589,7 +705,7 @@
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 24
+          "y": 31
         },
         "id": 8,
         "panels": [],
@@ -620,7 +736,7 @@
           "h": 7,
           "w": 24,
           "x": 0,
-          "y": 25
+          "y": 32
         },
         "id": 4,
         "interval": "1m",
@@ -935,7 +1051,7 @@
       }
     ],
     "refresh": "10s",
-    "schemaVersion": 37,
+    "schemaVersion": 38,
     "style": "dark",
     "tags": [
       "kubernetes-mixin"
@@ -994,10 +1110,10 @@
           "current": {
             "selected": true,
             "text": [
-              "ip-10-0-101-250.us-west-2.compute.internal"
+              "10.128.0.104"
             ],
             "value": [
-              "ip-10-0-101-250.us-west-2.compute.internal"
+              "10.128.0.104"
             ]
           },
           "datasource": {

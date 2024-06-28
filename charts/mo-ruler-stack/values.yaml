@@ -27,6 +27,13 @@ dashboards:
 alertrules:
   enabled: false
 
+defaultDatasource:
+  # from matrixorigin/ops
+  # cooperate with template templates/mo-ruler-datasource.yaml
+  ruler: true
+  # cooperate with template templates/alertmanager-datasource.yaml
+  alertmanager: true
+
 moRuler:
   replicaCount: 1
   enabled: false
@@ -133,6 +140,9 @@ alertmanagerWebhookAdapter:
   image:
     repository: ez4bruce3280/alertmanager-webhook-adapter
     tag: v1.1.7
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
 
 ## alertmanager sub-chart configurable values
 ## Please see https://github.com/prometheus-community/helm-charts/tree/main/charts/alertmanager

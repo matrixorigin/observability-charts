@@ -1,3 +1,4 @@
+{{- if .Values.defaultDatasource.alertmanager -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -25,3 +26,4 @@ data:
       # basicAuthUser: my_user
       # secureJsonData:
       #   basicAuthPassword: test_password
+{{- end -}}

@@ -24,7 +24,6 @@
     "editable": true,
     "fiscalYearStartMonth": 0,
     "graphTooltip": 0,
-    "id": 24,
     "links": [],
     "liveNow": false,
     "panels": [
@@ -104,7 +103,7 @@
           },
           "textMode": "auto"
         },
-        "pluginVersion": "9.3.8",
+        "pluginVersion": "10.1.4",
         "targets": [
           {
             "datasource": {
@@ -170,7 +169,7 @@
           },
           "textMode": "auto"
         },
-        "pluginVersion": "9.3.8",
+        "pluginVersion": "10.1.4",
         "targets": [
           {
             "datasource": {
@@ -236,7 +235,7 @@
           },
           "textMode": "auto"
         },
-        "pluginVersion": "9.3.8",
+        "pluginVersion": "10.1.4",
         "targets": [
           {
             "datasource": {
@@ -302,7 +301,7 @@
           },
           "textMode": "auto"
         },
-        "pluginVersion": "9.3.8",
+        "pluginVersion": "10.1.4",
         "targets": [
           {
             "datasource": {
@@ -382,7 +381,7 @@
           "alertThreshold": true
         },
         "percentage": false,
-        "pluginVersion": "9.3.8",
+        "pluginVersion": "10.1.4",
         "pointradius": 5,
         "points": false,
         "renderer": "flot",
@@ -816,7 +815,7 @@
           "alertThreshold": true
         },
         "percentage": false,
-        "pluginVersion": "9.3.8",
+        "pluginVersion": "10.1.4",
         "pointradius": 5,
         "points": false,
         "renderer": "flot",
@@ -914,6 +913,144 @@
         }
       },
       {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "$datasource"
+        },
+        "fill": 10,
+        "fillGradient": 0,
+        "gridPos": {
+          "h": 7,
+          "w": 24,
+          "x": 0,
+          "y": 28
+        },
+        "hiddenSeries": false,
+        "id": 30,
+        "interval": "1m",
+        "legend": {
+          "alignAsTable": true,
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "rightSide": true,
+          "show": true,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 0,
+        "links": [],
+        "nullPointMode": "null as zero",
+        "options": {
+          "alertThreshold": true
+        },
+        "percentage": false,
+        "pluginVersion": "10.1.4",
+        "pointradius": 5,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [
+          {
+            "alias": "quota - requests",
+            "color": "#F2495C",
+            "dashes": true,
+            "fill": 0,
+            "hiddenSeries": true,
+            "hideTooltip": true,
+            "legend": true,
+            "linewidth": 2,
+            "stack": false
+          },
+          {
+            "alias": "quota - limits",
+            "color": "#FF9830",
+            "dashes": true,
+            "fill": 0,
+            "hiddenSeries": true,
+            "hideTooltip": true,
+            "legend": true,
+            "linewidth": 2,
+            "stack": false
+          }
+        ],
+        "spaceLength": 10,
+        "stack": true,
+        "steppedLine": false,
+        "targets": [
+          {
+            "datasource": {
+              "uid": "$datasource"
+            },
+            "editorMode": "code",
+            "expr": "sum(container_memory_rss{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\", namespace=\"$namespace\", container!=\"\", image!=\"\"}) by (pod)",
+            "format": "time_series",
+            "intervalFactor": 2,
+            "legendFormat": "{{pod}}",
+            "range": true,
+            "refId": "A",
+            "step": 10
+          },
+          {
+            "datasource": {
+              "uid": "$datasource"
+            },
+            "expr": "scalar(kube_resourcequota{cluster=\"$cluster\", namespace=\"$namespace\", type=\"hard\",resource=\"requests.memory\"})",
+            "format": "time_series",
+            "intervalFactor": 2,
+            "legendFormat": "quota - requests",
+            "refId": "B",
+            "step": 10
+          },
+          {
+            "datasource": {
+              "uid": "$datasource"
+            },
+            "expr": "scalar(kube_resourcequota{cluster=\"$cluster\", namespace=\"$namespace\", type=\"hard\",resource=\"limits.memory\"})",
+            "format": "time_series",
+            "intervalFactor": 2,
+            "legendFormat": "quota - limits",
+            "refId": "C",
+            "step": 10
+          }
+        ],
+        "thresholds": [],
+        "timeRegions": [],
+        "title": "Memory Usage (RSS)",
+        "tooltip": {
+          "shared": false,
+          "sort": 2,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "mode": "time",
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "format": "bytes",
+            "logBase": 1,
+            "min": 0,
+            "show": true
+          },
+          {
+            "format": "short",
+            "logBase": 1,
+            "show": false
+          }
+        ],
+        "yaxis": {
+          "align": false
+        }
+      },
+      {
         "collapsed": false,
         "datasource": {
           "type": "prometheus",
@@ -923,7 +1060,7 @@
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 28
+          "y": 35
         },
         "id": 23,
         "panels": [],
@@ -954,7 +1091,7 @@
           "h": 7,
           "w": 24,
           "x": 0,
-          "y": 29
+          "y": 36
         },
         "id": 8,
         "interval": "1m",
@@ -1277,7 +1414,7 @@
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 36
+          "y": 43
         },
         "id": 24,
         "panels": [],
@@ -1296,17 +1433,19 @@
       {
         "aliasColors": {},
         "bars": false,
+        "columns": [],
         "dashLength": 10,
         "dashes": false,
         "datasource": {
           "uid": "$datasource"
         },
         "fill": 1,
+        "fontSize": "100%",
         "gridPos": {
           "h": 7,
           "w": 24,
           "x": 0,
-          "y": 37
+          "y": 44
         },
         "id": 9,
         "interval": "1m",
@@ -1330,6 +1469,11 @@
         "points": false,
         "renderer": "flot",
         "seriesOverrides": [],
+        "showHeader": true,
+        "sort": {
+          "col": 0,
+          "desc": true
+        },
         "spaceLength": 10,
         "stack": false,
         "steppedLine": false,
@@ -1570,7 +1714,7 @@
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 44
+          "y": 51
         },
         "id": 25,
         "panels": [],
@@ -1599,7 +1743,7 @@
           "h": 7,
           "w": 12,
           "x": 0,
-          "y": 45
+          "y": 52
         },
         "id": 10,
         "interval": "1m",
@@ -1679,7 +1823,7 @@
           "h": 7,
           "w": 12,
           "x": 12,
-          "y": 45
+          "y": 52
         },
         "id": 11,
         "interval": "1m",
@@ -1756,7 +1900,7 @@
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 52
+          "y": 59
         },
         "id": 26,
         "panels": [],
@@ -1785,7 +1929,7 @@
           "h": 7,
           "w": 12,
           "x": 0,
-          "y": 53
+          "y": 60
         },
         "id": 12,
         "interval": "1m",
@@ -1865,7 +2009,7 @@
           "h": 7,
           "w": 12,
           "x": 12,
-          "y": 53
+          "y": 60
         },
         "id": 13,
         "interval": "1m",
@@ -1942,7 +2086,7 @@
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 60
+          "y": 67
         },
         "id": 27,
         "panels": [],
@@ -1971,7 +2115,7 @@
           "h": 7,
           "w": 12,
           "x": 0,
-          "y": 61
+          "y": 68
         },
         "id": 14,
         "interval": "1m",
@@ -2051,7 +2195,7 @@
           "h": 7,
           "w": 12,
           "x": 12,
-          "y": 61
+          "y": 68
         },
         "id": 15,
         "interval": "1m",
@@ -2128,7 +2272,7 @@
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 68
+          "y": 75
         },
         "id": 28,
         "panels": [],
@@ -2158,7 +2302,7 @@
           "h": 7,
           "w": 12,
           "x": 0,
-          "y": 69
+          "y": 76
         },
         "id": 16,
         "interval": "1m",
@@ -2238,7 +2382,7 @@
           "h": 7,
           "w": 12,
           "x": 12,
-          "y": 69
+          "y": 76
         },
         "id": 17,
         "interval": "1m",
@@ -2315,7 +2459,7 @@
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 76
+          "y": 83
         },
         "id": 29,
         "panels": [],
@@ -2344,7 +2488,7 @@
           "h": 7,
           "w": 24,
           "x": 0,
-          "y": 77
+          "y": 84
         },
         "id": 18,
         "interval": "1m",
@@ -2604,7 +2748,7 @@
       }
     ],
     "refresh": "10s",
-    "schemaVersion": 37,
+    "schemaVersion": 38,
     "style": "dark",
     "tags": [
       "kubernetes-mixin"
@@ -2613,9 +2757,9 @@
       "list": [
         {
           "current": {
-            "selected": true,
-            "text": "MO-OB-Control-Plane-Prometheus-DEV",
-            "value": "MO-OB-Control-Plane-Prometheus-DEV"
+            "selected": false,
+            "text": "Prometheus",
+            "value": "prometheus"
           },
           "hide": 0,
           "includeAll": false,
@@ -2662,7 +2806,7 @@
         },
         {
           "current": {
-            "selected": true,
+            "selected": false,
             "text": "default",
             "value": "default"
           },
@@ -2725,4 +2869,4 @@
     "uid": "85a562078cdf77779eaa1add43ccec1e",
     "version": 1,
     "weekStart": ""
-  }
+}
