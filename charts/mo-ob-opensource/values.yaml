@@ -8,6 +8,11 @@ alerting:
 alertrules:
   enabled: false
 
+defaultDatasource:
+  # from matrixorigin/ops
+  # cooperate with template templates/loki-datasource.yaml
+  loki: true
+
 promtail:
   enabled: true
   serviceMonitor:

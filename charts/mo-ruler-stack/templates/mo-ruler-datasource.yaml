@@ -1,4 +1,4 @@
-{{ if .Values.moRuler.enabled }} 
+{{- if and .Values.moRuler.enabled .Values.defaultDatasource.ruler -}}
 
 apiVersion: v1
 kind: ConfigMap
@@ -20,4 +20,4 @@ data:
       jsonData:
         timeInterval: 120s
 
-{{ end }}
+{{- end -}}
