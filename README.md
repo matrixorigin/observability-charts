@@ -8,7 +8,7 @@ MOCloud Observability Charts
 添加 Helm 仓库
 
 ```shell
-helm repo add mo-ob https://matrixone-cloud.github.io/observability-charts
+helm repo add mo-ob https://matrixorigin.github.io/observability-charts
 ```
 
 更新仓库
