@@ -84,7 +84,7 @@ helm install -n ${OBNS} \
     --set kube-prometheus-stack.prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage=${PROM_STORAGE_SIZE} \
     --set kube-prometheus-stack.prometheus.prometheusSpec.resources.requests.memory="1Gi" \
     --set kube-prometheus-stack.prometheus.prometheusSpec.resources.requests.cpu="250m" \
-    mo-ob-opensource mo-ob/mo-ob-opensource --version ${MO_OB_OPENSOURCE_VERSION}
+    mo-ob-opensource ./charts/mo-ob-opensource --version ${MO_OB_OPENSOURCE_VERSION}
 ```
 
 卸载
@@ -97,7 +97,7 @@ helm uninstall -n ${OBNS} mo-ob-opensource
 
 安装
 ```
-helm install -n ${OBNS} controlplane-resources-chart mo-ob/controlplane-resources-chart --version ${CONTROLPLANE_RESOURCE_CHART_VERSION}
+helm install -n ${OBNS} controlplane-resources-chart ./charts/controlplane-resources-chart --version ${CONTROLPLANE_RESOURCE_CHART_VERSION}
 ```
 
 卸载
