@@ -1,3 +1,0 @@
-app.kubernetes.io/managed-by: anybody
-app.kubernetes.io/owner: anybody
-example: "1"

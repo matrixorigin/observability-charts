@@ -95,9 +95,26 @@ helm uninstall -n ${OBNS} mo-ob-opensource
 
 ### 部署 dashboard-chart
 
-安装
+build
+
 ```
-helm install -n ${OBNS} controlplane-resources-chart ./charts/controlplane-resources-chart --version ${CONTROLPLANE_RESOURCE_CHART_VERSION}
+git clone https://github.com/matrixorigin/ob-ops
+make ctrl-res
+
+```
+make之后将会生成 dashboard-chart
+
+安装
+
+<path-to-chart> 是上面make的dashboard-chart
+
+```
+helm install -n ${OBNS} controlplane-resources-chart \
+--set policies.log.enabled="false" \
+--set policies.metric.enabled="false" \
+--set rules.log.enabled="false" \
+--set rules.metric.enabled="false" \
+<path-to-chart>
 ```
 
 卸载
