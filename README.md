@@ -68,6 +68,7 @@ helm install -n ${OBNS} \
     --set loki.loki.storage.s3.endpoint=${S3_ENDPOINT} \
     --set loki.loki.storage.s3.accessKeyId=${S3_ACCESS_KEY} \
     --set loki.loki.storage.s3.secretAccessKey=${S3_SECRET_KEY} \
+    --set loki.loki.commonConfig.replication_factor=3 \
     --set loki.write.persistence.storageClass=${STORAGE_CLASS} \
     --set loki.write.replicas=2 \
     --set loki.write.resources.requests.memory="500Mi" \
