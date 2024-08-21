@@ -18,7 +18,6 @@ helm repo update
 ```
 helm search repo mo-ob/mo-ruler-stack --versions --devel
 helm search repo mo-ob/mo-ob-opensource --versions --devel
-helm search repo mo-ob/controlplane-resources-chart --versions --devel
 ```
 
 ### 设置环境变量
