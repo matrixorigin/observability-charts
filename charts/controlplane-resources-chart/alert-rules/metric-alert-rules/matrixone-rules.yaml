@@ -1,0 +1,19 @@
+groups:
+  - name: matrixone.rules
+    rules:
+      - alert: MonthlyOrgFreeCUUsageCloseOrExceeded
+        expr: sum without (instance,pod,pod_template_hash) (controlplane_organization_monthly_free_cu{quota_status=~"close|exceeded"}) > 0
+        for: 1m
+        labels:
+          alertOwner: shuqi.qin
+          alertTeam: "Cloud Team"
+          alertname: MonthlyOrgFreeCUUsageCloseOrExceeded
+          serviceScope: mo-cloud
+          orgid: |- 
+            {{ $labels.id }}
+          severity: "critical"
+        annotations:
+          summary: |-
+            {{ $labels.id }}: Monthly Org Free CU usage approaching limit {{ $labels.quota_status }}
+          description: |-
+            {{ $labels.id }}: Monthly Org Free CU usage is above 80% (current value is: {{ $value }})

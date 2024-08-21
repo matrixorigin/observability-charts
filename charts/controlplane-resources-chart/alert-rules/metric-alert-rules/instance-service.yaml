@@ -1,0 +1,150 @@
+groups:
+  - name: mo-cloud.instance.payment
+    rules:
+      # Alert for any instance's creaton time >120 sceonds.
+      - alert: CreationTimeoutFree
+        expr: controlplane_instance_creation_duration_seconds{payment="free"} > 120
+        labels:
+          alertOwner: DanielZhang
+          alertTeam: "Cloud Team"
+          serviceScope: mo-cloud
+          alertname: CreationTimeout
+          alerttype: timeout
+          instanceid: "{{$labels.id}}"
+          severity: critical
+        annotations:
+          summary: "{{$labels.name}}: Free Instance Creation Timeout"
+          description: "{{$labels.name}}: Free Instance Creation time is above 120s (current value is: {{ $value }})"
+
+      - alert: CreationTimeoutServerlessPaid
+        expr: controlplane_instance_creation_duration_seconds{payment="paid", plan_type="serverless"} > 600
+        labels:
+          alertOwner: DanielZhang
+          alertTeam: "Cloud Team"
+          serviceScope: mo-cloud
+          alertname: CreationTimeout
+          alerttype: timeout
+          instanceid: "{{$labels.id}}"
+          severity: critical
+        annotations:
+          summary: "{{$labels.name}}: Serverless Paid Instance Creation Timeout"
+          description: "{{$labels.name}}: Serverless Paid instance creation time is above 600s (current value is: {{ $value }})"
+      
+      - alert: CreationTimeoutStandard
+        expr: controlplane_instance_creation_duration_seconds{payment="paid", plan_type="standard"} > 900
+        labels:
+          alertOwner: DanielZhang
+          alertTeam: "Cloud Team"
+          serviceScope: mo-cloud
+          alertname: CreationTimeout
+          alerttype: timeout
+          instanceid: "{{$labels.id}}"
+          severity: critical
+        annotations:
+          summary: "{{$labels.name}}: Standard Instance Creation Timeout"
+          description: "{{$labels.name}}: Standard instance creation time is above 900s (current value is: {{ $value }})"
+
+      # Alert for serverless instance's update time >120 sceonds.
+      - alert: UpdateTimeout
+        expr: controlplane_instance_update_duration_seconds{plan_type="serverless"} > 120
+        labels:
+          alertOwner: DanielZhang
+          alertTeam: "Cloud Team"
+          alertname: UpdateTimeout
+          serviceScope: mo-cloud
+          alerttype: timeout
+          instanceid: "{{$labels.id}}"
+          severity: critical
+        annotations:
+          summary: "{{$labels.name}}: Serverless Update Timeout"
+          description: "{{$labels.name}}: Serverless Update time is above 120s (current value is: {{ $value }})"
+      
+      # Alert for standard instance's update time >900 sceonds.
+      - alert: UpdateTimeoutStandard
+        expr: controlplane_instance_update_duration_seconds{plan_type="standard"} > 900
+        labels:
+          alertOwner: DanielZhang
+          alertTeam: "Cloud Team"
+          alertname: UpdateTimeout
+          serviceScope: mo-cloud
+          alerttype: timeout
+          instanceid: "{{$labels.id}}"
+          severity: critical
+        annotations:
+          summary: "{{$labels.name}}: Standard Update Timeout"
+          description: "{{$labels.name}}: Standard Update time is above 900s (current value is: {{ $value }})"
+
+      # Alert for serverless instance's recovery time >120 sceonds.
+      - alert: RecoveryTimeout
+        expr: controlplane_instance_recovery_duration_seconds{plan_type="serverless"} > 120
+        labels:
+          alertOwner: DanielZhang
+          alertTeam: "Cloud Team"
+          alertname: RecoveryTimeout
+          alerttype: timeout
+          serviceScope: mo-cloud
+          instanceid: "{{$labels.id}}"
+          severity: critical
+        annotations:
+          summary: "{{$labels.name}}: Serverless Recovery Timeout"
+          description: "{{$labels.name}}: Serverless Recovery time is above 120s (current value is: {{ $value }})"
+
+      # Alert for standard instance's recovery time >900 sceonds.
+      - alert: RecoveryTimeoutStandard
+        expr: controlplane_instance_recovery_duration_seconds{plan_type="standard"} > 900
+        labels:
+          alertOwner: DanielZhang
+          alertTeam: "Cloud Team"
+          alertname: RecoveryTimeout
+          alerttype: timeout
+          serviceScope: mo-cloud
+          instanceid: "{{$labels.id}}"
+          severity: critical
+        annotations:
+          summary: "{{$labels.name}}: Standard Recovery Timeout"
+          description: "{{$labels.name}}: Standard Recovery time is above 900s (current value is: {{ $value }})"
+
+      # Alert for serverless instance's termination time >120 sceonds.
+      - alert: TerminationTimeout
+        expr: controlplane_instance_termination_duration_seconds{plan_type="serverless"} > 120
+        labels:
+          alertOwner: DanielZhang
+          alertTeam: "Cloud Team"
+          alertname: TerminationTimeout
+          alerttype: timeout
+          serviceScope: mo-cloud
+          instanceid: "{{$labels.id}}"
+          severity: critical
+        annotations:
+          summary: "{{$labels.name}}: Serverless Termination Timeout"
+          description: "{{$labels.name}}: Serverless Termination time is above 120s (current value is: {{ $value }})"
+      
+      # Alert for standard instance's termination time >600 sceonds.
+      - alert: TerminationTimeoutStandard
+        expr: controlplane_instance_termination_duration_seconds{plan_type="standard"} > 600
+        labels:
+          alertOwner: DanielZhang
+          alertTeam: "Cloud Team"
+          alertname: TerminationTimeout
+          alerttype: timeout
+          serviceScope: mo-cloud
+          instanceid: "{{$labels.id}}"
+          severity: critical
+        annotations:
+          summary: "{{$labels.name}}: Standard Termination Timeout"
+          description: "{{$labels.name}}: Standard Termination time is above 600s (current value is: {{ $value }})"
+
+      # Alert for standard instance's update config time >900 sceonds.
+      - alert: UpdateConfigTimeoutStandard
+        expr: controlplane_instance_update_config_duration_seconds{plan_type="standard"} > 900
+        labels:
+          alertOwner: DanielZhang
+          alertTeam: "Cloud Team"
+          alertname: UpdateConfigTimeout
+          alerttype: timeout
+          serviceScope: mo-cloud
+          instanceid: "{{$labels.id}}"
+          severity: critical
+        annotations:
+          summary: "{{$labels.name}}: Standard UpdateConfig Timeout"
+          description: "{{$labels.name}}: Standard Update config duration is above 900s (current value is: {{ $value }})"

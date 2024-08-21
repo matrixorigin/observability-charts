@@ -1,0 +1,2289 @@
+{
+  "annotations": {
+    "list": null
+  },
+  "editable": true,
+  "hideControls": false,
+  "id": 3,
+  "links": null,
+  "originalTitle": "",
+  "panels": null,
+  "refresh": "30s",
+  "rows": [
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 63,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_append_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "append",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_send_duration_seconds_bucket{step=\"total\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "send",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_send_duration_seconds_bucket{step=\"latency\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "send-latency",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_send_duration_seconds_bucket{step=\"network\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "send-network",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_apply_duration_seconds_bucket{step=\"apply\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "apply",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_apply_duration_seconds_bucket{step=\"apply-latency\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "apply-latency",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_apply_duration_seconds_bucket{step=\"apply-notify\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "apply-notify",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_apply_duration_seconds_bucket{step=\"apply-notify-latency\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "apply-notify-latency",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_txn_commit_duration_seconds_bucket{type=\"cn-wait-logtail\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "wait-commit-apply",
+              "refId": ""
+            }
+          ],
+          "title": "P50.000000 time",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "s",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 64,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_append_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "append",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_send_duration_seconds_bucket{step=\"total\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "send",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_send_duration_seconds_bucket{step=\"latency\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "send-latency",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_send_duration_seconds_bucket{step=\"network\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "send-network",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_apply_duration_seconds_bucket{step=\"apply\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "apply",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_apply_duration_seconds_bucket{step=\"apply-latency\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "apply-latency",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_apply_duration_seconds_bucket{step=\"apply-notify\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "apply-notify",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_apply_duration_seconds_bucket{step=\"apply-notify-latency\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "apply-notify-latency",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_txn_commit_duration_seconds_bucket{type=\"cn-wait-logtail\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "wait-commit-apply",
+              "refId": ""
+            }
+          ],
+          "title": "P80.000000 time",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "s",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 65,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_append_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "append",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_send_duration_seconds_bucket{step=\"total\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "send",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_send_duration_seconds_bucket{step=\"latency\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "send-latency",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_send_duration_seconds_bucket{step=\"network\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "send-network",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_apply_duration_seconds_bucket{step=\"apply\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "apply",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_apply_duration_seconds_bucket{step=\"apply-latency\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "apply-latency",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_apply_duration_seconds_bucket{step=\"apply-notify\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "apply-notify",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_apply_duration_seconds_bucket{step=\"apply-notify-latency\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "apply-notify-latency",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_txn_commit_duration_seconds_bucket{type=\"cn-wait-logtail\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "wait-commit-apply",
+              "refId": ""
+            }
+          ],
+          "title": "P90.000000 time",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "s",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 66,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_append_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "append",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_send_duration_seconds_bucket{step=\"total\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "send",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_send_duration_seconds_bucket{step=\"latency\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "send-latency",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_send_duration_seconds_bucket{step=\"network\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "send-network",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_apply_duration_seconds_bucket{step=\"apply\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "apply",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_apply_duration_seconds_bucket{step=\"apply-latency\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "apply-latency",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_apply_duration_seconds_bucket{step=\"apply-notify\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "apply-notify",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_apply_duration_seconds_bucket{step=\"apply-notify-latency\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "apply-notify-latency",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_txn_commit_duration_seconds_bucket{type=\"cn-wait-logtail\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "wait-commit-apply",
+              "refId": ""
+            }
+          ],
+          "title": "P99.000000 time",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "s",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "Logtail overview"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 67,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(mo_logtail_received_total{type=\"total\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}: total",
+              "refId": ""
+            },
+            {
+              "expr": "sum(rate(mo_logtail_received_total{type=\"subscribe\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}: subscribe",
+              "refId": ""
+            },
+            {
+              "expr": "sum(rate(mo_logtail_received_total{type=\"unsubscribe\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}: unsubscribe",
+              "refId": ""
+            },
+            {
+              "expr": "sum(rate(mo_logtail_received_total{type=\"update\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}: update",
+              "refId": ""
+            },
+            {
+              "expr": "sum(rate(mo_logtail_received_total{type=\"heartbeat\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}: heartbeat",
+              "refId": ""
+            }
+          ],
+          "title": "CN Received status",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 68,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(mo_logtail_queue_size{type=\"send\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"})",
+              "format": "time_series",
+              "legendFormat": "send",
+              "refId": ""
+            },
+            {
+              "expr": "sum(mo_logtail_queue_size{type=\"receive\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"})",
+              "format": "time_series",
+              "legendFormat": "receive",
+              "refId": ""
+            },
+            {
+              "expr": "sum(mo_logtail_queue_size{type=\"apply\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"})",
+              "format": "time_series",
+              "legendFormat": "apply",
+              "refId": ""
+            }
+          ],
+          "title": "Queue status",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 69,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(mo_logtail_load_checkpoint_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "Checkpoint logtail",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "Logtail Queue Status"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 70,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 12,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_bytes_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P50.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_bytes_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P80.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_bytes_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P90.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_bytes_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P99.00%",
+              "refId": ""
+            }
+          ],
+          "title": "Logtail size",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "bytes",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "Logtail size"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 71,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 12,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_load_checkpoint_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P50.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_load_checkpoint_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P80.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_load_checkpoint_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P90.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_load_checkpoint_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P99.00%",
+              "refId": ""
+            }
+          ],
+          "title": "Logtail load checkpoint",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "s",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "Logtail load checkpoint"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 72,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_pull_collection_phase1_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P50.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_pull_collection_phase1_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P80.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_pull_collection_phase1_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P90.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_pull_collection_phase1_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P99.00%",
+              "refId": ""
+            }
+          ],
+          "title": "pull type phase1 collection duration",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "s",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 73,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_pull_collection_phase2_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P50.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_pull_collection_phase2_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P80.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_pull_collection_phase2_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P90.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_pull_collection_phase2_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P99.00%",
+              "refId": ""
+            }
+          ],
+          "title": "pull type phase2 collection duration",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "s",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 74,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_push_collection_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P50.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_push_collection_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P80.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_push_collection_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P90.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_push_collection_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P99.00%",
+              "refId": ""
+            }
+          ],
+          "title": "push type collection duration",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "s",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "Logtail collect duration"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 75,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(mo_logtail_transmit_total{type=\"server-send\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "refId": ""
+            }
+          ],
+          "title": "Server Send",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 76,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(mo_logtail_transmit_total{type=\"client-receive\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "refId": ""
+            }
+          ],
+          "title": "Client Receive",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "Logtail Transmit counter"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 77,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(increase(mo_logtail_subscription_request_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "logtail subscription average increase",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 78,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(increase(mo_logtail_subscription_request_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "logtail subscription average increase, sensitive",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "logtail subscription the tn have received"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 79,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"enqueue-global-stats\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "enqueue-global-stats",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"get-partition\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-partition",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"get-lock\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-lock",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"get-catalog\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-catalog",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"handle-checkpoint\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "handle-checkpoint",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume-catalog-table\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume-catalog-table",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume-catalog-table\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume-catalog-table",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume-one-entry\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume-one-entry",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume-one-entry-logtailreplay\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume-one-entry-logtailreplay",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume-one-entry-catalog-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume-one-entry-catalog-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"update-timestamps\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "update-timestamps",
+              "refId": ""
+            }
+          ],
+          "title": "P50.000000 time",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "s",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 80,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"enqueue-global-stats\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "enqueue-global-stats",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"get-partition\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-partition",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"get-lock\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-lock",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"get-catalog\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-catalog",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"handle-checkpoint\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "handle-checkpoint",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume-catalog-table\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume-catalog-table",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume-catalog-table\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume-catalog-table",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume-one-entry\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume-one-entry",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume-one-entry-logtailreplay\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume-one-entry-logtailreplay",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume-one-entry-catalog-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume-one-entry-catalog-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"update-timestamps\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "update-timestamps",
+              "refId": ""
+            }
+          ],
+          "title": "P80.000000 time",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "s",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 81,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"enqueue-global-stats\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "enqueue-global-stats",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"get-partition\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-partition",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"get-lock\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-lock",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"get-catalog\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-catalog",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"handle-checkpoint\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "handle-checkpoint",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume-catalog-table\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume-catalog-table",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume-catalog-table\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume-catalog-table",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume-one-entry\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume-one-entry",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume-one-entry-logtailreplay\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume-one-entry-logtailreplay",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume-one-entry-catalog-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume-one-entry-catalog-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"update-timestamps\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "update-timestamps",
+              "refId": ""
+            }
+          ],
+          "title": "P90.000000 time",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "s",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 82,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"enqueue-global-stats\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "enqueue-global-stats",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"get-partition\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-partition",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"get-lock\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-lock",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"get-catalog\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-catalog",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"handle-checkpoint\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "handle-checkpoint",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume-catalog-table\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume-catalog-table",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume-catalog-table\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume-catalog-table",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume-one-entry\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume-one-entry",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume-one-entry-logtailreplay\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume-one-entry-logtailreplay",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"consume-one-entry-catalog-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "consume-one-entry-catalog-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_logtail_update_partition_duration_seconds_bucket{step=\"update-timestamps\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "update-timestamps",
+              "refId": ""
+            }
+          ],
+          "title": "P99.000000 time",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "s",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "Logtail update partition"
+    }
+  ],
+  "schemaVersion": 0,
+  "sharedCrosshair": true,
+  "slug": "",
+  "style": "dark",
+  "tags": ["MatrixOne", "MO"],
+  "templating": {
+    "list": [
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": [
+            "1m"
+          ],
+          "value": "1m"
+        },
+        "datasource": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": "interval",
+        "multi": false,
+        "multiFormat": "",
+        "name": "interval",
+        "options": [
+          {
+            "selected": false,
+            "text": "1m",
+            "value": "1m"
+          },
+          {
+            "selected": false,
+            "text": "5m",
+            "value": "5m"
+          },
+          {
+            "selected": false,
+            "text": "10m",
+            "value": "10m"
+          },
+          {
+            "selected": false,
+            "text": "30m",
+            "value": "30m"
+          },
+          {
+            "selected": false,
+            "text": "1h",
+            "value": "1h"
+          },
+          {
+            "selected": false,
+            "text": "6h",
+            "value": "6h"
+          },
+          {
+            "selected": false,
+            "text": "12h",
+            "value": "12h"
+          }
+        ],
+        "query": "1m,5m,10m,30m,1h,6h,12h",
+        "refresh": false,
+        "regex": "",
+        "sort": 0,
+        "type": "interval"
+      },
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": null,
+          "value": null
+        },
+        "datasource": "Prometheus",
+        "hide": 0,
+        "includeAll": false,
+        "label": "unit",
+        "multi": false,
+        "multiFormat": "",
+        "name": "unit",
+        "options": [],
+        "query": "label_values(mo_cluster_info, unit)",
+        "refresh": 1,
+        "regex": "",
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": null,
+          "value": null
+        },
+        "datasource": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": "ds_prom",
+        "multi": false,
+        "multiFormat": "",
+        "name": "ds_prom",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "/$unit-prometheus/",
+        "sort": 0,
+        "type": "datasource"
+      },
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": null,
+          "value": null
+        },
+        "datasource": "${ds_prom}",
+        "hide": 0,
+        "includeAll": false,
+        "label": "main_cluster",
+        "multi": false,
+        "multiFormat": "",
+        "name": "physicalCluster",
+        "options": [],
+        "query": "label_values(up, matrixone_cloud_main_cluster)",
+        "refresh": 1,
+        "regex": "",
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allFormat": "",
+        "allValue": ".*",
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": "$__all"
+        },
+        "datasource": "${ds_prom}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "owner",
+        "multi": true,
+        "multiFormat": "",
+        "name": "owner",
+        "options": [
+          {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          }
+        ],
+        "query": "label_values(up{matrixone_cloud_main_cluster=~\"$physicalCluster\"}, matrixorigin_io_owner)",
+        "refresh": 2,
+        "regex": "",
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": "$__all"
+        },
+        "datasource": "${ds_prom}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "pod",
+        "multi": true,
+        "multiFormat": "",
+        "name": "pod",
+        "options": [
+          {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          }
+        ],
+        "query": "label_values(up{matrixone_cloud_main_cluster=\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\"},pod)",
+        "refresh": 2,
+        "regex": "",
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
+  },
+  "timezone": "",
+  "title": "Logtail Metrics",
+  "uid": "matrixone_Logtail_Metrics",
+  "version": 1
+}

@@ -1,0 +1,5782 @@
+{
+  "annotations": {
+    "list": null
+  },
+  "editable": true,
+  "hideControls": false,
+  "id": 8,
+  "links": null,
+  "originalTitle": "",
+  "panels": null,
+  "refresh": "30s",
+  "rows": [
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 152,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_memory_classes_heap_free_bytes{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/memory/classes/heap/free:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 153,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_memory_classes_heap_objects_bytes{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/memory/classes/heap/objects:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 154,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_memory_classes_heap_released_bytes{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/memory/classes/heap/released:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 155,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_memory_classes_heap_stacks_bytes{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/memory/classes/heap/stacks:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 156,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_memory_classes_heap_unused_bytes{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/memory/classes/heap/unused:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 157,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_memory_classes_metadata_mcache_free_bytes{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/memory/classes/metadata/mcache/free:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 158,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_memory_classes_metadata_mcache_inuse_bytes{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/memory/classes/metadata/mcache/inuse:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 159,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_memory_classes_metadata_mspan_free_bytes{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/memory/classes/metadata/mspan/free:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 160,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_memory_classes_metadata_mspan_inuse_bytes{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/memory/classes/metadata/mspan/inuse:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 161,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_memory_classes_metadata_other_bytes{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/memory/classes/metadata/other:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 162,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_memory_classes_os_stacks_bytes{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/memory/classes/os-stacks:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 163,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_memory_classes_other_bytes{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/memory/classes/other:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 164,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_memory_classes_profiling_buckets_bytes{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/memory/classes/profiling/buckets:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 165,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_memory_classes_total_bytes{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/memory/classes/total:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "Memory"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 166,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_gc_cycles_automatic_gc_cycles_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/gc/cycles/automatic:gc-cycles",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 167,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(go_gc_cycles_automatic_gc_cycles_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "rate: /gc/cycles/automatic:gc-cycles",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "gc-cycles",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 168,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_gc_cycles_forced_gc_cycles_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/gc/cycles/forced:gc-cycles",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 169,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(go_gc_cycles_forced_gc_cycles_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "rate: /gc/cycles/forced:gc-cycles",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "gc-cycles",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 170,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_gc_cycles_total_gc_cycles_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/gc/cycles/total:gc-cycles",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 171,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(go_gc_cycles_total_gc_cycles_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "rate: /gc/cycles/total:gc-cycles",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "gc-cycles",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 172,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_gc_gogc_percent{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/gc/gogc:percent",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 173,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_gc_gomemlimit_bytes{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/gc/gomemlimit:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 174,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(go_gc_heap_allocs_by_size_bytes_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P80.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(go_gc_heap_allocs_by_size_bytes_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P90.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.950000, sum(rate(go_gc_heap_allocs_by_size_bytes_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P95.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(go_gc_heap_allocs_by_size_bytes_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P99.00%",
+              "refId": ""
+            }
+          ],
+          "title": "/gc/heap/allocs-by-size:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "bytes",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 175,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_gc_heap_allocs_bytes_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/gc/heap/allocs:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 176,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(go_gc_heap_allocs_bytes_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "rate: /gc/heap/allocs:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "bytes",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 177,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_gc_heap_allocs_objects_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/gc/heap/allocs:objects",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 178,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(go_gc_heap_allocs_objects_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "rate: /gc/heap/allocs:objects",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "objects",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 179,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(go_gc_heap_frees_by_size_bytes_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P80.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(go_gc_heap_frees_by_size_bytes_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P90.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.950000, sum(rate(go_gc_heap_frees_by_size_bytes_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P95.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(go_gc_heap_frees_by_size_bytes_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P99.00%",
+              "refId": ""
+            }
+          ],
+          "title": "/gc/heap/frees-by-size:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "bytes",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 180,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_gc_heap_frees_bytes_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/gc/heap/frees:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 181,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(go_gc_heap_frees_bytes_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "rate: /gc/heap/frees:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "bytes",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 182,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_gc_heap_frees_objects_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/gc/heap/frees:objects",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 183,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(go_gc_heap_frees_objects_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "rate: /gc/heap/frees:objects",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "objects",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 184,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_gc_heap_goal_bytes{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/gc/heap/goal:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 185,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_gc_heap_live_bytes{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/gc/heap/live:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 186,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_gc_heap_objects_objects{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/gc/heap/objects:objects",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 187,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_gc_heap_tiny_allocs_objects_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/gc/heap/tiny/allocs:objects",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 188,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(go_gc_heap_tiny_allocs_objects_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "rate: /gc/heap/tiny/allocs:objects",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "objects",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 189,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_gc_limiter_last_enabled_gc_cycle{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/gc/limiter/last-enabled:gc-cycle",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 190,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(go_gc_pauses_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P80.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(go_gc_pauses_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P90.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.950000, sum(rate(go_gc_pauses_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P95.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(go_gc_pauses_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P99.00%",
+              "refId": ""
+            }
+          ],
+          "title": "/gc/pauses:seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 191,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_gc_scan_globals_bytes{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/gc/scan/globals:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 192,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_gc_scan_heap_bytes{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/gc/scan/heap:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 193,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_gc_scan_stack_bytes{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/gc/scan/stack:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 194,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_gc_scan_total_bytes{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/gc/scan/total:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 195,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_gc_stack_starting_size_bytes{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/gc/stack/starting-size:bytes",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "GC"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 196,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_cpu_classes_gc_mark_assist_cpu_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/cpu/classes/gc/mark/assist:cpu-seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 197,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(go_cpu_classes_gc_mark_assist_cpu_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "rate: /cpu/classes/gc/mark/assist:cpu-seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "cpu-seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 198,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_cpu_classes_gc_mark_dedicated_cpu_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/cpu/classes/gc/mark/dedicated:cpu-seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 199,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(go_cpu_classes_gc_mark_dedicated_cpu_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "rate: /cpu/classes/gc/mark/dedicated:cpu-seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "cpu-seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 200,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_cpu_classes_gc_mark_idle_cpu_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/cpu/classes/gc/mark/idle:cpu-seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 201,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(go_cpu_classes_gc_mark_idle_cpu_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "rate: /cpu/classes/gc/mark/idle:cpu-seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "cpu-seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 202,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_cpu_classes_gc_pause_cpu_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/cpu/classes/gc/pause:cpu-seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 203,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(go_cpu_classes_gc_pause_cpu_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "rate: /cpu/classes/gc/pause:cpu-seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "cpu-seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 204,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_cpu_classes_gc_total_cpu_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/cpu/classes/gc/total:cpu-seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 205,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(go_cpu_classes_gc_total_cpu_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "rate: /cpu/classes/gc/total:cpu-seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "cpu-seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 206,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_cpu_classes_idle_cpu_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/cpu/classes/idle:cpu-seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 207,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(go_cpu_classes_idle_cpu_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "rate: /cpu/classes/idle:cpu-seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "cpu-seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 208,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_cpu_classes_scavenge_assist_cpu_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/cpu/classes/scavenge/assist:cpu-seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 209,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(go_cpu_classes_scavenge_assist_cpu_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "rate: /cpu/classes/scavenge/assist:cpu-seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "cpu-seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 210,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_cpu_classes_scavenge_background_cpu_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/cpu/classes/scavenge/background:cpu-seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 211,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(go_cpu_classes_scavenge_background_cpu_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "rate: /cpu/classes/scavenge/background:cpu-seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "cpu-seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 212,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_cpu_classes_scavenge_total_cpu_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/cpu/classes/scavenge/total:cpu-seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 213,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(go_cpu_classes_scavenge_total_cpu_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "rate: /cpu/classes/scavenge/total:cpu-seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "cpu-seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 214,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_cpu_classes_total_cpu_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/cpu/classes/total:cpu-seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 215,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(go_cpu_classes_total_cpu_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "rate: /cpu/classes/total:cpu-seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "cpu-seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 216,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_cpu_classes_user_cpu_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/cpu/classes/user:cpu-seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 217,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(go_cpu_classes_user_cpu_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "rate: /cpu/classes/user:cpu-seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "cpu-seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "CPU"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 218,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_sched_gomaxprocs_threads{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/sched/gomaxprocs:threads",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 219,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_sched_goroutines_goroutines{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/sched/goroutines:goroutines",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 220,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(go_sched_latencies_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P80.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(go_sched_latencies_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P90.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.950000, sum(rate(go_sched_latencies_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P95.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(go_sched_latencies_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P99.00%",
+              "refId": ""
+            }
+          ],
+          "title": "/sched/latencies:seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 221,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(go_sched_pauses_stopping_gc_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P80.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(go_sched_pauses_stopping_gc_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P90.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.950000, sum(rate(go_sched_pauses_stopping_gc_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P95.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(go_sched_pauses_stopping_gc_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P99.00%",
+              "refId": ""
+            }
+          ],
+          "title": "/sched/pauses/stopping/gc:seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 222,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(go_sched_pauses_stopping_other_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P80.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(go_sched_pauses_stopping_other_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P90.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.950000, sum(rate(go_sched_pauses_stopping_other_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P95.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(go_sched_pauses_stopping_other_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P99.00%",
+              "refId": ""
+            }
+          ],
+          "title": "/sched/pauses/stopping/other:seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 223,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(go_sched_pauses_total_gc_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P80.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(go_sched_pauses_total_gc_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P90.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.950000, sum(rate(go_sched_pauses_total_gc_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P95.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(go_sched_pauses_total_gc_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P99.00%",
+              "refId": ""
+            }
+          ],
+          "title": "/sched/pauses/total/gc:seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 224,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(go_sched_pauses_total_other_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P80.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(go_sched_pauses_total_other_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P90.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.950000, sum(rate(go_sched_pauses_total_other_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P95.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(go_sched_pauses_total_other_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P99.00%",
+              "refId": ""
+            }
+          ],
+          "title": "/sched/pauses/total/other:seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "Schedule"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 225,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_sync_mutex_wait_total_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/sync/mutex/wait/total:seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 226,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(go_sync_mutex_wait_total_seconds_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "rate: /sync/mutex/wait/total:seconds",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "Sync"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 227,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(go_cgo_go_to_c_calls_calls_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "/cgo/go-to-c-calls:calls",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 228,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(go_cgo_go_to_c_calls_calls_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "rate: /cgo/go-to-c-calls:calls",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "calls",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "CGO"
+    }
+  ],
+  "schemaVersion": 0,
+  "sharedCrosshair": true,
+  "slug": "",
+  "style": "dark",
+  "tags": ["MatrixOne", "MO"],
+  "templating": {
+    "list": [
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": [
+            "1m"
+          ],
+          "value": "1m"
+        },
+        "datasource": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": "interval",
+        "multi": false,
+        "multiFormat": "",
+        "name": "interval",
+        "options": [
+          {
+            "selected": false,
+            "text": "1m",
+            "value": "1m"
+          },
+          {
+            "selected": false,
+            "text": "5m",
+            "value": "5m"
+          },
+          {
+            "selected": false,
+            "text": "10m",
+            "value": "10m"
+          },
+          {
+            "selected": false,
+            "text": "30m",
+            "value": "30m"
+          },
+          {
+            "selected": false,
+            "text": "1h",
+            "value": "1h"
+          },
+          {
+            "selected": false,
+            "text": "6h",
+            "value": "6h"
+          },
+          {
+            "selected": false,
+            "text": "12h",
+            "value": "12h"
+          }
+        ],
+        "query": "1m,5m,10m,30m,1h,6h,12h",
+        "refresh": false,
+        "regex": "",
+        "sort": 0,
+        "type": "interval"
+      },
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": null,
+          "value": null
+        },
+        "datasource": "Prometheus",
+        "hide": 0,
+        "includeAll": false,
+        "label": "unit",
+        "multi": false,
+        "multiFormat": "",
+        "name": "unit",
+        "options": [],
+        "query": "label_values(mo_cluster_info, unit)",
+        "refresh": 1,
+        "regex": "",
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": null,
+          "value": null
+        },
+        "datasource": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": "ds_prom",
+        "multi": false,
+        "multiFormat": "",
+        "name": "ds_prom",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "/$unit-prometheus/",
+        "sort": 0,
+        "type": "datasource"
+      },
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": null,
+          "value": null
+        },
+        "datasource": "${ds_prom}",
+        "hide": 0,
+        "includeAll": false,
+        "label": "main_cluster",
+        "multi": false,
+        "multiFormat": "",
+        "name": "physicalCluster",
+        "options": [],
+        "query": "label_values(up, matrixone_cloud_main_cluster)",
+        "refresh": 1,
+        "regex": "",
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allFormat": "",
+        "allValue": ".*",
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": "$__all"
+        },
+        "datasource": "${ds_prom}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "owner",
+        "multi": true,
+        "multiFormat": "",
+        "name": "owner",
+        "options": [
+          {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          }
+        ],
+        "query": "label_values(up{matrixone_cloud_main_cluster=~\"$physicalCluster\"}, matrixorigin_io_owner)",
+        "refresh": 2,
+        "regex": "",
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": "$__all"
+        },
+        "datasource": "${ds_prom}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "pod",
+        "multi": true,
+        "multiFormat": "",
+        "name": "pod",
+        "options": [
+          {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          }
+        ],
+        "query": "label_values(up{matrixone_cloud_main_cluster=\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\"},pod)",
+        "refresh": 2,
+        "regex": "",
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
+  },
+  "timezone": "",
+  "title": "Go Runtime Metrics",
+  "uid": "matrixone_Go_Runtime_Metrics",
+  "version": 1
+}

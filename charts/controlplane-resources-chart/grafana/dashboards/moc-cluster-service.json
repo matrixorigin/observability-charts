@@ -1,0 +1,3153 @@
+{
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": {
+            "type": "grafana",
+            "uid": "-- Grafana --"
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "target": {
+            "limit": 100,
+            "matchAny": false,
+            "tags": [],
+            "type": "dashboard"
+          },
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 32,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+      {
+        "collapsed": false,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "id": 6,
+        "panels": [],
+        "title": "Cluster Service",
+        "type": "row"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${datasource}"
+        },
+        "description": "",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "次数",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 10,
+          "w": 12,
+          "x": 0,
+          "y": 1
+        },
+        "id": 2,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/healthcheck\"})",
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "A"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/metrics\"})",
+            "hide": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "B"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/CreateInstance\"})",
+            "hide": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "C"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/DescribeClientIP\"})",
+            "hide": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "D"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/DescribeDBPlatformURL\"})",
+            "hide": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "E"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/DescribeInstanceInfo\"})",
+            "hide": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "F"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/DescribeInstanceStatus\"})",
+            "hide": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "G"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/DescribeInstances\"})",
+            "hide": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "H"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/RecoverInstance\"})",
+            "hide": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "I"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/TerminateInstance\"})",
+            "hide": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "J"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/UpdateInstance\"})",
+            "hide": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "K"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/instance/metric/runtime\"})",
+            "hide": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "L"
+          }
+        ],
+        "title": "Auth Service API Access Total (without /healthcheck and /metrics) ",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${datasource}"
+        },
+        "description": "",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "次数",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 10,
+          "w": 12,
+          "x": 12,
+          "y": 1
+        },
+        "id": 41,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/healthcheck\", code!=\"200\"})",
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "A"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/metrics\", code!=\"200\"})",
+            "hide": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "B"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/CreateInstance\", code!=\"200\"})",
+            "hide": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "C"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/DescribeClientIP\", code!=\"200\"})",
+            "hide": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "D"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/DescribeDBPlatformURL\", code!=\"200\"})",
+            "hide": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "E"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/DescribeInstanceInfo\", code!=\"200\"})",
+            "hide": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "F"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/DescribeInstanceStatus\", code!=\"200\"})",
+            "hide": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "G"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/DescribeInstances\", code!=\"200\"})",
+            "hide": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "H"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/RecoverInstance\", code!=\"200\"})",
+            "hide": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "I"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/TerminateInstance\", code!=\"200\"})",
+            "hide": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "J"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/UpdateInstance\", code!=\"200\"})",
+            "hide": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "K"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "editorMode": "builder",
+            "expr": "sum by(path) (cluster_service_api_access_total{path=\"/instance/metric/runtime\", code!=\"200\"})",
+            "hide": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "L"
+          }
+        ],
+        "title": "Cluster Service API Error",
+        "type": "timeseries"
+      },
+      {
+        "collapsed": true,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 11
+        },
+        "id": 26,
+        "panels": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "ms",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 0,
+              "y": 12
+            },
+            "id": 28,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_sum{path=\"/CreateInstance\"}",
+                "legendFormat": "{{path}}-ms-sum",
+                "range": true,
+                "refId": "A"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_count{path=\"/CreateInstance\"}",
+                "hide": false,
+                "legendFormat": "{{path}}-ms-count",
+                "range": true,
+                "refId": "B"
+              }
+            ],
+            "title": "/CreateInstance Average Duration",
+            "transformations": [
+              {
+                "id": "calculateField",
+                "options": {
+                  "alias": "",
+                  "binary": {
+                    "left": "/CreateInstance-ms-sum",
+                    "operator": "/",
+                    "reducer": "sum",
+                    "right": "/CreateInstance-ms-count"
+                  },
+                  "mode": "binary",
+                  "reduce": {
+                    "reducer": "sum"
+                  },
+                  "replaceFields": true
+                }
+              }
+            ],
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "ms",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 12,
+              "y": 12
+            },
+            "id": 43,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_sum{path=\"/DescribeClientIP\"}",
+                "legendFormat": "{{path}}-ms-sum",
+                "range": true,
+                "refId": "A"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_count{path=\"/DescribeClientIP\"}",
+                "hide": false,
+                "legendFormat": "{{path}}-ms-count",
+                "range": true,
+                "refId": "B"
+              }
+            ],
+            "title": "/DescribeClientIP Average Duration",
+            "transformations": [
+              {
+                "id": "calculateField",
+                "options": {
+                  "alias": "",
+                  "binary": {
+                    "left": "/DescribeClientIP-ms-sum",
+                    "operator": "/",
+                    "reducer": "sum",
+                    "right": "/DescribeClientIP-ms-count"
+                  },
+                  "mode": "binary",
+                  "reduce": {
+                    "reducer": "sum"
+                  },
+                  "replaceFields": true
+                }
+              }
+            ],
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "ms",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 0,
+              "y": 20
+            },
+            "id": 44,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_sum{path=\"/DescribeDBPlatformURL\"}",
+                "legendFormat": "{{path}}-ms-sum",
+                "range": true,
+                "refId": "A"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_count{path=\"/DescribeDBPlatformURL\"}",
+                "hide": false,
+                "legendFormat": "{{path}}-ms-count",
+                "range": true,
+                "refId": "B"
+              }
+            ],
+            "title": "/DescribeDBPlatformURL Average Duration",
+            "transformations": [
+              {
+                "id": "calculateField",
+                "options": {
+                  "alias": "",
+                  "binary": {
+                    "left": "/DescribeDBPlatformURL-ms-sum",
+                    "operator": "/",
+                    "reducer": "sum",
+                    "right": "/DescribeDBPlatformURL-ms-count"
+                  },
+                  "mode": "binary",
+                  "reduce": {
+                    "reducer": "sum"
+                  },
+                  "replaceFields": true
+                }
+              }
+            ],
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "ms",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 12,
+              "y": 20
+            },
+            "id": 45,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_sum{path=\"/DescribeInstanceInfo\"}",
+                "legendFormat": "{{path}}-ms-sum",
+                "range": true,
+                "refId": "A"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_count{path=\"/DescribeInstanceInfo\"}",
+                "hide": false,
+                "legendFormat": "{{path}}-ms-count",
+                "range": true,
+                "refId": "B"
+              }
+            ],
+            "title": "/DescribeInstanceInfo Average Duration",
+            "transformations": [
+              {
+                "id": "calculateField",
+                "options": {
+                  "alias": "",
+                  "binary": {
+                    "left": "/DescribeInstanceInfo-ms-sum",
+                    "operator": "/",
+                    "reducer": "sum",
+                    "right": "/DescribeInstanceInfo-ms-count"
+                  },
+                  "mode": "binary",
+                  "reduce": {
+                    "reducer": "sum"
+                  },
+                  "replaceFields": true
+                }
+              }
+            ],
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "ms",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 0,
+              "y": 28
+            },
+            "id": 46,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_sum{path=\"/DescribeInstanceStatus\"}",
+                "legendFormat": "{{path}}-ms-sum",
+                "range": true,
+                "refId": "A"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_count{path=\"/DescribeInstanceStatus\"}",
+                "hide": false,
+                "legendFormat": "{{path}}-ms-count",
+                "range": true,
+                "refId": "B"
+              }
+            ],
+            "title": "/DescribeInstanceStatus Average Duration",
+            "transformations": [
+              {
+                "id": "calculateField",
+                "options": {
+                  "alias": "",
+                  "binary": {
+                    "left": "/DescribeInstanceStatus-ms-sum",
+                    "operator": "/",
+                    "reducer": "sum",
+                    "right": "/DescribeInstanceStatus-ms-count"
+                  },
+                  "mode": "binary",
+                  "reduce": {
+                    "reducer": "sum"
+                  },
+                  "replaceFields": true
+                }
+              }
+            ],
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "ms",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 12,
+              "y": 28
+            },
+            "id": 47,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_sum{path=\"/DescribeInstances\"}",
+                "legendFormat": "{{path}}-ms-sum",
+                "range": true,
+                "refId": "A"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_count{path=\"/DescribeInstances\"}",
+                "hide": false,
+                "legendFormat": "{{path}}-ms-count",
+                "range": true,
+                "refId": "B"
+              }
+            ],
+            "title": "/DescribeInstances Average Duration",
+            "transformations": [
+              {
+                "id": "calculateField",
+                "options": {
+                  "alias": "",
+                  "binary": {
+                    "left": "/DescribeInstances-ms-sum",
+                    "operator": "/",
+                    "reducer": "sum",
+                    "right": "/DescribeInstances-ms-count"
+                  },
+                  "mode": "binary",
+                  "reduce": {
+                    "reducer": "sum"
+                  },
+                  "replaceFields": true
+                }
+              }
+            ],
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "ms",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 0,
+              "y": 36
+            },
+            "id": 48,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_sum{path=\"/RecoverInstance\"}",
+                "legendFormat": "{{path}}-ms-sum",
+                "range": true,
+                "refId": "A"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_count{path=\"/RecoverInstance\"}",
+                "hide": false,
+                "legendFormat": "{{path}}-ms-count",
+                "range": true,
+                "refId": "B"
+              }
+            ],
+            "title": "/RecoverInstance Average Duration",
+            "transformations": [
+              {
+                "id": "calculateField",
+                "options": {
+                  "alias": "",
+                  "binary": {
+                    "left": "/RecoverInstance-ms-sum",
+                    "operator": "/",
+                    "reducer": "sum",
+                    "right": "/RecoverInstance-ms-count"
+                  },
+                  "mode": "binary",
+                  "reduce": {
+                    "reducer": "sum"
+                  },
+                  "replaceFields": true
+                }
+              }
+            ],
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "ms",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 12,
+              "y": 36
+            },
+            "id": 49,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_sum{path=\"/TerminateInstance\"}",
+                "legendFormat": "{{path}}-ms-sum",
+                "range": true,
+                "refId": "A"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_count{path=\"/TerminateInstance\"}",
+                "hide": false,
+                "legendFormat": "{{path}}-ms-count",
+                "range": true,
+                "refId": "B"
+              }
+            ],
+            "title": "/TerminateInstance Average Duration",
+            "transformations": [
+              {
+                "id": "calculateField",
+                "options": {
+                  "alias": "",
+                  "binary": {
+                    "left": "/TerminateInstance-ms-sum",
+                    "operator": "/",
+                    "reducer": "sum",
+                    "right": "/TerminateInstance-ms-count"
+                  },
+                  "mode": "binary",
+                  "reduce": {
+                    "reducer": "sum"
+                  },
+                  "replaceFields": true
+                }
+              }
+            ],
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "ms",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 0,
+              "y": 44
+            },
+            "id": 50,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_sum{path=\"/UpdateInstance\"}",
+                "legendFormat": "{{path}}-ms-sum",
+                "range": true,
+                "refId": "A"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_count{path=\"/UpdateInstance\"}",
+                "hide": false,
+                "legendFormat": "{{path}}-ms-count",
+                "range": true,
+                "refId": "B"
+              }
+            ],
+            "title": "/UpdateInstance Average Duration",
+            "transformations": [
+              {
+                "id": "calculateField",
+                "options": {
+                  "alias": "",
+                  "binary": {
+                    "left": "/UpdateInstance-ms-sum",
+                    "operator": "/",
+                    "reducer": "sum",
+                    "right": "/UpdateInstance-ms-count"
+                  },
+                  "mode": "binary",
+                  "reduce": {
+                    "reducer": "sum"
+                  },
+                  "replaceFields": true
+                }
+              }
+            ],
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "ms",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 12,
+              "y": 44
+            },
+            "id": 51,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_sum{path=\"/healthcheck\"}",
+                "legendFormat": "{{path}}-ms-sum",
+                "range": true,
+                "refId": "A"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_count{path=\"/healthcheck\"}",
+                "hide": false,
+                "legendFormat": "{{path}}-ms-count",
+                "range": true,
+                "refId": "B"
+              }
+            ],
+            "title": "/healthcheck Average Duration",
+            "transformations": [
+              {
+                "id": "calculateField",
+                "options": {
+                  "alias": "",
+                  "binary": {
+                    "left": "/healthcheck-ms-sum",
+                    "operator": "/",
+                    "reducer": "sum",
+                    "right": "/healthcheck-ms-count"
+                  },
+                  "mode": "binary",
+                  "reduce": {
+                    "reducer": "sum"
+                  },
+                  "replaceFields": true
+                }
+              }
+            ],
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "ms",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 0,
+              "y": 52
+            },
+            "id": 52,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_sum{path=\"/instance/metric/runtime\"}",
+                "legendFormat": "{{path}}-ms-sum",
+                "range": true,
+                "refId": "A"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_count{path=\"/instance/metric/runtime\"}",
+                "hide": false,
+                "legendFormat": "{{path}}-ms-count",
+                "range": true,
+                "refId": "B"
+              }
+            ],
+            "title": "/instance/metric/runtime Average Duration",
+            "transformations": [
+              {
+                "id": "calculateField",
+                "options": {
+                  "alias": "",
+                  "binary": {
+                    "left": "/instance/metric/runtime-ms-sum",
+                    "operator": "/",
+                    "reducer": "sum",
+                    "right": "/instance/metric/runtime-ms-count"
+                  },
+                  "mode": "binary",
+                  "reduce": {
+                    "reducer": "sum"
+                  },
+                  "replaceFields": true
+                }
+              }
+            ],
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "ms",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 12,
+              "y": 52
+            },
+            "id": 53,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_sum{path=\"/metrics\"}",
+                "legendFormat": "{{path}}-ms-sum",
+                "range": true,
+                "refId": "A"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_count{path=\"/metrics\"}",
+                "hide": false,
+                "legendFormat": "{{path}}-ms-count",
+                "range": true,
+                "refId": "B"
+              }
+            ],
+            "title": "/metrics  Average Duration",
+            "transformations": [
+              {
+                "id": "calculateField",
+                "options": {
+                  "alias": "",
+                  "binary": {
+                    "left": "/metrics-ms-sum",
+                    "operator": "/",
+                    "reducer": "sum",
+                    "right": "/metrics-ms-count"
+                  },
+                  "mode": "binary",
+                  "reduce": {
+                    "reducer": "sum"
+                  },
+                  "replaceFields": true
+                }
+              }
+            ],
+            "type": "timeseries"
+          }
+        ],
+        "title": "API Avg Duration",
+        "type": "row"
+      },
+      {
+        "collapsed": true,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 12
+        },
+        "id": 8,
+        "panels": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "次数",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 0,
+              "y": 13
+            },
+            "id": 12,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_bucket{path=\"/CreateInstance\"}",
+                "hide": false,
+                "legendFormat": "le-{{le}}",
+                "range": true,
+                "refId": "A"
+              }
+            ],
+            "title": "/CreateInstance Le Distribution",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "次数",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 12,
+              "y": 13
+            },
+            "id": 54,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_bucket{path=\"/DescribeClientIP\"}",
+                "hide": false,
+                "legendFormat": "le-{{le}}",
+                "range": true,
+                "refId": "A"
+              }
+            ],
+            "title": "/DescribeClientIP Le Distribution",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "次数",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 0,
+              "y": 21
+            },
+            "id": 55,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_bucket{path=\"/DescribeDBPlatformURL\"}",
+                "hide": false,
+                "legendFormat": "le-{{le}}",
+                "range": true,
+                "refId": "A"
+              }
+            ],
+            "title": "/DescribeDBPlatformURL Le Distribution",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "次数",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 12,
+              "y": 21
+            },
+            "id": 56,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_bucket{path=\"/DescribeInstanceInfo\"}",
+                "hide": false,
+                "legendFormat": "le-{{le}}",
+                "range": true,
+                "refId": "A"
+              }
+            ],
+            "title": "/DescribeInstanceInfo Le Distribution",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "次数",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 0,
+              "y": 29
+            },
+            "id": 57,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_bucket{path=\"/DescribeInstanceStatus\"}",
+                "hide": false,
+                "legendFormat": "le-{{le}}",
+                "range": true,
+                "refId": "A"
+              }
+            ],
+            "title": "/DescribeInstanceStatus Le Distribution",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "次数",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 12,
+              "y": 29
+            },
+            "id": 58,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_bucket{path=\"/DescribeInstances\"}",
+                "hide": false,
+                "legendFormat": "le-{{le}}",
+                "range": true,
+                "refId": "A"
+              }
+            ],
+            "title": "/DescribeInstances Le Distribution",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "次数",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 0,
+              "y": 37
+            },
+            "id": 59,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_bucket{path=\"/RecoverInstance\"}",
+                "hide": false,
+                "legendFormat": "le-{{le}}",
+                "range": true,
+                "refId": "A"
+              }
+            ],
+            "title": "/RecoverInstance Le Distribution",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "次数",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 12,
+              "y": 37
+            },
+            "id": 60,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_bucket{path=\"/TerminateInstance\"}",
+                "hide": false,
+                "legendFormat": "le-{{le}}",
+                "range": true,
+                "refId": "A"
+              }
+            ],
+            "title": "/TerminateInstance Le Distribution",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "次数",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 0,
+              "y": 45
+            },
+            "id": 61,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_bucket{path=\"/UpdateInstance\"}",
+                "hide": false,
+                "legendFormat": "le-{{le}}",
+                "range": true,
+                "refId": "A"
+              }
+            ],
+            "title": "/UpdateInstance Le Distribution",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "次数",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 12,
+              "y": 45
+            },
+            "id": 62,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_bucket{path=\"/healthcheck\"}",
+                "hide": false,
+                "legendFormat": "le-{{le}}",
+                "range": true,
+                "refId": "A"
+              }
+            ],
+            "title": "/healthcheck Le Distribution",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "次数",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 0,
+              "y": 53
+            },
+            "id": 63,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_bucket{path=\"/instance/metric/runtime\"}",
+                "hide": false,
+                "legendFormat": "le-{{le}}",
+                "range": true,
+                "refId": "A"
+              }
+            ],
+            "title": "/instance/metric/runtime Le Distribution",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "次数",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 12,
+              "y": 53
+            },
+            "id": 64,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+                },
+                "editorMode": "builder",
+                "expr": "cluster_service_api_durations_ms_bucket{path=\"/metrics\"}",
+                "hide": false,
+                "legendFormat": "le-{{le}}",
+                "range": true,
+                "refId": "A"
+              }
+            ],
+            "title": "/metrics Le Distribution",
+            "type": "timeseries"
+          }
+        ],
+        "title": "API Le Distribution",
+        "type": "row"
+      }
+    ],
+    "schemaVersion": 37,
+    "style": "dark",
+    "tags": [
+      "MO-Cloud"
+    ],
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "selected": false,
+            "text": "MO-OB-Control-Plane-Prometheus-DEV",
+            "value": "MO-OB-Control-Plane-Prometheus-DEV"
+          },
+          "hide": 0,
+          "includeAll": false,
+          "label": "Datasource",
+          "multi": false,
+          "name": "datasource",
+          "options": [],
+          "query": "prometheus",
+          "queryValue": "",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "type": "datasource"
+        }
+      ]
+    },
+    "time": {
+      "from": "now-30m",
+      "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "MOCloud / Cluster Service",
+    "uid": "gwcmXIL4z1123123",
+    "version": 4,
+    "weekStart": ""
+  }

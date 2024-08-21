@@ -25,7 +25,7 @@ promtail:
     logLevel: info
     logFormat: logfmt
     clients:
-      - url: http://loki-gateway/loki/api/v1/push
+      - url: http://{{ .Release.Name }}-loki-gateway/loki/api/v1/push
         batchwait: 1s
         batchsize: 1048576
     snippets:

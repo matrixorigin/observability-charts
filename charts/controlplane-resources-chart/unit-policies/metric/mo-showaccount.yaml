@@ -1,0 +1,21 @@
+labels:
+  matrixone.cloud/rule-type: metric
+  matrixone.cloud/unit-name: default
+groups:
+- name: mo.showaccount.metric.rules
+  rules:
+  - alert: ShowAccountsLong
+    expr: histogram_quantile(0.99, sum by(le, matrixone_cloud_main_cluster) (rate(mo_task_short_duration_seconds_bucket{type="show_accounts_total_duration"}[1m]))) > 30
+    for: 0m
+    labels:
+      severity: warning
+      serviceScope: mo-cluster
+      alertOwner: GouHongShen
+      alertTeam: "DN Team"
+      mainCluster: |-
+        {{ $labels.matrixone_cloud_main_cluster }}
+    annotations:
+      summary: show accounts exec too long, over 30s (more details on moc#2169)
+      description: |-
+        show accounts exec too long, over 30s, cluster {{ $labels.matrixone_cloud_main_cluster }}, cost {{ $value }} secs
+

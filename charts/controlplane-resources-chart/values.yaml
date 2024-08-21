@@ -1,0 +1,21 @@
+alerting:
+  namespace: "mo-ob"
+
+grafana:
+  namespace: "mo-ob"
+  dashboards:
+    enabled: true
+    matrixone:
+      enabled: true
+
+policies:
+  log:
+    enabled: false
+  metric:
+    enabled: false
+
+rules:
+  log:
+    enabled: false
+  metric:
+    enabled: false

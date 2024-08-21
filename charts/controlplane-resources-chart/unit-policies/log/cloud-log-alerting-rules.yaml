@@ -1,0 +1,33 @@
+labels:
+  matrixone.cloud/rule-type: log
+  matrixone.cloud/unit-name: default
+  matrixone.cloud/control-plane: "true"
+groups:
+  - name: mo_cloud_logs.rules
+    rules:
+      - alert: alert_error_logs_mocloud
+        expr: count_over_time({namespace="mo-cloud"} | json | level =~ `ERROR` [1m]) > 0
+        for: 0m
+        labels:
+          alertOwner: XiaoShuWei
+          alertTeam: "Cloud Team"
+          serviceScope: "mo-cloud"
+          alerttype: "error-log"
+          alertname: "alert_error_logs_mocloud"
+          severity: "warning"
+        annotations:
+          summary: "{{ $labels.pod }}: 错误日志告警"
+          description: "{{ $labels.pod }}: 错误日志告警: {{ $labels.msg }}"
+      - alert: alert_error_logs_local_service
+        expr: count_over_time({app="local-service"} | json | level =~ `ERROR` [1m]) > 0
+        for: 0m
+        labels:
+          alertOwner: XiaoShuWei
+          alertTeam: "Cloud Team"
+          serviceScope: "mo-cloud"
+          alerttype: "error-log"
+          alertname: "alert_error_logs_local_service"
+          severity: "warning"
+        annotations:
+          summary: "{{ $labels.pod }}: 错误日志告警"
+          description: "{{ $labels.pod }}: 错误日志告警: {{ $labels.msg }}"

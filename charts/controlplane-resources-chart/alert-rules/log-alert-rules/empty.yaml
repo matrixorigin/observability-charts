@@ -1,0 +1,18 @@
+groups:
+  - name: empty.rules
+    rules: []
+#  - name: alertmanager.rules
+#    rules:
+#    - alert: alert_notify_failed
+#      # 发送告警失败时会不断重试，直到超时，并输出 notify retry canceled after x attempts 
+#      expr: count_over_time({app="alertmanager"} |= `notify retry canceled` [1m]) > 0
+#      for: 1m
+#      labels:
+#        alertname: AlertNotifyFailed
+#        severity: "critical"
+#        serviceScope: "mo-ob"
+#        alertOwner: bruce
+#        alertTeam: "Orch Team"
+#      annotations:
+#        summary: "alertmanager: Notify for alerts failed on {{ $labels.pod }}"
+#        description: "alertmanager: Notify for alerts failed on {{ $labels.pod }}"

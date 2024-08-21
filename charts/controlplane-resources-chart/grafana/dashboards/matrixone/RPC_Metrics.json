@@ -1,0 +1,1575 @@
+{
+  "annotations": {
+    "list": null
+  },
+  "editable": true,
+  "hideControls": false,
+  "id": 6,
+  "links": null,
+  "originalTitle": "",
+  "panels": null,
+  "refresh": "30s",
+  "rows": [
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 124,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(irate(mo_rpc_network_bytes_total{type=\"input\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "RPC Network Input",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "bytes",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 125,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(irate(mo_rpc_network_bytes_total{type=\"output\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (pod)",
+              "format": "time_series",
+              "legendFormat": "{{ pod }}",
+              "refId": ""
+            }
+          ],
+          "title": "RPC Network Output",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "bytes",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 126,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(mo_rpc_client_create_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (name)",
+              "format": "time_series",
+              "legendFormat": "{{ name }}",
+              "refId": ""
+            }
+          ],
+          "title": "RPC Client Create",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 127,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(mo_rpc_backend_pool_size{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (name)",
+              "format": "time_series",
+              "legendFormat": "{{ name }}",
+              "refId": ""
+            }
+          ],
+          "title": "Connection pool",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 128,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(mo_rpc_sending_queue_size{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (name, side)",
+              "format": "time_series",
+              "legendFormat": "{{ name }}({{ side }})",
+              "refId": ""
+            }
+          ],
+          "title": "Sending queue",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 129,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(mo_rpc_sending_batch_size{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (name)",
+              "format": "time_series",
+              "legendFormat": "{{ name }}",
+              "refId": ""
+            }
+          ],
+          "title": "Write Batch Size",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 130,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(mo_rpc_server_session_size{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}) by (name)",
+              "format": "time_series",
+              "legendFormat": "{{ name }}",
+              "refId": ""
+            }
+          ],
+          "title": "Server sessions",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "RPC overview"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 131,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(mo_rpc_backend_create_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (name)",
+              "format": "time_series",
+              "legendFormat": "{{ name }}",
+              "refId": ""
+            }
+          ],
+          "title": "Create",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 132,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(mo_rpc_backend_close_total{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (name)",
+              "format": "time_series",
+              "legendFormat": "{{ name }}",
+              "refId": ""
+            }
+          ],
+          "title": "Close",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 133,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(mo_rpc_backend_connect_total{type=\"total\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (name)",
+              "format": "time_series",
+              "legendFormat": "{{ name }}",
+              "refId": ""
+            }
+          ],
+          "title": "Reconnect Total",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 134,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(mo_rpc_backend_connect_total{type=\"failed\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (name)",
+              "format": "time_series",
+              "legendFormat": "{{ name }}",
+              "refId": ""
+            }
+          ],
+          "title": "Reconnect Failed",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "Connection Status"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 135,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 12,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_rpc_backend_connect_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P50.00%)",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_rpc_backend_connect_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P80.00%)",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_rpc_backend_connect_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P90.00%)",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_rpc_backend_connect_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P99.00%)",
+              "refId": ""
+            }
+          ],
+          "title": "Connect duration",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "s",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "RPC connection duration"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 136,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_rpc_write_duration_seconds_bucket{side=\"client\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P50.00%)",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_rpc_write_duration_seconds_bucket{side=\"client\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P80.00%)",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_rpc_write_duration_seconds_bucket{side=\"client\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P90.00%)",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_rpc_write_duration_seconds_bucket{side=\"client\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P99.00%)",
+              "refId": ""
+            }
+          ],
+          "title": "Client-side Write To Network Duration",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "s",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 137,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_rpc_write_latency_duration_seconds_bucket{side=\"client\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P50.00%)",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_rpc_write_latency_duration_seconds_bucket{side=\"client\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P80.00%)",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_rpc_write_latency_duration_seconds_bucket{side=\"client\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P90.00%)",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_rpc_write_latency_duration_seconds_bucket{side=\"client\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P99.00%)",
+              "refId": ""
+            }
+          ],
+          "title": "Client-side Write Latency Duration",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "s",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 138,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_rpc_write_duration_seconds_bucket{side=\"server\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P50.00%)",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_rpc_write_duration_seconds_bucket{side=\"server\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P80.00%)",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_rpc_write_duration_seconds_bucket{side=\"server\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P90.00%)",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_rpc_write_duration_seconds_bucket{side=\"server\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P99.00%)",
+              "refId": ""
+            }
+          ],
+          "title": "Server-side Write To Network Duration",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "s",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 139,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_rpc_write_latency_duration_seconds_bucket{side=\"server\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P50.00%)",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_rpc_write_latency_duration_seconds_bucket{side=\"server\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P80.00%)",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_rpc_write_latency_duration_seconds_bucket{side=\"server\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P90.00%)",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_rpc_write_latency_duration_seconds_bucket{side=\"server\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P99.00%)",
+              "refId": ""
+            }
+          ],
+          "title": "Server-side Write Latency Duration",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "s",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "RPC write duration"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 140,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 12,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_rpc_backend_done_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P50.00%)",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_rpc_backend_done_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P80.00%)",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_rpc_backend_done_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P90.00%)",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_rpc_backend_done_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le, name))",
+              "format": "time_series",
+              "legendFormat": "{{ name }}(P99.00%)",
+              "refId": ""
+            }
+          ],
+          "title": "Request done Duration",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "s",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "Request done Duration"
+    }
+  ],
+  "schemaVersion": 0,
+  "sharedCrosshair": true,
+  "slug": "",
+  "style": "dark",
+  "tags": ["MatrixOne", "MO"],
+  "templating": {
+    "list": [
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": [
+            "1m"
+          ],
+          "value": "1m"
+        },
+        "datasource": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": "interval",
+        "multi": false,
+        "multiFormat": "",
+        "name": "interval",
+        "options": [
+          {
+            "selected": false,
+            "text": "1m",
+            "value": "1m"
+          },
+          {
+            "selected": false,
+            "text": "5m",
+            "value": "5m"
+          },
+          {
+            "selected": false,
+            "text": "10m",
+            "value": "10m"
+          },
+          {
+            "selected": false,
+            "text": "30m",
+            "value": "30m"
+          },
+          {
+            "selected": false,
+            "text": "1h",
+            "value": "1h"
+          },
+          {
+            "selected": false,
+            "text": "6h",
+            "value": "6h"
+          },
+          {
+            "selected": false,
+            "text": "12h",
+            "value": "12h"
+          }
+        ],
+        "query": "1m,5m,10m,30m,1h,6h,12h",
+        "refresh": false,
+        "regex": "",
+        "sort": 0,
+        "type": "interval"
+      },
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": null,
+          "value": null
+        },
+        "datasource": "Prometheus",
+        "hide": 0,
+        "includeAll": false,
+        "label": "unit",
+        "multi": false,
+        "multiFormat": "",
+        "name": "unit",
+        "options": [],
+        "query": "label_values(mo_cluster_info, unit)",
+        "refresh": 1,
+        "regex": "",
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": null,
+          "value": null
+        },
+        "datasource": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": "ds_prom",
+        "multi": false,
+        "multiFormat": "",
+        "name": "ds_prom",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "/$unit-prometheus/",
+        "sort": 0,
+        "type": "datasource"
+      },
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": null,
+          "value": null
+        },
+        "datasource": "${ds_prom}",
+        "hide": 0,
+        "includeAll": false,
+        "label": "main_cluster",
+        "multi": false,
+        "multiFormat": "",
+        "name": "physicalCluster",
+        "options": [],
+        "query": "label_values(up, matrixone_cloud_main_cluster)",
+        "refresh": 1,
+        "regex": "",
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allFormat": "",
+        "allValue": ".*",
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": "$__all"
+        },
+        "datasource": "${ds_prom}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "owner",
+        "multi": true,
+        "multiFormat": "",
+        "name": "owner",
+        "options": [
+          {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          }
+        ],
+        "query": "label_values(up{matrixone_cloud_main_cluster=~\"$physicalCluster\"}, matrixorigin_io_owner)",
+        "refresh": 2,
+        "regex": "",
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": "$__all"
+        },
+        "datasource": "${ds_prom}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "pod",
+        "multi": true,
+        "multiFormat": "",
+        "name": "pod",
+        "options": [
+          {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          }
+        ],
+        "query": "label_values(up{matrixone_cloud_main_cluster=\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\"},pod)",
+        "refresh": 2,
+        "regex": "",
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
+  },
+  "timezone": "",
+  "title": "RPC Metrics",
+  "uid": "matrixone_RPC_Metrics",
+  "version": 1
+}

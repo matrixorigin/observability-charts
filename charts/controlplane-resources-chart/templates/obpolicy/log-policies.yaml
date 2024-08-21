@@ -1,0 +1,27 @@
+## cooperate with {folder_to_char}/unit-policies/log/*.yaml
+{{- if .Values.policies.log.enabled }}
+{{- $files := .Files.Glob "unit-policies/log/*.yaml" }}
+{{- if $files }}
+apiVersion: v1
+kind: List
+metadata:
+  name: mo-ob-log-policies
+  namespace: "{{ $.Values.alerting.namespace }}"
+items:
+{{- range $path, $fileContents := $files }}
+{{- $alertgroupName := regexReplaceAll "(^.*/)(.*/)(.*)\\.yaml$" $path "${3}" }}
+  - apiVersion: ob.matrixone-cloud/v1alpha1
+    kind: OBPolicy
+    metadata:
+      namespace: {{ $.Values.alerting.namespace }}
+      name: {{ printf "%s-%s" "unit" $alertgroupName | trunc 63 | trimSuffix "-" }}
+      labels:
+        app: "controlplane-resources"
+        loki_rule: "true"
+      annotations:
+        checksum/config: {{ ($.Files.Get $path) | sha256sum | trunc 8 }}
+    spec:
+{{ ($.Files.Get $path) | indent 6}}
+{{- end }}
+{{- end }}
+{{- end }}

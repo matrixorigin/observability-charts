@@ -1,0 +1,18 @@
+labels:
+  matrixone.cloud/rule-type: metric
+  matrixone.cloud/unit-name: qa-unit-cn-hangzhou
+groups:
+  - name: ob.infra.metric.rules
+    rules:
+    - alert: PrometheusMemoryUsageHigh
+      expr: sum by(pod) (container_memory_working_set_bytes{pod=~".*prometheus.*", container="prometheus", image!=""}) / sum by(pod) (kube_pod_container_resource_limits{pod=~".*prometheus.*", container="prometheus", resource="memory"}) * 100.0 > 76.6
+      for: 5m
+      labels:
+        severity: "warning"
+        serviceScope: mo-cluster
+        alertOwner: jacksonxie
+        alertTeam: "Orch Team"
+        pod: "{{ $labels.pod }}"
+      annotations:
+        summary: "Prometheus pod {{ $labels.pod }} memory usage over 76.6%"
+        description: "Prometheus pod {{ $labels.pod }} memory usage over 76.6%: {{ $value }}"

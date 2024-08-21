@@ -1,0 +1,2 @@
+app.kubernetes.io/managed-by: cos
+app.kubernetes.io/owner: cos

@@ -1,0 +1,54 @@
+labels:
+  matrixone.cloud/rule-type: log
+  matrixone.cloud/unit-name: default
+groups:
+  - name: mo.rules
+    rules:
+    - alert: mo_report_fatal
+      expr: count_over_time({matrixorigin_io_component=~".+"} |= `"level":"FATAL"` [1m]) > 0
+      for: 0m
+      labels:
+        alertname: MOReportFatal
+        severity: "critical"
+        serviceScope: "mo-cluster"
+        alertOwner: "shuqi.qin"
+        alertTeam: "Orch Team"
+      annotations:
+        summary: "{{$labels.matrixone_cloud_main_cluster}}: {{$labels.namespace}}.{{$labels.pod}} mo report fatal"
+        description: "{{$labels.matrixone_cloud_main_cluster}}: {{$labels.namespace}}.{{$labels.pod}} mo report fatal"
+    - alert: mo_panic
+      expr: sum(count_over_time({matrixorigin_io_component=~".+"} |~ `panic:` [1m])) by (matrixone_cloud_main_cluster, namespace, pod) > 0
+      for: 0m
+      labels:
+        alertname: MOPanic
+        severity: "critical"
+        serviceScope: "mo-cluster"
+        alertOwner: "aylei"
+        alertTeam: "Orch Team"
+      annotations:
+        summary: "{{$labels.matrixone_cloud_main_cluster}}: {{$labels.namespace}}.{{$labels.pod}} mo panic"
+        description: "{{$labels.matrixone_cloud_main_cluster}}: {{$labels.namespace}}.{{$labels.pod}} mo panic"
+    - alert: mo_lock_table_bind_changed
+      expr: sum by(matrixone_cloud_main_cluster, pod, matrixorigin_io_owner) (rate({matrixone_cloud_main_cluster=~".+", matrixone_cloud_component="cn"} |= `lock table bind changed` [5s] offset 1m)) > 0
+      for: 1m
+      labels:
+        alertname: MOLockTableBindChanged
+        severity: "critical"
+        serviceScope: "mo-cluster"
+        alertOwner: "LinJunHong"
+        alertTeam: "CN2 Team"
+      annotations:
+        summary: "{{$labels.matrixone_cloud_main_cluster}}: error 'lock table bind changed' lasts 1 min"
+        description: "{{$labels.matrixone_cloud_main_cluster}}.{{$labels.pod}} owner {{$labels.matrixorigin_io_owner}}, error 'lock table bind changed' lasts 1 min"
+    - alert: mo_cn_protocol_closed
+      expr: sum by(matrixone_cloud_main_cluster, pod, matrixorigin_io_owner) (rate({matrixone_cloud_main_cluster=~".+", matrixone_cloud_component="cn"} |= `unexpected protocol closed` [5s] offset 1m)) > 0
+      for: 0m
+      labels:
+        alertname: MOCnProtocolClosed
+        severity: "warning"
+        serviceScope: "mo-cluster"
+        alertOwner: "jacksonxie"
+        alertTeam: "Orch Team"
+      annotations:
+        summary: "{{$labels.matrixone_cloud_main_cluster}}: unexpected protocol closed, from #16844"
+        description: "{{$labels.matrixone_cloud_main_cluster}}.{{$labels.pod}} owner {{$labels.matrixorigin_io_owner}}, unexpected protocol closed (1min ago)"

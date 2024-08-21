@@ -16,7 +16,7 @@ data:
       type: loki
       # default loki datasource
       uid: loki
-      url: http://loki-gateway
+      url: http://{{ .Release.Name }}-loki-gateway
       access: proxy
       jsonData:
         maxLines: 1000

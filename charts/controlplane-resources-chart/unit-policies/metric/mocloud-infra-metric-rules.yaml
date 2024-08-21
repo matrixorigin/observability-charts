@@ -1,0 +1,30 @@
+labels:
+  matrixone.cloud/rule-type: metric
+  matrixone.cloud/unit-name: default
+groups:
+  - name: mocloud.infra.metric.rules
+    rules:
+      - alert: OrchKubernetesNodeNotReady
+        expr: kube_node_status_condition{condition="NotReady"} > 0
+        for: 5m
+        labels:
+          severity: "critical"
+          serviceScope: mo-cloud
+          alertOwner: qiuweimin
+          alertTeam: "Orch Team"
+        annotations:
+          summary: Kubernetes Node not ready (instance {{ $labels.instance }})
+          description: "Node {{ $labels.node }} has been not ready for a 5min"
+      - alert: OrchTargetDown
+        # exclude unit-agent in favor of https://github.com/matrixorigin/MO-Cloud/issues/2002
+        # exclude node-related metrics in favor of https://github.com/matrixorigin/MO-Cloud/issues/2008
+        expr: up{service!~"(unit-agent|mo-ob-opensource-kube-prom-kubelet|mo-ob-opensource-promtail-metrics|prometheus-node-exporter|mo-ob-opensource-prometheus-node-exporter|mo-ob-opensource-loki-gateway)"} < 1
+        for: 5m
+        labels:
+          severity: "critical"
+          serviceScope: mo-cloud
+          alertOwner: aylei
+          alertTeam: "Orch Team"
+        annotations:
+          summary: Scrape target down
+          description: "Scrape target {{ $labels.service }}/{{ $labels.pod }} has been down for 5 minutes"

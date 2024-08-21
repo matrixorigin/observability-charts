@@ -1,0 +1,971 @@
+{
+  "annotations": {
+    "list": null
+  },
+  "editable": true,
+  "hideControls": false,
+  "id": 10,
+  "links": null,
+  "originalTitle": "",
+  "panels": null,
+  "refresh": "30s",
+  "rows": [
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 234,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(mo_proxy_connect_counter{type=\"accepted\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "legendFormat": "accepted",
+              "refId": ""
+            },
+            {
+              "expr": "sum(rate(mo_proxy_connect_counter{type=\"current\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "legendFormat": "current",
+              "refId": ""
+            },
+            {
+              "expr": "sum(rate(mo_proxy_connect_counter{type=\"success\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "legendFormat": "success",
+              "refId": ""
+            },
+            {
+              "expr": "sum(rate(mo_proxy_connect_counter{type=\"route-fail\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "legendFormat": "route-fail",
+              "refId": ""
+            },
+            {
+              "expr": "sum(rate(mo_proxy_connect_counter{type=\"common-fail\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "legendFormat": "common-fail",
+              "refId": ""
+            },
+            {
+              "expr": "sum(rate(mo_proxy_connect_counter{type=\"retry\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "legendFormat": "retry",
+              "refId": ""
+            },
+            {
+              "expr": "sum(rate(mo_proxy_connect_counter{type=\"select\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "legendFormat": "select",
+              "refId": ""
+            },
+            {
+              "expr": "sum(rate(mo_proxy_connect_counter{type=\"reject\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "legendFormat": "reject",
+              "refId": ""
+            }
+          ],
+          "title": "Connect Counter",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 235,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(mo_proxy_disconnect_counter{type=\"server\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "legendFormat": "server",
+              "refId": ""
+            },
+            {
+              "expr": "sum(rate(mo_proxy_disconnect_counter{type=\"client\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "legendFormat": "client",
+              "refId": ""
+            }
+          ],
+          "title": "Disconnect Counter",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "Proxy Connection"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 236,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 12,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_proxy_connection_transfer_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P50.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_proxy_connection_transfer_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P80.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_proxy_connection_transfer_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P90.00%",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_proxy_connection_transfer_duration_seconds_bucket{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval])) by (le))",
+              "format": "time_series",
+              "legendFormat": "P99.00%",
+              "refId": ""
+            }
+          ],
+          "title": "connection transfer duration",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "s",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "Connection transfer duration"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 237,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(mo_proxy_connection_transfer_counter{type=\"success\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "legendFormat": "success",
+              "refId": ""
+            },
+            {
+              "expr": "sum(rate(mo_proxy_connection_transfer_counter{type=\"fail\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "legendFormat": "fail",
+              "refId": ""
+            },
+            {
+              "expr": "sum(rate(mo_proxy_connection_transfer_counter{type=\"abort\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "legendFormat": "abort",
+              "refId": ""
+            }
+          ],
+          "title": "Connection Transfer Counter",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 238,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(mo_proxy_drain_counter{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "refId": ""
+            }
+          ],
+          "title": "Backend Server Drain Counter",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "Proxy Transfer"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 239,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(mo_proxy_available_backend_server_num{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "refId": ""
+            }
+          ],
+          "title": "Available Backend Server Num",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 240,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(mo_proxy_transfer_queue_size{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "refId": ""
+            }
+          ],
+          "title": "Transfer Queue Size",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 241,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(mo_proxy_connections_need_to_transfer{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "refId": ""
+            }
+          ],
+          "title": "Connections Need To Transfer",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 242,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(mo_proxy_connections_transfer_intent{matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "refId": ""
+            }
+          ],
+          "title": "Connections In Transfer Intent State",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "Proxy Others State"
+    }
+  ],
+  "schemaVersion": 0,
+  "sharedCrosshair": true,
+  "slug": "",
+  "style": "dark",
+  "tags": ["MatrixOne", "MO"],
+  "templating": {
+    "list": [
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": [
+            "1m"
+          ],
+          "value": "1m"
+        },
+        "datasource": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": "interval",
+        "multi": false,
+        "multiFormat": "",
+        "name": "interval",
+        "options": [
+          {
+            "selected": false,
+            "text": "1m",
+            "value": "1m"
+          },
+          {
+            "selected": false,
+            "text": "5m",
+            "value": "5m"
+          },
+          {
+            "selected": false,
+            "text": "10m",
+            "value": "10m"
+          },
+          {
+            "selected": false,
+            "text": "30m",
+            "value": "30m"
+          },
+          {
+            "selected": false,
+            "text": "1h",
+            "value": "1h"
+          },
+          {
+            "selected": false,
+            "text": "6h",
+            "value": "6h"
+          },
+          {
+            "selected": false,
+            "text": "12h",
+            "value": "12h"
+          }
+        ],
+        "query": "1m,5m,10m,30m,1h,6h,12h",
+        "refresh": false,
+        "regex": "",
+        "sort": 0,
+        "type": "interval"
+      },
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": null,
+          "value": null
+        },
+        "datasource": "Prometheus",
+        "hide": 0,
+        "includeAll": false,
+        "label": "unit",
+        "multi": false,
+        "multiFormat": "",
+        "name": "unit",
+        "options": [],
+        "query": "label_values(mo_cluster_info, unit)",
+        "refresh": 1,
+        "regex": "",
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": null,
+          "value": null
+        },
+        "datasource": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": "ds_prom",
+        "multi": false,
+        "multiFormat": "",
+        "name": "ds_prom",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "/$unit-prometheus/",
+        "sort": 0,
+        "type": "datasource"
+      },
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": null,
+          "value": null
+        },
+        "datasource": "${ds_prom}",
+        "hide": 0,
+        "includeAll": false,
+        "label": "main_cluster",
+        "multi": false,
+        "multiFormat": "",
+        "name": "physicalCluster",
+        "options": [],
+        "query": "label_values(up, matrixone_cloud_main_cluster)",
+        "refresh": 1,
+        "regex": "",
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allFormat": "",
+        "allValue": ".*",
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": "$__all"
+        },
+        "datasource": "${ds_prom}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "owner",
+        "multi": true,
+        "multiFormat": "",
+        "name": "owner",
+        "options": [
+          {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          }
+        ],
+        "query": "label_values(up{matrixone_cloud_main_cluster=~\"$physicalCluster\"}, matrixorigin_io_owner)",
+        "refresh": 2,
+        "regex": "",
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": "$__all"
+        },
+        "datasource": "${ds_prom}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "pod",
+        "multi": true,
+        "multiFormat": "",
+        "name": "pod",
+        "options": [
+          {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          }
+        ],
+        "query": "label_values(up{matrixone_cloud_main_cluster=\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\"},pod)",
+        "refresh": 2,
+        "regex": "",
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
+  },
+  "timezone": "",
+  "title": "Proxy Metrics",
+  "uid": "matrixone_Proxy_Metrics",
+  "version": 1
+}

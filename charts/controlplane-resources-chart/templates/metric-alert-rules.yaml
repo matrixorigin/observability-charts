@@ -1,0 +1,24 @@
+## cooperate with {folder_to_char}/alert-rules/metric-alert-rules/*.yaml
+{{- if .Values.rules.metric.enabled }}
+{{- $files := .Files.Glob "alert-rules/metric-alert-rules/*.yaml" }}
+{{- if $files }}
+apiVersion: v1
+kind: List
+metadata:
+  name: mo-ob-metric-alerting-rules
+  namespace: "{{ $.Values.alerting.namespace }}"
+items:
+{{- range $path, $fileContents := $files }}
+{{- $alertgroupName := regexReplaceAll "(^.*/)(.*/)(.*)\\.yaml$" $path "${3}" }}
+  - apiVersion: monitoring.coreos.com/v1
+    kind: PrometheusRule
+    metadata:
+      name: {{ printf "%s-%s" "controlplane" $alertgroupName | trunc 63 | trimSuffix "-" }}
+      namespace: "{{ $.Values.alerting.namespace }}"
+      labels:
+        app: "controlplane-resources"
+    spec: 
+{{ ($.Files.Get $path) | indent 6}}
+{{- end }}
+{{- end }}
+{{- end }}

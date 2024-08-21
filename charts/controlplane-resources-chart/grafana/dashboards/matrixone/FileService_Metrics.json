@@ -1,0 +1,2115 @@
+{
+  "annotations": {
+    "list": null
+  },
+  "editable": true,
+  "hideControls": false,
+  "id": 5,
+  "links": null,
+  "originalTitle": "",
+  "panels": null,
+  "refresh": "30s",
+  "rows": [
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 105,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(mo_fs_read_total{type=\"s3\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "legendFormat": "s3",
+              "refId": ""
+            },
+            {
+              "expr": "sum(rate(mo_fs_read_total{type=\"hit-mem\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "legendFormat": "hit-mem",
+              "refId": ""
+            },
+            {
+              "expr": "sum(rate(mo_fs_read_total{type=\"hit-disk\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "legendFormat": "hit-disk",
+              "refId": ""
+            },
+            {
+              "expr": "sum(rate(mo_fs_read_total{type=\"hit-remote\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "legendFormat": "hit-remote",
+              "refId": ""
+            }
+          ],
+          "title": "S3 Read requests",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 106,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(mo_fs_write_total{type=\"s3\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "legendFormat": "s3",
+              "refId": ""
+            },
+            {
+              "expr": "sum(rate(mo_fs_write_total{type=\"local\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "legendFormat": "local",
+              "refId": ""
+            }
+          ],
+          "title": "S3 Write requests",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "FileService Overview"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 107,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_io_merger_duration_seconds_bucket{type=\"wait\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "wait",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_io_merger_duration_seconds_bucket{type=\"initiate\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "initiate",
+              "refId": ""
+            }
+          ],
+          "title": "P90.000000 time",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 108,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_io_merger_duration_seconds_bucket{type=\"wait\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "wait",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_io_merger_duration_seconds_bucket{type=\"initiate\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "initiate",
+              "refId": ""
+            }
+          ],
+          "title": "P99.000000 time",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 109,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(1.000000, sum(rate(mo_fs_io_merger_duration_seconds_bucket{type=\"wait\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "wait",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(1.000000, sum(rate(mo_fs_io_merger_duration_seconds_bucket{type=\"initiate\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "initiate",
+              "refId": ""
+            }
+          ],
+          "title": "P100.000000 time",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "FileService io merger duration"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 110,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_read_write_duration_bucket{type=\"read-vector-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "read-vector-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_read_write_duration_bucket{type=\"update-vector-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "update-vector-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_read_write_duration_bucket{type=\"read-memory-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "read-memory-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_read_write_duration_bucket{type=\"update-memory-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "update-memory-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_read_write_duration_bucket{type=\"read-disk-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "read-disk-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_read_write_duration_bucket{type=\"update-disk-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "update-disk-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_read_write_duration_bucket{type=\"read-remote-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "read-remote-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_read_write_duration_bucket{type=\"get-reader\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-reader",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_read_write_duration_bucket{type=\"get-content\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-content",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_read_write_duration_bucket{type=\"get-entry-data \",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-entry-data ",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_read_write_duration_bucket{type=\"write-to-writer\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "write-to-writer",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_read_write_duration_bucket{type=\"set-cached-data\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "set-cached-data",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_read_write_duration_bucket{type=\"disk-cache-set-file\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "disk-cache-set-file",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_read_write_duration_bucket{type=\"list\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "list",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_read_write_duration_bucket{type=\"stat\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "stat",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_read_write_duration_bucket{type=\"write\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "write",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_read_write_duration_bucket{type=\"io-read-all\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "io-read-all",
+              "refId": ""
+            }
+          ],
+          "title": "P90.000000 time",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 111,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_read_write_duration_bucket{type=\"read-vector-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "read-vector-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_read_write_duration_bucket{type=\"update-vector-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "update-vector-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_read_write_duration_bucket{type=\"read-memory-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "read-memory-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_read_write_duration_bucket{type=\"update-memory-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "update-memory-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_read_write_duration_bucket{type=\"read-disk-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "read-disk-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_read_write_duration_bucket{type=\"update-disk-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "update-disk-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_read_write_duration_bucket{type=\"read-remote-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "read-remote-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_read_write_duration_bucket{type=\"get-reader\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-reader",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_read_write_duration_bucket{type=\"get-content\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-content",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_read_write_duration_bucket{type=\"get-entry-data \",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-entry-data ",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_read_write_duration_bucket{type=\"write-to-writer\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "write-to-writer",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_read_write_duration_bucket{type=\"set-cached-data\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "set-cached-data",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_read_write_duration_bucket{type=\"disk-cache-set-file\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "disk-cache-set-file",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_read_write_duration_bucket{type=\"list\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "list",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_read_write_duration_bucket{type=\"stat\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "stat",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_read_write_duration_bucket{type=\"write\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "write",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_read_write_duration_bucket{type=\"io-read-all\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "io-read-all",
+              "refId": ""
+            }
+          ],
+          "title": "P99.000000 time",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 112,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(1.000000, sum(rate(mo_fs_read_write_duration_bucket{type=\"read-vector-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "read-vector-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(1.000000, sum(rate(mo_fs_read_write_duration_bucket{type=\"update-vector-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "update-vector-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(1.000000, sum(rate(mo_fs_read_write_duration_bucket{type=\"read-memory-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "read-memory-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(1.000000, sum(rate(mo_fs_read_write_duration_bucket{type=\"update-memory-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "update-memory-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(1.000000, sum(rate(mo_fs_read_write_duration_bucket{type=\"read-disk-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "read-disk-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(1.000000, sum(rate(mo_fs_read_write_duration_bucket{type=\"update-disk-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "update-disk-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(1.000000, sum(rate(mo_fs_read_write_duration_bucket{type=\"read-remote-cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "read-remote-cache",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(1.000000, sum(rate(mo_fs_read_write_duration_bucket{type=\"get-reader\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-reader",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(1.000000, sum(rate(mo_fs_read_write_duration_bucket{type=\"get-content\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-content",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(1.000000, sum(rate(mo_fs_read_write_duration_bucket{type=\"get-entry-data \",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-entry-data ",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(1.000000, sum(rate(mo_fs_read_write_duration_bucket{type=\"write-to-writer\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "write-to-writer",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(1.000000, sum(rate(mo_fs_read_write_duration_bucket{type=\"set-cached-data\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "set-cached-data",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(1.000000, sum(rate(mo_fs_read_write_duration_bucket{type=\"disk-cache-set-file\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "disk-cache-set-file",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(1.000000, sum(rate(mo_fs_read_write_duration_bucket{type=\"list\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "list",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(1.000000, sum(rate(mo_fs_read_write_duration_bucket{type=\"stat\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "stat",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(1.000000, sum(rate(mo_fs_read_write_duration_bucket{type=\"write\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "write",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(1.000000, sum(rate(mo_fs_read_write_duration_bucket{type=\"io-read-all\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "io-read-all",
+              "refId": ""
+            }
+          ],
+          "title": "P100.000000 time",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "seconds",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "FileService read write duration"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 113,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(mo_fs_malloc_live_objects{type=\"io_entry_data\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"})",
+              "format": "time_series",
+              "legendFormat": "io_entry_data",
+              "refId": ""
+            },
+            {
+              "expr": "sum(mo_fs_malloc_live_objects{type=\"bytes\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"})",
+              "format": "time_series",
+              "legendFormat": "bytes",
+              "refId": ""
+            },
+            {
+              "expr": "sum(mo_fs_malloc_live_objects{type=\"memory_cache\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"})",
+              "format": "time_series",
+              "legendFormat": "memory_cache",
+              "refId": ""
+            }
+          ],
+          "title": "active objects",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "malloc stats"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 114,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_fs_s3_io_bytes_bucket{type=\"read\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "s3-read",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_fs_s3_io_bytes_bucket{type=\"write\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "s3-write",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_fs_local_io_bytes_bucket{type=\"read\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "local-read",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_fs_local_io_bytes_bucket{type=\"write\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "local-write",
+              "refId": ""
+            }
+          ],
+          "title": "P50.000000 time",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "bytes",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 115,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_fs_s3_io_bytes_bucket{type=\"read\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "s3-read",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_fs_s3_io_bytes_bucket{type=\"write\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "s3-write",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_fs_local_io_bytes_bucket{type=\"read\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "local-read",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_fs_local_io_bytes_bucket{type=\"write\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "local-write",
+              "refId": ""
+            }
+          ],
+          "title": "P80.000000 time",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "bytes",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 116,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_s3_io_bytes_bucket{type=\"read\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "s3-read",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_s3_io_bytes_bucket{type=\"write\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "s3-write",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_local_io_bytes_bucket{type=\"read\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "local-read",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_local_io_bytes_bucket{type=\"write\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "local-write",
+              "refId": ""
+            }
+          ],
+          "title": "P90.000000 time",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "bytes",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 117,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_s3_io_bytes_bucket{type=\"read\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "s3-read",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_s3_io_bytes_bucket{type=\"write\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "s3-write",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_local_io_bytes_bucket{type=\"read\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "local-read",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_local_io_bytes_bucket{type=\"write\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "local-write",
+              "refId": ""
+            }
+          ],
+          "title": "P99.000000 time",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "bytes",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "FileService read write bytes"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 118,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(mo_fs_s3_conn_duration_seconds_count{type=\"connect\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "refId": ""
+            }
+          ],
+          "title": "Connect",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 119,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(mo_fs_s3_conn_duration_seconds_count{type=\"dns-resolve\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))",
+              "format": "time_series",
+              "refId": ""
+            }
+          ],
+          "title": "DNS Resolve",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "FileService S3 connection overview"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 120,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_fs_s3_conn_duration_seconds_bucket{type=\"connect\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "connect",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_fs_s3_conn_duration_seconds_bucket{type=\"get-conn\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-conn",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_fs_s3_conn_duration_seconds_bucket{type=\"dns-resolve\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "dns-resolve",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.500000, sum(rate(mo_fs_s3_conn_duration_seconds_bucket{type=\"tls-handshake\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "tls-handshake",
+              "refId": ""
+            }
+          ],
+          "title": "P50.000000 time",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "s",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 121,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_fs_s3_conn_duration_seconds_bucket{type=\"connect\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "connect",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_fs_s3_conn_duration_seconds_bucket{type=\"get-conn\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-conn",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_fs_s3_conn_duration_seconds_bucket{type=\"dns-resolve\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "dns-resolve",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.800000, sum(rate(mo_fs_s3_conn_duration_seconds_bucket{type=\"tls-handshake\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "tls-handshake",
+              "refId": ""
+            }
+          ],
+          "title": "P80.000000 time",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "s",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 122,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_s3_conn_duration_seconds_bucket{type=\"connect\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "connect",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_s3_conn_duration_seconds_bucket{type=\"get-conn\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-conn",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_s3_conn_duration_seconds_bucket{type=\"dns-resolve\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "dns-resolve",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.900000, sum(rate(mo_fs_s3_conn_duration_seconds_bucket{type=\"tls-handshake\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "tls-handshake",
+              "refId": ""
+            }
+          ],
+          "title": "P90.000000 time",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "s",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "${ds_prom}",
+          "editable": false,
+          "error": false,
+          "fill": 1,
+          "gridPos": {},
+          "id": 123,
+          "isNew": false,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_s3_conn_duration_seconds_bucket{type=\"connect\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "connect",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_s3_conn_duration_seconds_bucket{type=\"get-conn\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "get-conn",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_s3_conn_duration_seconds_bucket{type=\"dns-resolve\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "dns-resolve",
+              "refId": ""
+            },
+            {
+              "expr": "histogram_quantile(0.990000, sum(rate(mo_fs_s3_conn_duration_seconds_bucket{type=\"tls-handshake\",matrixone_cloud_main_cluster=~\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\", pod=~\"$pod\"}[$interval]))  by (le))",
+              "format": "time_series",
+              "legendFormat": "tls-handshake",
+              "refId": ""
+            }
+          ],
+          "title": "P99.000000 time",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": ""
+          },
+          "transparent": false,
+          "type": "graph",
+          "x-axis": true,
+          "xaxis": {
+            "format": "time",
+            "logBase": 1,
+            "show": true
+          },
+          "y-axis": true,
+          "yaxes": [
+            {
+              "format": "s",
+              "logBase": 1,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "showTitle": true,
+      "title": "FileService s3 connection duration"
+    }
+  ],
+  "schemaVersion": 0,
+  "sharedCrosshair": true,
+  "slug": "",
+  "style": "dark",
+  "tags": ["MatrixOne", "MO"],
+  "templating": {
+    "list": [
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": [
+            "1m"
+          ],
+          "value": "1m"
+        },
+        "datasource": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": "interval",
+        "multi": false,
+        "multiFormat": "",
+        "name": "interval",
+        "options": [
+          {
+            "selected": false,
+            "text": "1m",
+            "value": "1m"
+          },
+          {
+            "selected": false,
+            "text": "5m",
+            "value": "5m"
+          },
+          {
+            "selected": false,
+            "text": "10m",
+            "value": "10m"
+          },
+          {
+            "selected": false,
+            "text": "30m",
+            "value": "30m"
+          },
+          {
+            "selected": false,
+            "text": "1h",
+            "value": "1h"
+          },
+          {
+            "selected": false,
+            "text": "6h",
+            "value": "6h"
+          },
+          {
+            "selected": false,
+            "text": "12h",
+            "value": "12h"
+          }
+        ],
+        "query": "1m,5m,10m,30m,1h,6h,12h",
+        "refresh": false,
+        "regex": "",
+        "sort": 0,
+        "type": "interval"
+      },
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": null,
+          "value": null
+        },
+        "datasource": "Prometheus",
+        "hide": 0,
+        "includeAll": false,
+        "label": "unit",
+        "multi": false,
+        "multiFormat": "",
+        "name": "unit",
+        "options": [],
+        "query": "label_values(mo_cluster_info, unit)",
+        "refresh": 1,
+        "regex": "",
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": null,
+          "value": null
+        },
+        "datasource": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": "ds_prom",
+        "multi": false,
+        "multiFormat": "",
+        "name": "ds_prom",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "/$unit-prometheus/",
+        "sort": 0,
+        "type": "datasource"
+      },
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": null,
+          "value": null
+        },
+        "datasource": "${ds_prom}",
+        "hide": 0,
+        "includeAll": false,
+        "label": "main_cluster",
+        "multi": false,
+        "multiFormat": "",
+        "name": "physicalCluster",
+        "options": [],
+        "query": "label_values(up, matrixone_cloud_main_cluster)",
+        "refresh": 1,
+        "regex": "",
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allFormat": "",
+        "allValue": ".*",
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": "$__all"
+        },
+        "datasource": "${ds_prom}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "owner",
+        "multi": true,
+        "multiFormat": "",
+        "name": "owner",
+        "options": [
+          {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          }
+        ],
+        "query": "label_values(up{matrixone_cloud_main_cluster=~\"$physicalCluster\"}, matrixorigin_io_owner)",
+        "refresh": 2,
+        "regex": "",
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allFormat": "",
+        "allValue": "",
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": "$__all"
+        },
+        "datasource": "${ds_prom}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "pod",
+        "multi": true,
+        "multiFormat": "",
+        "name": "pod",
+        "options": [
+          {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          }
+        ],
+        "query": "label_values(up{matrixone_cloud_main_cluster=\"$physicalCluster\", matrixorigin_io_owner=~\"$owner\"},pod)",
+        "refresh": 2,
+        "regex": "",
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
+  },
+  "timezone": "",
+  "title": "FileService Metrics",
+  "uid": "matrixone_FileService_Metrics",
+  "version": 1
+}

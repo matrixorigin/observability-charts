@@ -1,0 +1,33 @@
+{
+  "editable": false,
+  "panels": [
+    {
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "- Branch: 1.2-dev\n- Commit Id: 6db968c84\n- Commit Time: ",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.1.6",
+      "title": "Version Info",
+      "type": "text"
+    }
+  ],
+  "style": "dark",
+  "tags": ["MatrixOne", "MO"],
+  "timezone": "",
+  "title": "~ MO Dashboard Info",
+  "uid": "mo_dashboard_info",
+  "version": 2,
+  "weekStart": ""
+}
