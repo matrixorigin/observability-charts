@@ -1,6 +1,141 @@
 # Observability
 MOCloud Observability Charts
 
+
+## 在已有k8s集群上部署mo-ob
+
+### 添加 Helm 仓库
+
+添加 Helm 仓库
+```
+helm repo add mo-ob https://matrixorigin.github.io/observability-charts
+```
+更新仓库
+```
+helm repo update
+```
+查看版本
+```
+helm search repo mo-ob/mo-ruler-stack --versions --devel
+helm search repo mo-ob/mo-ob-opensource --versions --devel
+```
+
+### 设置环境变量
+
+请指定 chart 版本 MO_RULER_STACK_VERSION 和 MO_OB_OPENSOURCE_VERSION
+
+```
+OBNS=mo-ob
+S3_ENDPOINT=<your-s3-endpoint>
+S3_ACCESS_KEY=<your-s3-access-key>
+S3_SECRET_KEY=<your-s3-secret-key>
+S3_BUCKET=<your-bucket-name>
+STORAGE_CLASS=<your-storage-class>
+PROM_STORAGE_SIZE=10Gi
+GRAFANA_USER=<your-admin-user>
+GRAFANA_PWD=<your-grafana-pwd>
+MO_RULER_STACK_VERSION=<helm version>
+MO_OB_OPENSOURCE_VERSION=<helm version>
+CONTROLPLANE_RESOURCE_CHART_VERSION=<helm version>
+```
+
+### 部署 mo-ruler-stack
+安装
+
+```
+kubectl create namespace mo-ob
+
+helm install -n ${OBNS} \
+    --set grafana.persistence.storageClassName=${STORAGE_CLASS} \
+    --set grafana.service.type="NodePort" \
+    --set grafana.adminUser=${GRAFANA_USER} \
+    --set grafana.adminPassword=${GRAFANA_PWD} \
+    --set alertmanager.persistence.enabled="false" \
+    mo-ruler-stack mo-ob/mo-ruler-stack --version ${MO_RULER_STACK_VERSION}
+```
+
+卸载
+
+```
+helm uninstall -n ${OBNS} mo-ruler-stack
+```
+
+### 部署 mo-ob-opensource
+安装
+
+```
+helm install -n ${OBNS} \
+    --set loki.loki.storage.bucketNames.chunks=${S3_BUCKET} \
+    --set loki.loki.storage.s3.endpoint=${S3_ENDPOINT} \
+    --set loki.loki.storage.s3.accessKeyId=${S3_ACCESS_KEY} \
+    --set loki.loki.storage.s3.secretAccessKey=${S3_SECRET_KEY} \
+    --set loki.write.persistence.storageClass=${STORAGE_CLASS} \
+    --set loki.write.replicas=2 \
+    --set loki.write.resources.requests.memory="500Mi" \
+    --set loki.write.resources.requests.cpu="250m" \
+    --set loki.read.persistence.storageClass=${STORAGE_CLASS} \
+    --set loki.read.resources.requests.memory="1Gi" \
+    --set loki.read.resources.requests.cpu="250m" \
+    --set loki.backend.persistence.storageClass=${STORAGE_CLASS} \
+    --set loki.backend.resources.requests.memory="500Mi" \
+    --set loki.backend.resources.requests.cpu="250m" \
+    --set kube-prometheus-stack.prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.storageClassName=${STORAGE_CLASS} \
+    --set kube-prometheus-stack.prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage=${PROM_STORAGE_SIZE} \
+    --set kube-prometheus-stack.prometheus.prometheusSpec.resources.requests.memory="1Gi" \
+    --set kube-prometheus-stack.prometheus.prometheusSpec.resources.requests.cpu="250m" \
+    mo-ob-opensource ./charts/mo-ob-opensource --version ${MO_OB_OPENSOURCE_VERSION}
+```
+
+卸载
+
+```
+helm uninstall -n ${OBNS} mo-ob-opensource
+```
+
+### 部署 dashboard-chart
+
+build
+
+```
+git clone https://github.com/matrixorigin/ob-ops
+make ctrl-res
+
+```
+make之后将会生成 dashboard-chart
+
+安装
+
+<path-to-chart> 是上面make的dashboard-chart
+
+```
+helm install -n ${OBNS} controlplane-resources-chart \
+--set policies.log.enabled="false" \
+--set policies.metric.enabled="false" \
+--set rules.log.enabled="false" \
+--set rules.metric.enabled="false" \
+<path-to-chart>
+```
+
+卸载
+
+```
+helm uninstall -n ${OBNS} controlplane-resources-chart
+```
+
+###
+
+获取grafana账号
+
+```
+kubectl get secret -n ${OBNS} grafana-admin-secret  -o jsonpath="{.data['admin-user']}" | base64 -d
+```
+
+获取grafana密码
+
+```
+kubectl get secret -n ${OBNS} grafana-admin-secret  -o jsonpath="{.data['admin-password']}" | base64 -d
+```
+
 # Scrape
 
 [Scrape List](./docs/scrape/README.md) 
