@@ -36,7 +36,6 @@ GRAFANA_USER=<your-admin-user>
 GRAFANA_PWD=<your-grafana-pwd>
 MO_RULER_STACK_VERSION=<helm version>
 MO_OB_OPENSOURCE_VERSION=<helm version>
-CONTROLPLANE_RESOURCE_CHART_VERSION=<helm version>
 ```
 
 ### 部署 mo-ruler-stack

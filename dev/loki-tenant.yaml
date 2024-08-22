@@ -4,12 +4,12 @@ ingress:
     console:
         enabled: false
 secrets:
-    accessKey: obtest-access
     name: minio-env-configuration
+    accessKey: obtest-access
     secretKey: obtest-secret
 tenant:
     buckets:
-        - name: loki
+        - name: test-bucket
     certificate:
         requestAutoCert: false
     configuration:
@@ -19,6 +19,7 @@ tenant:
         - servers: 1
           size: 10Gi
           volumesPerServer: 1
+          name: loki-tenant-pools
     env: 
         - name: MINIO_PROMETHEUS_AUTH_TYPE
           value: "public"

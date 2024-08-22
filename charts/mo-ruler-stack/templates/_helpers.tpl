@@ -279,9 +279,8 @@ global:
 {{- end -}}
 
 {{ define "alertmanager.web" }}
-alertmanagerWebConfig:
-  basic_auth_users:
-    - {{ .Values.secretValue.alertmanager.alertmanager_web_auth_user }}: {{ .Values.secretValue.alertmanager.alertmanager_web_auth_password }}
+basic_auth_users:
+  {{ .Values.secretValue.alertmanager.alertmanager_web_auth_user }}: {{ .Values.secretValue.alertmanager.alertmanager_web_auth_password_bcrypted }}
 {{ end }}
 
 {{- define "alertmanager.web-digest" -}}

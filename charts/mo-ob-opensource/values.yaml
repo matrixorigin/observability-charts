@@ -578,9 +578,12 @@ kube-prometheus-stack:
           pathPrefix: ""
           apiVersion: v2
           basicAuth:
-            # secret define in mo-ruler-stack: alertmanager-auth-secret
-            username: alertmanager-auth-secret
-            password: alertmanager-auth-secret
+            username: 
+              key: username
+              name: alertmanager-auth-secret
+            password: 
+              key: password
+              name: alertmanager-auth-secret
 
   thanosRuler:
     enabled: false

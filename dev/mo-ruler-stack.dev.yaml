@@ -1,0 +1,79 @@
+# secret value to create secret automatically
+secretValue:
+  # should be encoded with base64
+  alertmanager_email_secret: cmVxdWlyZQo=
+  auth_generic_oauth_secret:
+    id: cmVxdWlyZQo=
+    secret: cmVxdWlyZQo=
+  instance_service_webhook_authorization: cmVxdWlyZQo=
+ 
+  alertmanager: 
+    # see: https://prometheus.io/docs/alerting/0.25/https
+    # no need to encoded
+    alertmanager_web_auth_user: admin
+    # need to be bcrypted, in bash: htpasswd -bnBC 10 "" YOUR_PASSWORD | tr -d ':\n'
+    alertmanager_web_auth_password: admin
+    alertmanager_web_auth_password_bcrypted: $2y$10$Z3zgfm2IIeQqNmGWeqsrSecRuRmo/EAh4Srn0Mi0fG98dJZMn7RTS
+
+alertmanager:
+  replicaCount: 3
+  persistence:
+    enabled: false
+  extraArgs:
+    # your grafana url e.g. http://mo-grafna-url
+    web.config.file: /tmp/alertmanager-web-config/alertmanager-web-config.yaml
+    web.external-url: null
+    log.level: debug
+  livenessProbe:
+    httpGet:
+      path: /
+      httpHeaders:
+        - name: Authorization
+          value: Basic YWRtaW46YWRtaW4=
+  readinessProbe: 
+    httpGet:
+      path: /
+      httpHeaders:
+        - name: Authorization
+          value: Basic YWRtaW46YWRtaW4=
+  
+  servicePerReplica:
+    enabled: true
+    type: ClusterIP
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/path: "/metrics"
+      prometheus.io/port: "9093"
+
+  config:
+    global:
+      resolve_timeout: 5m
+      smtp_from: "it@matrixorigin.cn"
+      smtp_hello: "smtp.exmail.qq.com:465"
+      smtp_smarthost: "smtp.exmail.qq.com:465"
+      smtp_auth_username: "it@matrixorigin.cn"
+      smtp_auth_password_file: "/tmp/alertmanager-email-smtp/smtp-authorization"
+      smtp_require_tls: false
+    route:
+      group_by: ["alertname"] # 分组标签
+      group_wait: 10s # 告警等待时间。告警产生后等待10s，如果有同组告警一起发出
+      group_interval: 10s # 两组告警的间隔时间
+      repeat_interval: 1d # 重复告警的间隔时间，可减少相同邮件的发送频率
+      receiver: "null"
+      # routes:
+    receivers:
+      - name: "null" 
+        
+
+grafana:
+  persistence:
+    storageClassName: standard
+  service:
+    type: NodePort
+  adminUser: admin
+  adminPassword: admin
+  admin:
+    existingSecret: ""
+    grafana.ini:
+    auth.generic_oauth:
+      enabled: false
