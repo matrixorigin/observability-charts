@@ -1,0 +1,70 @@
+# Default values for mo-ruler-stack.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# secret value to create secret automatically
+secretValue:
+  # should be encoded with base64
+  alertmanager_email_secret: cmVxdWlyZQo=
+  auth_generic_oauth_secret:
+    id: cmVxdWlyZQo=
+    secret: cmVxdWlyZQo=
+  instance_service_webhook_authorization: cmVxdWlyZQo=
+ 
+  alertmanager: 
+    # see: https://prometheus.io/docs/alerting/0.25/https
+    # no need to encoded
+    alertmanager_web_auth_user: admin
+    alertmanager_web_auth_password: admin
+
+# secretSeed config secret generation params
+# echo env should config diff values
+secretSeed:
+  ## param for templates/grafana/grafana-admin-secret.yaml
+  grafana: YXNkZl9wYXNzd29y
+
+alertmanager:
+  extraArgs:
+    # your grafana url e.g. http://mo-grafna-url
+    web.config.file: /tmp/alertmanager-web-config
+    web.external-url: null
+    log.level: debug
+  enabled: true
+  fullnameOverride: "mo-ob-alertmanager"
+  persistence:
+    enabled: false
+  replicaCount: 1
+
+  extraSecretMounts:
+    # kubectl -n mo-ob create secret generic instance-service-webhook-authorization --from-literal=instance-service=[your-authorization]
+    # 请注意，为了保证CI运行，这里的name请和secret的keyname一致
+    - name: instance-service                                # 这里的name请和secret的keyname一致
+      mountPath: /tmp/instance-service-webhook-authorization
+      subPath: ""
+      secretName: instance-service-webhook-authorization
+      readOnly: true
+    # kubectl -n mo-ob create secret generic alertmanager-email-secret --from-literal=smtp-authorization=[your-smtp-password]
+    - name: smtp-authorization
+      mountPath: /tmp/alertmanager-email-smtp
+      subPath: ""
+      secretName: alertmanager-email-secret
+      readOnly: true
+    - name: web-config
+      mountPath: /tmp/alertmanager-web-config
+      subPath: ""
+      secretName: alertmanager-web-config
+      readOnly: true
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 10m
+      memory: 32Mi
+
+grafana:
+  service:
+    enabled: true
+    type: NodePort
+    port: 3000
+    targetPort: 3000
