@@ -36,7 +36,6 @@ GRAFANA_USER=<your-admin-user>
 GRAFANA_PWD=<your-grafana-pwd>
 MO_RULER_STACK_VERSION=<helm version>
 MO_OB_OPENSOURCE_VERSION=<helm version>
-CONTROLPLANE_RESOURCE_CHART_VERSION=<helm version>
 ```
 
 ### 部署 mo-ruler-stack
@@ -135,6 +134,67 @@ kubectl get secret -n ${OBNS} grafana-admin-secret  -o jsonpath="{.data['admin-u
 ```
 kubectl get secret -n ${OBNS} grafana-admin-secret  -o jsonpath="{.data['admin-password']}" | base64 -d
 ```
+
+
+# 进阶配置
+
+
+## alertmanger 打开 web 鉴权
+
+1.在 `charts/mo-ruler-stack/values.yaml` 下设置 secretValue.alertmanager，alertmanager_web_auth_password_bcrypted 是 alertmanager_web_auth_password 的 bcrypt 加密
+
+```
+# secret value to create secret automatically
+secretValue:
+  alertmanager: 
+    # see: https://prometheus.io/docs/alerting/0.25/https
+    alertmanager_web_auth_user: admin
+    alertmanager_web_auth_password: admin
+    # need to be bcrypted, in bash: htpasswd -bnBC 10 "" <alertmanager_web_auth_password> | tr -d ':\n'
+    alertmanager_web_auth_password_bcrypted: $2y$10$Z3zgfm2IIeQqNmGWeqsrSecRuRmo/EAh4Srn0Mi0fG98dJZMn7RTS
+```
+
+2.在 `charts/mo-ruler-stack/values.yaml` 下启用 web.config.file:
+```
+alertmanager:
+  extraArgs:
+    web.config.file: /tmp/alertmanager-web-config/alertmanager-web-config.yaml
+```
+
+
+## 开启 alertmanager 鉴权与 alertmanager ha集群模式
+
+需要修改以下配置：
+
+1.在 `charts/mo-ruler-stack/values.yaml` 下修改 replicaCount:
+```
+alertmanager:
+  replicaCount: 3
+```
+
+
+2.在 `charts/mo-ob-opensource/values.yaml` 下修改 prometheus 的 alertingEndpoints 启用多个 alertmanager
+
+```
+kube-prometheus-stack:
+  prometheus:
+    pometheusSpec:
+      alertingEndpoints:
+      - name: "mo-ob-alertmanager-0"
+      - name: "mo-ob-alertmanager-1"
+      - name: "mo-ob-alertmanager-2"
+```
+
+3.在 `charts/mo-ob-opensource/values.yaml` 下修改 loki 的 alertmanager_url 启用多个 alertmanager
+
+```
+loki:
+  loki:
+    rulerConfig:
+      alertmanager_url: http://mo-ob-alertmanager-0.mo-ob:9093,http://mo-ob-alertmanager-1.mo-ob:9093,http://mo-ob-alertmanager-2.mo-ob:9093
+```
+
+即可启用 alertmanager ha集群
 
 # Scrape
 

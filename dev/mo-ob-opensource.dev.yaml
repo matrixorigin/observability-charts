@@ -1,0 +1,171 @@
+
+promtail:
+  enabled: true
+
+loki:
+  enabled: true
+  tableManager:
+    enabled: false
+  monitoring:
+    lokiCanary:
+      enabled: false
+  loki:
+    analytics:
+      reporting_enabled: false
+
+    schema_config:
+      configs:
+      - from: 2024-08-15
+        store: tsdb
+        object_store: s3
+        schema: v13
+        index:
+          prefix: index_
+          period: 24h
+    storage_config:
+      aws:
+        s3: http://obtest-access:obtest-secret@minio.loki-tenant/test-bucket
+        s3forcepathstyle: true
+    rulerConfig: 
+      # alertmanager 单节点
+      alertmanager_url: http://mo-ob-alertmanager.mo-ob:9093
+      # alertmanager 3节点集群使用：
+      # alertmanager_url: http://mo-ob-alertmanager-0.mo-ob:9093,http://mo-ob-alertmanager-1.mo-ob:9093,http://mo-ob-alertmanager-2.mo-ob:9093 
+      alertmanager_client:
+        type: "Basic"
+        credentials_file: "/tmp/loki/alertmanager-loki-credentials"
+
+  write:
+    # -- Number of replicas for the write
+    replicas: 2
+    persistence:
+      enableStatefulSetAutoDeletePVC: false
+      size: 5Gi
+      storageClass: standard
+    resources: 
+      requests:
+        memory: "1Gi"
+        cpu: "250m"
+      limits:
+        memory: "4Gi"
+        cpu: "2000m"
+
+  read:
+    replicas: 1
+    persistence:
+      enableStatefulSetAutoDeletePVC: false
+      size: 5Gi
+      storageClass: standard
+    resources: 
+      requests:
+        memory: "1Gi"
+        cpu: "250m"
+      limits:
+        memory: "2Gi"
+        cpu: "2000m"
+
+  backend:
+    replicas: 1
+    persistence:
+      enableStatefulSetAutoDeletePVC: true
+      size: 2Gi
+      storageClass: standard
+    resources: 
+      requests:
+        memory: "1Gi"
+        cpu: "250m"
+      limits:
+        memory: "2Gi"
+        cpu: "2000m"
+
+  # Configuration for the gateway
+  gateway:
+    enabled: true
+    replicas: 1
+    resources: 
+      requests:
+        memory: "250Mi"
+        cpu: "250m"
+      limits:
+        memory: "2Gi"
+        cpu: "2000m"
+
+kube-prometheus-stack:
+  enabled: false
+  prometheus:
+    prometheusSpec:
+      resources:
+        limits:
+          cpu: 2000m
+          memory: "4Gi"
+        requests:
+          cpu: 500m
+          memory: "1Gi"
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: "standard"
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 5Gi
+      alertingEndpoints:  
+      # 单节点部署
+        - name: "mo-ob-alertmanager"
+          # 如果跨ns，需要修改
+          namespace: "mo-ob"
+          port: 9093
+          scheme: http
+          pathPrefix: ""
+          apiVersion: v2
+          basicAuth:
+            username: 
+              key: username
+              name: alertmanager-auth-secret
+            password: 
+              key: password
+              name: alertmanager-auth-secret
+      #集群部署
+        # - name: "mo-ob-alertmanager-0"
+        #   # 如果跨ns，需要修改
+        #   namespace: "mo-ob"
+        #   port: 9093
+        #   scheme: http
+        #   pathPrefix: ""
+        #   apiVersion: v2
+        #   basicAuth:
+        #     username: 
+        #       key: username
+        #       name: alertmanager-auth-secret
+        #     password: 
+        #       key: password
+        #       name: alertmanager-auth-secret
+        # - name: "mo-ob-alertmanager-1"
+        #   # 如果跨ns，需要修改
+        #   namespace: "mo-ob"
+        #   port: 9093
+        #   scheme: http
+        #   pathPrefix: ""
+        #   apiVersion: v2
+        #   basicAuth:
+        #     username: 
+        #       key: username
+        #       name: alertmanager-auth-secret
+        #     password: 
+        #       key: password
+        #       name: alertmanager-auth-secret
+        # - name: "mo-ob-alertmanager-2"
+        #   # 如果跨ns，需要修改
+        #   namespace: "mo-ob"
+        #   port: 9093
+        #   scheme: http
+        #   pathPrefix: ""
+        #   apiVersion: v2
+        #   basicAuth:
+        #     username: 
+        #       key: username
+        #       name: alertmanager-auth-secret
+        #     password: 
+        #       key: password
+        #       name: alertmanager-auth-secret
+

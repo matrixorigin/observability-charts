@@ -10,6 +10,14 @@ secretValue:
     id: cmVxdWlyZQo=
     secret: cmVxdWlyZQo=
   instance_service_webhook_authorization: cmVxdWlyZQo=
+ 
+  alertmanager: 
+    # see: https://prometheus.io/docs/alerting/0.25/https
+    # if setted, should change k8s livenessProbe and readinessProbe header
+    alertmanager_web_auth_user: admin
+    alertmanager_web_auth_password: admin
+    # need to be bcrypted, in bash: htpasswd -bnBC 10 "" <alertmanager_web_auth_password> | tr -d ':\n'
+    alertmanager_web_auth_password_bcrypted: $2y$10$Z3zgfm2IIeQqNmGWeqsrSecRuRmo/EAh4Srn0Mi0fG98dJZMn7RTS
 
 # secretSeed config secret generation params
 # echo env should config diff values
@@ -33,6 +41,212 @@ defaultDatasource:
   ruler: true
   # cooperate with template templates/alertmanager-datasource.yaml
   alertmanager: true
+
+## alertmanager sub-chart configurable values
+## Please see https://github.com/prometheus-community/helm-charts/tree/main/charts/alertmanager
+##
+## Configuration for alertmanager
+## ref: https://prometheus.io/docs/alerting/alertmanager/
+##
+alertmanager:
+  enabled: true
+  configAnnotations:
+    # shoud compute and change every time base auth change
+    baseAuthChecksum: required
+  extraArgs:
+    # ha集群部署
+    # web.config.file: /tmp/alertmanager-web-config/alertmanager-web-config.yaml
+    # your grafana url e.g. http://mo-grafna-url
+    web.external-url: null
+    log.level: debug
+  # 单节点部署
+  replicaCount: 1
+  
+  # ha集群部署：修改副本数以及打开 web.config.file
+  # replicaCount: 3
+  
+  livenessProbe:
+    httpGet:
+      path: /
+      httpHeaders:
+        - name: Authorization
+          # echo -n "<alertmanager_web_auth_user>:<alertmanager_web_auth_password>" | base64
+          # Basic xxxxx=
+          value: Basic YWRtaW46YWRtaW4=
+  
+  readinessProbe: 
+    httpGet:
+      path: /
+      httpHeaders:
+        - name: Authorization
+          # echo -n "<alertmanager_web_auth_user>:<alertmanager_web_auth_password>" | base64
+          # Basic xxxxx=
+          value: Basic YWRtaW46YWRtaW4=
+
+  service:
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/path: "/metrics"
+      prometheus.io/port: "9093"
+
+  servicePerReplica:
+    enabled: true
+    type: ClusterIP
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/path: "/metrics"
+      prometheus.io/port: "9093"
+
+  configmapReload:
+    enabled: false
+
+  fullnameOverride: "mo-ob-alertmanager"
+  persistence:
+    enabled: true
+    storageClass: "alicloud-disk-essd"
+    accessModes:
+      - ReadWriteOnce
+    # 阿里云部署时要调整为20G，因为其最小的PV只能说20G
+    size: 20Gi
+  # persistence:
+  #   enabled: true
+  #   ## Persistent Volume Storage Class
+  #   ## If defined, storageClassName: <storageClass>
+  #   ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  #   ## If undefined (the default) or set to null, no storageClassName spec is
+  #   ## set, choosing the default provisioner.
+  #   ##
+  #   # storageClass: "-"
+  #   accessModes:
+  #     - ReadWriteOnce
+  #   # size: 50Mi
+  # 阿里云部署时要调整为20G，因为其最小的PV只能说20G
+  #   size: 20Gi
+  # alertmanagerSpec:
+  #   image:
+  #     registry: registry.cn-hangzhou.aliyuncs.com
+  #     repository: alertmanager
+  #     tag: v0.25.0
+  #     sha: ""
+  config:
+    global:
+      resolve_timeout: 5m
+      smtp_from: "it@matrixorigin.cn"
+      smtp_hello: "smtp.exmail.qq.com:465"
+      smtp_smarthost: "smtp.exmail.qq.com:465"
+      smtp_auth_username: "it@matrixorigin.cn"
+      smtp_auth_password_file: "/tmp/alertmanager-email-smtp/smtp-authorization"
+      smtp_require_tls: false
+    route:
+      group_by: ["alertname"] # 分组标签
+      group_wait: 10s # 告警等待时间。告警产生后等待10s，如果有同组告警一起发出
+      group_interval: 10s # 两组告警的间隔时间
+      repeat_interval: 1d # 重复告警的间隔时间，可减少相同邮件的发送频率
+      receiver: "null"
+      # routes:
+    receivers:
+      - name: email-receiver
+        email_configs:
+          - to: "moc-warning@matrixone.cloud"
+          # send_resolved: true
+      - name: "null"
+      - name: 'wecom-group'
+        webhook_configs:
+        - url: "http://alertmanager-webhook-adapter/webhook/send?channel_type=weixin&token=<token>"
+      - name: notify-user
+        webhook_configs:
+          - url: http://mailservice.mo-cloud:8020/alerts
+            http_config:
+              authorization:
+                type: "Bearer"
+                credentials_file: /tmp/instance-service-webhook-authorization/instance-service
+  extraSecretMounts:
+    # kubectl -n mo-ob create secret generic instance-service-webhook-authorization --from-literal=instance-service=[your-authorization]
+    # 请注意，为了保证CI运行，这里的name请和secret的keyname一致
+    - name: instance-service                                # 这里的name请和secret的keyname一致
+      mountPath: /tmp/instance-service-webhook-authorization
+      subPath: ""
+      secretName: instance-service-webhook-authorization
+      readOnly: true
+    # kubectl -n mo-ob create secret generic alertmanager-email-secret --from-literal=smtp-authorization=[your-smtp-password]
+    - name: smtp-authorization
+      mountPath: /tmp/alertmanager-email-smtp
+      subPath: ""
+      secretName: alertmanager-email-secret
+      readOnly: true
+    - name: web-config
+      mountPath: /tmp/alertmanager-web-config
+      subPath: ""
+      secretName: alertmanager-web-config
+      readOnly: true
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 10m
+      memory: 32Mi
+
+## Using default values from https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
+## details in https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md
+##
+grafana:
+  replicas: 1
+  enabled: true
+    # static passwd
+    #adminUser: admin
+    #adminPassword: admin
+  admin:
+    ## Name of the secret. Can be templated.
+    existingSecret: "grafana-admin-secret"
+    userKey: admin-user
+    passwordKey: admin-password
+  # for grafana.ini
+  extraSecretMounts:
+    - name: auth-generic-oauth-secret-mount
+      secretName: auth-generic-oauth-secret
+      defaultMode: 0440
+      mountPath: /etc/secrets/auth_generic_oauth
+      readOnly: true
+  grafana.ini:
+    auth.generic_oauth:
+      name: dex
+      enabled: true
+      scopes: openid profile email offline_access
+      auth_url: https://oidc.matrixorigin.cn:31443/dex/auth
+      token_url: https://oidc.matrixorigin.cn:31443/dex/token
+      api_url: https://oidc.matrixorigin.cn:31443/dex/userinfo
+      allow_sign_up: true
+      client_id: $__file{/etc/secrets/auth_generic_oauth/client_id}
+      client_secret: $__file{/etc/secrets/auth_generic_oauth/client_secret}
+    dataproxy:
+      logging: false
+      # this timeout should greater than loki's http server read/write timeout
+      timeout : 300
+      dialTimeout: 10
+      keep_alive_seconds: 150
+  service:
+    enabled: true
+    type: LoadBalancer
+    port: 80
+    targetPort: 3000
+    # targetPort: 4181 To be used with a proxy extraContainer
+    ## Service annotations. Can be templated.
+    # aws需要添加该annotation，以启用暴露在公网的LoadBalancer
+    annotations: {
+      service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+    }
+    labels: {}
+    portName: service
+    # Adds the appProtocol field to the service. This allows to work with istio protocol selection. Ex: "http" or "tcp"
+    appProtocol: ""
+  sidecar:
+    dashboards:
+      enabled: true
+    datasources:
+      enabled: true
+      searchNamespace: ALL
+
 
 moRuler:
   replicaCount: 1
@@ -143,165 +357,3 @@ alertmanagerWebhookAdapter:
   nodeSelector: {}
   tolerations: []
   affinity: {}
-
-## alertmanager sub-chart configurable values
-## Please see https://github.com/prometheus-community/helm-charts/tree/main/charts/alertmanager
-##
-## Configuration for alertmanager
-## ref: https://prometheus.io/docs/alerting/alertmanager/
-##
-alertmanager:
-  service:
-    annotations:
-      prometheus.io/scrape: "true"
-      prometheus.io/path: "/metrics"
-      prometheus.io/port: "9093"
-  configmapReload:
-    enabled: true
-  extraArgs:
-    # your grafana url e.g. http://mo-grafna-url
-    web.external-url: null
-    log.level: debug
-  enabled: true
-  fullnameOverride: "mo-ob-alertmanager"
-  persistence:
-    enabled: true
-    storageClass: "alicloud-disk-essd"
-    accessModes:
-      - ReadWriteOnce
-    # 阿里云部署时要调整为20G，因为其最小的PV只能说20G
-    size: 20Gi
-  # persistence:
-  #   enabled: true
-  #   ## Persistent Volume Storage Class
-  #   ## If defined, storageClassName: <storageClass>
-  #   ## If set to "-", storageClassName: "", which disables dynamic provisioning
-  #   ## If undefined (the default) or set to null, no storageClassName spec is
-  #   ## set, choosing the default provisioner.
-  #   ##
-  #   # storageClass: "-"
-  #   accessModes:
-  #     - ReadWriteOnce
-  #   # size: 50Mi
-  # 阿里云部署时要调整为20G，因为其最小的PV只能说20G
-  #   size: 20Gi
-  replicaCount: 1
-  # alertmanagerSpec:
-  #   image:
-  #     registry: registry.cn-hangzhou.aliyuncs.com
-  #     repository: alertmanager
-  #     tag: v0.25.0
-  #     sha: ""
-  config:
-    global:
-      resolve_timeout: 5m
-      smtp_from: "it@matrixorigin.cn"
-      smtp_hello: "smtp.exmail.qq.com:465"
-      smtp_smarthost: "smtp.exmail.qq.com:465"
-      smtp_auth_username: "it@matrixorigin.cn"
-      smtp_auth_password_file: "/tmp/alertmanager-email-smtp/smtp-authorization"
-      smtp_require_tls: false
-    route:
-      group_by: ["alertname"] # 分组标签
-      group_wait: 10s # 告警等待时间。告警产生后等待10s，如果有同组告警一起发出
-      group_interval: 10s # 两组告警的间隔时间
-      repeat_interval: 1d # 重复告警的间隔时间，可减少相同邮件的发送频率
-      receiver: "null"
-      # routes:
-    receivers:
-      - name: email-receiver
-        email_configs:
-          - to: "moc-warning@matrixone.cloud"
-          # send_resolved: true
-      - name: "null"
-      - name: 'wecom-group'
-        webhook_configs:
-        - url: "http://alertmanager-webhook-adapter/webhook/send?channel_type=weixin&token=89451de4-757f-4422-aa94-686d0a4e877e"
-      - name: notify-user
-        webhook_configs:
-          - url: http://mailservice.mo-cloud:8020/alerts
-            http_config:
-              authorization:
-                type: "Bearer"
-                credentials_file: /tmp/instance-service-webhook-authorization/instance-service
-  extraSecretMounts:
-    # kubectl -n mo-ob create secret generic instance-service-webhook-authorization --from-literal=instance-service=[your-authorization]
-    # 请注意，为了保证CI运行，这里的name请和secret的keyname一致
-    - name: instance-service                                # 这里的name请和secret的keyname一致
-      mountPath: /tmp/instance-service-webhook-authorization
-      subPath: ""
-      secretName: instance-service-webhook-authorization
-      readOnly: true
-    # kubectl -n mo-ob create secret generic alertmanager-email-secret --from-literal=smtp-authorization=[your-smtp-password]
-    - name: smtp-authorization
-      mountPath: /tmp/alertmanager-email-smtp
-      subPath: ""
-      secretName: alertmanager-email-secret
-      readOnly: true
-  resources:
-    limits:
-      cpu: 100m
-      memory: 128Mi
-    requests:
-      cpu: 10m
-      memory: 32Mi
-
-## Using default values from https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
-## details in https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md
-##
-grafana:
-  replicas: 1
-  enabled: true
-    # static passwd
-    #adminUser: admin
-    #adminPassword: admin
-  admin:
-    ## Name of the secret. Can be templated.
-    existingSecret: "grafana-admin-secret"
-    userKey: admin-user
-    passwordKey: admin-password
-  # for grafana.ini
-  extraSecretMounts:
-    - name: auth-generic-oauth-secret-mount
-      secretName: auth-generic-oauth-secret
-      defaultMode: 0440
-      mountPath: /etc/secrets/auth_generic_oauth
-      readOnly: true
-  grafana.ini:
-    auth.generic_oauth:
-      name: dex
-      enabled: true
-      scopes: openid profile email offline_access
-      auth_url: https://oidc.matrixorigin.cn:31443/dex/auth
-      token_url: https://oidc.matrixorigin.cn:31443/dex/token
-      api_url: https://oidc.matrixorigin.cn:31443/dex/userinfo
-      allow_sign_up: true
-      client_id: $__file{/etc/secrets/auth_generic_oauth/client_id}
-      client_secret: $__file{/etc/secrets/auth_generic_oauth/client_secret}
-    dataproxy:
-      logging: false
-      # this timeout should greater than loki's http server read/write timeout
-      timeout : 300
-      dialTimeout: 10
-      keep_alive_seconds: 150
-  service:
-    enabled: true
-    type: LoadBalancer
-    port: 80
-    targetPort: 3000
-    # targetPort: 4181 To be used with a proxy extraContainer
-    ## Service annotations. Can be templated.
-    # aws需要添加该annotation，以启用暴露在公网的LoadBalancer
-    annotations: {
-      service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
-    }
-    labels: {}
-    portName: service
-    # Adds the appProtocol field to the service. This allows to work with istio protocol selection. Ex: "http" or "tcp"
-    appProtocol: ""
-  sidecar:
-    dashboards:
-      enabled: true
-    datasources:
-      enabled: true
-      searchNamespace: ALL
