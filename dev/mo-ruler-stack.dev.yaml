@@ -22,9 +22,11 @@ alertmanager:
     enabled: false
   extraArgs:
     # your grafana url e.g. http://mo-grafna-url
-    # web.config.file: /tmp/alertmanager-web-config/alertmanager-web-config.yaml
+    web.config.file: /tmp/alertmanager-web-config/alertmanager-web-config.yaml
     web.external-url: null
     log.level: debug
+  configAnnotations:
+    baseAuthChecksum: required
   livenessProbe:
     httpGet:
       path: /

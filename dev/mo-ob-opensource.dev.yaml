@@ -31,7 +31,9 @@ loki:
       alertmanager_url: http://mo-ob-alertmanager.mo-ob:9093
       # alertmanager 3节点集群使用：
       # alertmanager_url: http://mo-ob-alertmanager-0.mo-ob:9093,http://mo-ob-alertmanager-1.mo-ob:9093,http://mo-ob-alertmanager-2.mo-ob:9093 
-
+      alertmanager_client:
+        type: "Basic"
+        credentials_file: "/tmp/loki/alertmanager-loki-credentials"
 
   write:
     # -- Number of replicas for the write

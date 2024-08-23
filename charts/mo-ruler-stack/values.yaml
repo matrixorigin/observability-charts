@@ -50,6 +50,9 @@ defaultDatasource:
 ##
 alertmanager:
   enabled: true
+  configAnnotations:
+    # shoud compute and change every time base auth change
+    baseAuthChecksum: required
   extraArgs:
     # ha集群部署
     # web.config.file: /tmp/alertmanager-web-config/alertmanager-web-config.yaml
