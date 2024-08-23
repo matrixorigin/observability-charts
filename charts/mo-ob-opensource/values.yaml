@@ -156,7 +156,17 @@ loki:
         type: local
         local: 
           directory: /rules
+      # alertmanager 单节点
       alertmanager_url: http://mo-ob-alertmanager.mo-ob:9093
+      # alertmanager 3节点集群使用：
+      # alertmanager_url: http://mo-ob-alertmanager-0.mo-ob:9093,http://mo-ob-alertmanager-1.mo-ob:9093,http://mo-ob-alertmanager-2.mo-ob:9093 
+      enable_alertmanager_v2: true
+      enable_api: true
+      alertmanager_client:
+        type: "Basic"
+        credentials_file: "/tmp/loki/alertmanager-loki-credentials"
+
+    
     # -- Additional query scheduler config
     ### use default config, old config not work in loki 3.0.0
     #storage_config:
@@ -233,6 +243,15 @@ loki:
       limits:
         memory: "2Gi"
         cpu: "2000m"
+    # -- Volume mounts to add to the backend pods
+    extraVolumeMounts:
+    - name: alertmanager-credentials
+      mountPath: /tmp/loki
+      readOnly: true
+    extraVolumes: 
+    - name: alertmanager-credentials
+      secret:
+        secretName: alertmanager-loki-credentials
 
   # Configuration for the gateway
   gateway:
@@ -570,6 +589,7 @@ kube-prometheus-stack:
               target_label: pod
 
       alertingEndpoints:
+      # 单节点部署
         - name: "mo-ob-alertmanager"
           # 如果跨ns，需要修改
           namespace: "mo-ob"
@@ -584,6 +604,50 @@ kube-prometheus-stack:
             password: 
               key: password
               name: alertmanager-auth-secret
+      #集群部署
+        # - name: "mo-ob-alertmanager-0"
+        #   # 如果跨ns，需要修改
+        #   namespace: "mo-ob"
+        #   port: 9093
+        #   scheme: http
+        #   pathPrefix: ""
+        #   apiVersion: v2
+        #   basicAuth:
+        #     username: 
+        #       key: username
+        #       name: alertmanager-auth-secret
+        #     password: 
+        #       key: password
+        #       name: alertmanager-auth-secret
+        # - name: "mo-ob-alertmanager-1"
+        #   # 如果跨ns，需要修改
+        #   namespace: "mo-ob"
+        #   port: 9093
+        #   scheme: http
+        #   pathPrefix: ""
+        #   apiVersion: v2
+        #   basicAuth:
+        #     username: 
+        #       key: username
+        #       name: alertmanager-auth-secret
+        #     password: 
+        #       key: password
+        #       name: alertmanager-auth-secret
+        # - name: "mo-ob-alertmanager-2"
+        #   # 如果跨ns，需要修改
+        #   namespace: "mo-ob"
+        #   port: 9093
+        #   scheme: http
+        #   pathPrefix: ""
+        #   apiVersion: v2
+        #   basicAuth:
+        #     username: 
+        #       key: username
+        #       name: alertmanager-auth-secret
+        #     password: 
+        #       key: password
+        #       name: alertmanager-auth-secret
+
 
   thanosRuler:
     enabled: false

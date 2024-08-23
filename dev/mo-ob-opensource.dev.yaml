@@ -4,19 +4,35 @@ promtail:
 
 loki:
   enabled: true
+  tableManager:
+    enabled: false
+  monitoring:
+    lokiCanary:
+      enabled: false
   loki:
-    storage:
-      bucketNames:
-        # use same bucket
-        chunks: test-bucket
-        ruler: test-bucket
-      type: s3
-      s3:
-        endpoint: http://minio.loki-tenant:9000
-        secretAccessKey: obtest-access
-        accessKeyId: obtest-secret
-        s3ForcePathStyle: false
-        insecure: false
+    analytics:
+      reporting_enabled: false
+
+    schema_config:
+      configs:
+      - from: 2024-08-15
+        store: tsdb
+        object_store: s3
+        schema: v13
+        index:
+          prefix: index_
+          period: 24h
+    storage_config:
+      aws:
+        s3: http://obtest-access:obtest-secret@minio.loki-tenant/test-bucket
+        s3forcepathstyle: true
+    rulerConfig: 
+      # alertmanager 单节点
+      alertmanager_url: http://mo-ob-alertmanager.mo-ob:9093
+      # alertmanager 3节点集群使用：
+      # alertmanager_url: http://mo-ob-alertmanager-0.mo-ob:9093,http://mo-ob-alertmanager-1.mo-ob:9093,http://mo-ob-alertmanager-2.mo-ob:9093 
+
+
   write:
     # -- Number of replicas for the write
     replicas: 2
@@ -73,6 +89,7 @@ loki:
         cpu: "2000m"
 
 kube-prometheus-stack:
+  enabled: false
   prometheus:
     prometheusSpec:
       resources:
@@ -90,8 +107,9 @@ kube-prometheus-stack:
             resources:
               requests:
                 storage: 5Gi
-      alertingEndpoints:
-        - name: "mo-ob-alertmanager-0"
+      alertingEndpoints:  
+      # 单节点部署
+        - name: "mo-ob-alertmanager"
           # 如果跨ns，需要修改
           namespace: "mo-ob"
           port: 9093
@@ -105,32 +123,47 @@ kube-prometheus-stack:
             password: 
               key: password
               name: alertmanager-auth-secret
-        - name: "mo-ob-alertmanager-1"
-          # 如果跨ns，需要修改
-          namespace: "mo-ob"
-          port: 9093
-          scheme: http
-          pathPrefix: ""
-          apiVersion: v2
-          basicAuth:
-            username: 
-              key: username
-              name: alertmanager-auth-secret
-            password: 
-              key: password
-              name: alertmanager-auth-secret
-        - name: "mo-ob-alertmanager-2"
-          # 如果跨ns，需要修改
-          namespace: "mo-ob"
-          port: 9093
-          scheme: http
-          pathPrefix: ""
-          apiVersion: v2
-          basicAuth:
-            username: 
-              key: username
-              name: alertmanager-auth-secret
-            password: 
-              key: password
-              name: alertmanager-auth-secret
+      #集群部署
+        # - name: "mo-ob-alertmanager-0"
+        #   # 如果跨ns，需要修改
+        #   namespace: "mo-ob"
+        #   port: 9093
+        #   scheme: http
+        #   pathPrefix: ""
+        #   apiVersion: v2
+        #   basicAuth:
+        #     username: 
+        #       key: username
+        #       name: alertmanager-auth-secret
+        #     password: 
+        #       key: password
+        #       name: alertmanager-auth-secret
+        # - name: "mo-ob-alertmanager-1"
+        #   # 如果跨ns，需要修改
+        #   namespace: "mo-ob"
+        #   port: 9093
+        #   scheme: http
+        #   pathPrefix: ""
+        #   apiVersion: v2
+        #   basicAuth:
+        #     username: 
+        #       key: username
+        #       name: alertmanager-auth-secret
+        #     password: 
+        #       key: password
+        #       name: alertmanager-auth-secret
+        # - name: "mo-ob-alertmanager-2"
+        #   # 如果跨ns，需要修改
+        #   namespace: "mo-ob"
+        #   port: 9093
+        #   scheme: http
+        #   pathPrefix: ""
+        #   apiVersion: v2
+        #   basicAuth:
+        #     username: 
+        #       key: username
+        #       name: alertmanager-auth-secret
+        #     password: 
+        #       key: password
+        #       name: alertmanager-auth-secret
 

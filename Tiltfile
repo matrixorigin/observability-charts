@@ -41,3 +41,5 @@ k8s_yaml(
     values=['./dev/mo-ob-opensource.dev.yaml'],
   )
 )
+
+k8s_yaml("./dev/loki_test_rule.yaml")

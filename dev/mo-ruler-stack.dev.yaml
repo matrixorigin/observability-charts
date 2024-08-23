@@ -16,12 +16,13 @@ secretValue:
     alertmanager_web_auth_password_bcrypted: $2y$10$Z3zgfm2IIeQqNmGWeqsrSecRuRmo/EAh4Srn0Mi0fG98dJZMn7RTS
 
 alertmanager:
-  replicaCount: 3
+  replicaCount: 1
+  # replicaCount: 3
   persistence:
     enabled: false
   extraArgs:
     # your grafana url e.g. http://mo-grafna-url
-    web.config.file: /tmp/alertmanager-web-config/alertmanager-web-config.yaml
+    # web.config.file: /tmp/alertmanager-web-config/alertmanager-web-config.yaml
     web.external-url: null
     log.level: debug
   livenessProbe:
@@ -59,11 +60,13 @@ alertmanager:
       group_wait: 10s # 告警等待时间。告警产生后等待10s，如果有同组告警一起发出
       group_interval: 10s # 两组告警的间隔时间
       repeat_interval: 1d # 重复告警的间隔时间，可减少相同邮件的发送频率
-      receiver: "null"
+      receiver: "wecom-group"
       # routes:
     receivers:
       - name: "null" 
-        
+      - name: 'wecom-group'
+        webhook_configs:
+        - url: "http://alertmanager-webhook-adapter/webhook/send?channel_type=weixin&token=ca66171c-cc72-4f88-abd5-c6802df203bd"
 
 grafana:
   persistence:
@@ -71,7 +74,7 @@ grafana:
   service:
     type: NodePort
   adminUser: admin
-  adminPassword: admin
+  adminPassword: admin123
   admin:
     existingSecret: ""
     grafana.ini:

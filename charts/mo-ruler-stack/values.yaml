@@ -16,7 +16,7 @@ secretValue:
     # if setted, should change k8s livenessProbe and readinessProbe header
     alertmanager_web_auth_user: admin
     alertmanager_web_auth_password: admin
-    # need to be bcrypted, in bash: htpasswd -bnBC 10 "" YOUR_PASSWORD | tr -d ':\n'
+    # need to be bcrypted, in bash: htpasswd -bnBC 10 "" <alertmanager_web_auth_password> | tr -d ':\n'
     alertmanager_web_auth_password_bcrypted: $2y$10$Z3zgfm2IIeQqNmGWeqsrSecRuRmo/EAh4Srn0Mi0fG98dJZMn7RTS
 
 # secretSeed config secret generation params
@@ -51,12 +51,16 @@ defaultDatasource:
 alertmanager:
   enabled: true
   extraArgs:
+    # ha集群部署
+    # web.config.file: /tmp/alertmanager-web-config/alertmanager-web-config.yaml
     # your grafana url e.g. http://mo-grafna-url
-    web.config.file: /tmp/alertmanager-web-config/alertmanager-web-config.yaml
     web.external-url: null
     log.level: debug
+  # 单节点部署
+  replicaCount: 1
   
-  replicaCount: 3
+  # ha集群部署：修改副本数以及打开 web.config.file
+  # replicaCount: 3
   
   livenessProbe:
     httpGet:

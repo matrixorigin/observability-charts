@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-loki-rule
+  namespace: mo-ob
+  labels:
+    loki_rule: 'true'
+data:
+  loki_test_rule.yaml: |
+    groups:
+    - name: alertmanager.rules
+      rules:
+      - alert: loki_test
+        expr: count_over_time({app="loki"} |= `"POST /loki/api/v1/push HTTP/1.1"` [1m]) > 0
+        for: 0m
+        labels:
+          alertOwner: bruce
+          alertTeam: Orch Team
+          alertname: JustATestLoki
+          serviceScope: mo-ob
+          severity: critical
