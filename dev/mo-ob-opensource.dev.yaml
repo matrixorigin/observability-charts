@@ -91,7 +91,7 @@ loki:
         cpu: "2000m"
 
 kube-prometheus-stack:
-  enabled: false
+  enabled: true
   prometheus:
     prometheusSpec:
       resources:

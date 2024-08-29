@@ -68,7 +68,7 @@ alertmanager:
       - name: "null" 
       - name: 'wecom-group'
         webhook_configs:
-        - url: "http://alertmanager-webhook-adapter/webhook/send?channel_type=weixin&token=ca66171c-cc72-4f88-abd5-c6802df203bd"
+        - url: "http://alertmanager-webhook-adapter/webhook/send?channel_type=weixin&token=<token>"
 
 grafana:
   persistence:

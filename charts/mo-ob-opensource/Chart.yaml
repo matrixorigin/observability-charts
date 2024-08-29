@@ -17,3 +17,7 @@ dependencies:
   name: promtail
   repository: https://grafana.github.io/helm-charts
   version: 6.15.1
+- condition: alloy.enabled
+  name: alloy
+  repository: https://grafana.github.io/helm-charts
+  version: 0.6.1
