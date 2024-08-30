@@ -15,7 +15,7 @@ defaultDatasource:
 
 # alloy for k8s events
 alloy:
-  resources: {}
+  
   image:
     registry: "docker.io"
     repository: grafana/alloy
@@ -28,6 +28,13 @@ alloy:
       tag: v0.12.0
   enabled: true
   alloy:
+    resources: 
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 200m
+        memory: 200Mi
     configMap:
       # -- Content to assign to the new ConfigMap.  This is passed into `tpl` allowing for templating from values.
       content: |
