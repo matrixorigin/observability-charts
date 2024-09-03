@@ -139,6 +139,20 @@ kubectl get secret -n ${OBNS} grafana-admin-secret  -o jsonpath="{.data['admin-p
 # 进阶配置
 
 
+## 需要替换的镜像源
+
+如果部署的时候发现 image pull failed 等错误，需要替换镜像源（如阿里云），这些被替换的镜像都已经显示的写在了 chart 的 values.yaml 下，如 `charts/mo-ob-opensource/values.yaml` 下
+
+```
+alloy:
+  image:
+    registry: "docker.io"
+    repository: grafana/alloy
+    tag: v1.3.1
+```
+将对应的镜像 push 到需要替换的镜像源仓库即可部署
+
+
 ## alertmanger 打开 web 鉴权
 
 1.在 `charts/mo-ruler-stack/values.yaml` 下设置 secretValue.alertmanager，alertmanager_web_auth_password_bcrypted 是 alertmanager_web_auth_password 的 bcrypt 加密
