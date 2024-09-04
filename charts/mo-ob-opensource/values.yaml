@@ -13,6 +13,41 @@ defaultDatasource:
   # cooperate with template templates/loki-datasource.yaml
   loki: true
 
+# alloy for k8s events
+alloy:
+  
+  image:
+    registry: "docker.io"
+    repository: grafana/alloy
+    tag: v1.3.1
+  configReloader:
+    enabled: true
+    image:
+      registry: "ghcr.io"
+      repository: jimmidyson/configmap-reload
+      tag: v0.12.0
+  enabled: true
+  alloy:
+    resources: 
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 200m
+        memory: 200Mi
+    configMap:
+      # -- Content to assign to the new ConfigMap.  This is passed into `tpl` allowing for templating from values.
+      content: |
+        loki.source.kubernetes_events "k8s_event" {
+          forward_to = [loki.write.local.receiver]
+        }
+
+        loki.write "local" {
+          endpoint {
+            url = "http://{{ .Release.Name }}-loki-gateway/loki/api/v1/push"
+          }
+        }
+
 promtail:
   enabled: true
   serviceMonitor:
@@ -97,6 +132,15 @@ loki:
     # retention related issue: https://github.com/matrixone-cloud/observability/issues/86
     retention_deletes_enabled: true
     retention_period: 720h
+  lokiCanary:
+    enabled: false
+  
+  chunksCache:
+    enabled: false
+  
+  resultsCache:
+    enabled: false
+  
   loki:
     # -- Defines what kind of object stores the configuration, a ConfigMap or a Secret.
     # In order to move sensitive information (such as credentials) from the ConfigMap/Secret to a more secure location (e.g. vault), it is possible to use [environment variables in the configuration](https://grafana.com/docs/loki/latest/configuration/#use-environment-variables-in-the-configuration).
