@@ -432,24 +432,6 @@ kube-prometheus-stack:
               requests:
                 storage: 40Gi
       additionalScrapeConfigs: 
-        # 过渡方案：在相关组件添加完成 annotation 后会被删除
-        - job_name: "mocloud-application"
-          honor_labels: true
-          kubernetes_sd_configs:
-            - role: endpoints
-          relabel_configs:
-            - action: keep
-              regex: "mo-cloud|cos"
-              source_labels:
-              - __meta_kubernetes_namespace
-            - action: drop
-              source_labels: [__meta_kubernetes_pod_name, __meta_kubernetes_pod]
-              regex: frps
-            - action: labelmap
-              regex: __meta_kubernetes_pod_label_(.+)
-            - source_labels: [__meta_kubernetes_pod_name]
-              action: replace
-              target_label: pod
         # Scrape config for service endpoints.
         #
         # The relabeling allows the actual service scrape endpoint to be configured
