@@ -23,6 +23,7 @@ loki:
           prefix: index_
           period: 24h
     storage_config:
+      object_prefix: loki-controlplane
       aws:
         s3: http://obtest-access:obtest-secret@minio.loki-tenant/test-bucket
         s3forcepathstyle: true
