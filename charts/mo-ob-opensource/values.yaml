@@ -213,7 +213,9 @@ loki:
     
     # -- Additional query scheduler config
     ### use default config, old config not work in loki 3.0.0
-    #storage_config:
+    storage_config:
+      # bucket subpath
+      object_prefix: ""
     #  boltdb_shipper:
     #    active_index_directory: /var/loki/data/loki/boltdb-shipper-active
     #    cache_location: /var/loki/data/loki/boltdb-shipper-cache
