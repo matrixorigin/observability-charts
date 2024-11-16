@@ -540,7 +540,7 @@ mo-ruler-stack:
     persistence: 
       enabled:          true
       type:             "statefulset"
-      storageClassName: ""
+      storageClassName: 
       size:             "5Gi"
     
     # static passwd

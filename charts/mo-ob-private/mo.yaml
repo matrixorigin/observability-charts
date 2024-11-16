@@ -1,0 +1,194 @@
+mo-ob-opensource:
+
+  alloy:
+    image:
+      registry: "docker.io"
+      repository: grafana/alloy
+      tag: v1.3.1
+
+
+  promtail:
+    image:
+      registry: docker.io
+      repository: grafana/promtail
+      tag: "2.8.4"
+
+  loki:
+    sidecar: 
+      image:
+        repository: kiwigrid/k8s-sidecar
+        tag: 1.27.5
+    image:
+      registry: docker.io
+      repository: grafana/loki
+      tag: "3.2.0"
+    enabled: true
+    tableManager:
+      enabled: true
+      retention_deletes_enabled: true
+      retention_period: 720h
+
+    loki:
+      # disable log alert in paivate env
+      rulerConfig: 
+        storage: 
+          type: ""  
+      commonConfig:
+        replication_factor: 1
+      storage_config:
+        object_prefix: loki-controlplane
+      storage:
+        bucketNames:
+          chunks: test-bucket
+        type: s3
+        s3:
+          endpoint: minio.loki-tenant
+          accessKeyId: obtest-access
+          secretAccessKey: obtest-secret
+          s3ForcePathStyle: true
+          insecure: true
+
+    write:
+      # -- Number of replicas for the write
+      replicas: 1
+      persistence:
+        enableStatefulSetAutoDeletePVC: false
+        size: 10Gi
+        storageClass: 
+      resources:
+        requests:
+          memory: "1Gi"
+          cpu: "250m"
+        limits:
+          memory: "1Gi"
+          cpu: "1000m"
+
+    read:
+      replicas: 1
+      persistence:
+        enableStatefulSetAutoDeletePVC: true
+        size: 10Gi
+        storageClass: 
+      resources:
+        requests:
+          memory: "3Gi"
+          cpu: "250m"
+        limits:
+          memory: "3Gi"
+          cpu: "1000m"
+
+    backend:
+      replicas: 1
+      persistence:
+        enableStatefulSetAutoDeletePVC: true
+        size: 10Gi
+        storageClass: 
+      resources:
+        requests:
+          memory: "250Mi"
+          cpu: "200m"
+        limits:
+          memory: "250Mi"
+          cpu: "200m"
+
+    # Configuration for the gateway
+    gateway:
+      image:
+        registry: docker.io
+        repository: nginxinc/nginx-unprivileged
+        tag: 1.27-alpine
+      enabled: true
+      replicas: 1
+      resources:
+        requests:
+          memory: "250Mi"
+          cpu: "250m"
+        limits:
+          memory: "1Gi"
+          cpu: "1000m"
+
+  kube-prometheus-stack:
+    prometheus-node-exporter: 
+      image:
+        registry: quay.io
+        repository: prometheus/node-exporter
+        tag: v1.5.0
+    
+    prometheusOperator:
+      image: 
+        registry: quay.io
+        repository: prometheus-operator/prometheus-operator
+        tag: v0.63.0
+      prometheusConfigReloader: 
+        image:
+          registry: quay.io
+          repository: prometheus-operator/prometheus-config-reloader
+          # if not set appVersion field from Chart.yaml is used
+          tag: v0.63.0
+    
+    prometheus:
+      prometheusSpec:
+        image:
+          registry: quay.io
+          repository: prometheus/prometheus
+          tag: v2.42.0
+        retention: 14d
+        externalLabels:
+          clusterDetail: mo-ob-private-cluster
+        resources:
+          limits:
+            cpu: 1000m
+            memory: "2Gi"
+          requests:
+            cpu: 1000m
+            memory: "2Gi"
+        # [必要]根据部署的云厂商选择存储配置
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: ""
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 40Gi
+
+    kube-state-metrics:
+      enabled: true
+      image:
+        registry: registry.k8s.io
+        repository: kube-state-metrics/kube-state-metrics
+        tag: v2.8.2
+
+
+mo-ruler-stack:
+
+  alertmanager:
+    image:
+      repository: quay.io/prometheus/alertmanager
+      pullPolicy: IfNotPresent
+      tag: v0.27.0
+
+  grafana:
+    image:
+      repository: docker.io/grafana/grafana
+      tag: 10.1.6
+    initChownData: 
+      image:
+        repository: docker.io/library/busybox
+        tag: 1.31.1
+    sidecar: 
+      image:
+        repository: quay.io/kiwigrid/k8s-sidecar
+        tag: 1.25.1
+
+    persistence: 
+      enabled:          true
+      type:             "statefulset"
+      storageClassName: 
+      size:             "5Gi"
+    
+    service:
+      enabled: true
+      type: NodePort
+      targetPort: 3000
+      portName: service
