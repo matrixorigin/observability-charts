@@ -1,8 +1,12 @@
-.PHONY: local/up
-local/up: cluster/up  ## (beta) deploy all containers locally via tilt (k8s cluster will be created if it doesn't exist)
-	tilt up
+.PHONY: moc/up
+moc/up: cluster/up  ## (beta) deploy all containers locally via tilt (k8s cluster will be created if it doesn't exist)
+	TILT_COMMAND=moc tilt up
 
-.PHONY: local/down
+.PHONY: private/up
+private/up: cluster/up
+	TILT_COMMAND=private tilt up
+
+.PHONY: down
 local/down:  ## (beta) remove all containers deployed via tilt
 	tilt down
 
