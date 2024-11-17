@@ -5,14 +5,27 @@ mo-ob-opensource:
       registry: "docker.io"
       repository: grafana/alloy
       tag: v1.3.1
-
+    alloy:
+      resources: 
+        limits:
+          cpu: 500m
+          memory: 512Mi
+        requests:
+          cpu: 200m
+          memory: 200Mi
 
   promtail:
     image:
       registry: docker.io
       repository: grafana/promtail
       tag: "2.8.4"
-
+    resources:
+      limits:
+        cpu: "200m"
+        memory: "200Mi"
+      requests:
+        cpu: "100m"
+        memory: "200Mi"
   loki:
     sidecar: 
       image:
@@ -33,8 +46,8 @@ mo-ob-opensource:
       rulerConfig: 
         storage: 
           type: ""  
-      commonConfig:
-        replication_factor: 1
+      # commonConfig:
+      #   replication_factor: 1
       storage_config:
         object_prefix: loki-controlplane
       storage:
@@ -50,46 +63,46 @@ mo-ob-opensource:
 
     write:
       # -- Number of replicas for the write
-      replicas: 1
+      replicas: 3
       persistence:
         enableStatefulSetAutoDeletePVC: false
-        size: 10Gi
+        size: 20Gi
         storageClass: 
       resources:
         requests:
-          memory: "1Gi"
-          cpu: "250m"
+          memory: "2Gi"
+          cpu: "500m"
         limits:
-          memory: "1Gi"
+          memory: "2Gi"
           cpu: "1000m"
 
     read:
-      replicas: 1
+      replicas: 3
       persistence:
         enableStatefulSetAutoDeletePVC: true
-        size: 10Gi
+        size: 20Gi
         storageClass: 
       resources:
         requests:
-          memory: "3Gi"
-          cpu: "250m"
+          memory: "2Gi"
+          cpu: "500m"
         limits:
-          memory: "3Gi"
+          memory: "2Gi"
           cpu: "1000m"
 
     backend:
       replicas: 1
       persistence:
         enableStatefulSetAutoDeletePVC: true
-        size: 10Gi
+        size: 20Gi
         storageClass: 
       resources:
         requests:
-          memory: "250Mi"
-          cpu: "200m"
+          memory: "2Gi"
+          cpu: "500m"
         limits:
-          memory: "250Mi"
-          cpu: "200m"
+          memory: "2Gi"
+          cpu: "1000m"
 
     # Configuration for the gateway
     gateway:
@@ -101,8 +114,8 @@ mo-ob-opensource:
       replicas: 1
       resources:
         requests:
-          memory: "250Mi"
-          cpu: "250m"
+          memory: "500Mi"
+          cpu: "500m"
         limits:
           memory: "1Gi"
           cpu: "1000m"
@@ -137,11 +150,11 @@ mo-ob-opensource:
           clusterDetail: mo-ob-private-cluster
         resources:
           limits:
-            cpu: 1000m
-            memory: "2Gi"
+            cpu: 2000m
+            memory: "6Gi"
           requests:
-            cpu: 1000m
-            memory: "2Gi"
+            cpu: 2000m
+            memory: "6Gi"
         # [必要]根据部署的云厂商选择存储配置
         storageSpec:
           volumeClaimTemplate:
@@ -150,7 +163,7 @@ mo-ob-opensource:
               accessModes: ["ReadWriteOnce"]
               resources:
                 requests:
-                  storage: 40Gi
+                  storage: 100Gi
 
     kube-state-metrics:
       enabled: true
@@ -186,7 +199,13 @@ mo-ruler-stack:
       type:             "statefulset"
       storageClassName: 
       size:             "5Gi"
-    
+    resources: 
+      limits: 
+        cpu:    "1000m"
+        memory: "2Gi"
+      requests: 
+        cpu:    "1000m"
+        memory: "2Gi"
     service:
       enabled: true
       type: NodePort

@@ -9,7 +9,14 @@ mo-ob-opensource:
       tag: v1.3.1
     configReloader:
       enabled: false
-
+    alloy:
+      resources: 
+        limits:
+          cpu: 500m
+          memory: 512Mi
+        requests:
+          cpu: 200m
+          memory: 200Mi
   promtail:
     image:
       registry: docker.io
