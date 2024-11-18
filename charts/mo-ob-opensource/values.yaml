@@ -168,20 +168,14 @@ loki:
     # -- Storage config. Providing this will automatically populate all necessary storage configs in the templated config.
     storage:
       bucketNames:
-        # use same bucket
         chunks: test-bucket
-        ruler: test-bucket
       type: s3
       s3:
-        # s3: null
-        # e.g. s3.us-west-2.amazonaws.com
-        endpoint: null
-        # e.g. us-west-2
-        region: null
-        secretAccessKey: null
-        accessKeyId: null
-        s3ForcePathStyle: false
-        insecure: false
+        endpoint: minio.loki-tenant
+        accessKeyId: obtest-access
+        secretAccessKey: obtest-secret
+        s3ForcePathStyle: true
+        insecure: true
     # -- Check https://grafana.com/docs/loki/latest/configuration/#schema_config for more info on how to configure schemas
     schemaConfig: 
       configs:

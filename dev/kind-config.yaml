@@ -10,3 +10,5 @@ kindV1Alpha4Cluster:
       image: kindest/node:v1.27.3
     - role: worker
       image: kindest/node:v1.27.3
+    - role: worker
+      image: kindest/node:v1.27.3

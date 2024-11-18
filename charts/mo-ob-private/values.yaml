@@ -1,11 +1,27 @@
 mo-ob-opensource:
   enabled: true
 
+  alloy:
+    enabled: true
+    image:
+      registry: "docker.io"
+      repository: grafana/alloy
+      tag: v1.3.1
+    configReloader:
+      enabled: false
+    alloy:
+      resources: 
+        limits:
+          cpu: 500m
+          memory: 512Mi
+        requests:
+          cpu: 200m
+          memory: 200Mi
   promtail:
-    # image: 
-    #   registry:   "registry.cn-hangzhou.aliyuncs.com/ack-cos"
-    #   repository: "promtail"
-    #   tag:        "2.8.4"
+    image:
+      registry: docker.io
+      repository: grafana/promtail
+      tag: "2.8.4"
     enabled: true
     resources:
       limits:
@@ -15,12 +31,16 @@ mo-ob-opensource:
         cpu: "10m"
         memory: "20Mi"
   loki:
-    # sidecar: 
-    #   image: 
-    #     repository: "registry.cn-hangzhou.aliyuncs.com/ack-cos/k8s-sidecar"
-    # image: 
-    #   registry:   "registry.cn-hangzhou.aliyuncs.com/ack-cos"
-    #   repository: "loki"
+    lokiCanary:
+      enabled: false
+    sidecar: 
+      image:
+        repository: kiwigrid/k8s-sidecar
+        tag: 1.27.5
+    image:
+      registry: docker.io
+      repository: grafana/loki
+      tag: "3.2.0"
     enabled: true
     tableManager:
       enabled: true
@@ -37,18 +57,18 @@ mo-ob-opensource:
           type: ""  
       commonConfig:
         replication_factor: 1
+      storage_config:
+        object_prefix: loki-controlplane
       storage:
         bucketNames:
-          chunks: ""
+          chunks: test-bucket
         type: s3
         s3:
-          # s3: null
-          endpoint: 
-          # region: us-west-2
-          secretAccessKey:
-          accessKeyId:
-          s3ForcePathStyle: false
-          insecure: false
+          endpoint: minio.loki-tenant
+          accessKeyId: obtest-access
+          secretAccessKey: obtest-secret
+          s3ForcePathStyle: true
+          insecure: true
       schemaConfig:
         configs:
           - from: "2024-01-01"
@@ -56,7 +76,7 @@ mo-ob-opensource:
               period: 24h
               prefix: index_
             object_store: s3
-            schema: v12
+            schema: v13
             store: tsdb
     write:
       # -- Number of replicas for the write
@@ -103,6 +123,10 @@ mo-ob-opensource:
 
     # Configuration for the gateway
     gateway:
+      image:
+        registry: docker.io
+        repository: nginxinc/nginx-unprivileged
+        tag: 1.27-alpine
       enabled: true
       replicas: 1
       resources:
@@ -117,9 +141,10 @@ mo-ob-opensource:
     enabled: true
     
     prometheus-node-exporter: 
-      # image: 
-      #   registry:   "registry.cn-hangzhou.aliyuncs.com/ack-cos"
-      #   repository: "node-exporter"
+      image:
+        registry: quay.io
+        repository: prometheus/node-exporter
+        tag: v1.5.0
       enabled: true
       resources: 
         limits: 
@@ -130,13 +155,16 @@ mo-ob-opensource:
           memory: "20Mi"
     
     prometheusOperator:
-      # image: 
-      #   registry:   "registry.cn-hangzhou.aliyuncs.com/ack-cos"
-      #   repository: "prometheus-operator"
-      # prometheusConfigReloader: 
-      #   image: 
-      #     registry:   "registry.cn-hangzhou.aliyuncs.com/ack-cos"
-      #     repository: "prometheus-config-reloader"
+      image: 
+        registry: quay.io
+        repository: prometheus-operator/prometheus-operator
+        tag: v0.63.0
+      prometheusConfigReloader: 
+        image:
+          registry: quay.io
+          repository: prometheus-operator/prometheus-config-reloader
+          # if not set appVersion field from Chart.yaml is used
+          tag: v0.63.0
       admissionWebhooks: 
         enabled: false
         patch: 
@@ -151,9 +179,10 @@ mo-ob-opensource:
     
     prometheus:
       prometheusSpec:
-        # image: 
-        #   registry:   "registry.cn-hangzhou.aliyuncs.com/ack-cos"
-        #   repository: "prometheus"
+        image:
+          registry: quay.io
+          repository: prometheus/prometheus
+          tag: v2.42.0
         retention: 21d
         externalLabels:
           clusterDetail: mo-ob-private-cluster
@@ -168,7 +197,7 @@ mo-ob-opensource:
         storageSpec:
           volumeClaimTemplate:
             spec:
-              storageClassName: ""
+              storageClassName: standard
               accessModes: ["ReadWriteOnce"]
               resources:
                 requests:
@@ -425,9 +454,10 @@ mo-ob-opensource:
     
     kube-state-metrics:
       enabled: true
-      # image: 
-      #   registry:   "registry.cn-hangzhou.aliyuncs.com/ack-cos"
-      #   repository: "kube-state-metrics"
+      image:
+        registry: registry.k8s.io
+        repository: kube-state-metrics/kube-state-metrics
+        tag: v2.8.2
       prometheus:
         monitor:
           enabled: ture
@@ -445,17 +475,64 @@ mo-ruler-stack:
       tag: v1.1.7
 
   alertmanager:
-    enabled: false
+    image:
+      repository: quay.io/prometheus/alertmanager
+      pullPolicy: IfNotPresent
+      tag: v0.27.0
+    enabled: true
+    persistence:
+      enabled: false
+    config:
+      global:
+        resolve_timeout: 5m
+        smtp_from: "it@matrixorigin.cn"
+        smtp_hello: "smtp.exmail.qq.com:465"
+        smtp_smarthost: "smtp.exmail.qq.com:465"
+        smtp_auth_username: "it@matrixorigin.cn"
+        smtp_auth_password_file: "/tmp/alertmanager-email-smtp/smtp-authorization"
+        smtp_require_tls: false
+      route:
+        group_by: ["alertname"] # 分组标签
+        group_wait: 10s # 告警等待时间。告警产生后等待10s，如果有同组告警一起发出
+        group_interval: 10s # 两组告警的间隔时间
+        repeat_interval: 1d # 重复告警的间隔时间，可减少相同邮件的发送频率
+        receiver: "null"
+        # routes: 
+      receivers:
+        - name: "null"
+
+    extraSecretMounts:
+      # kubectl -n mo-ob create secret generic alertmanager-email-secret --from-literal=smtp-authorization=[your-smtp-password]
+      - name: smtp-authorization
+        mountPath: /tmp/alertmanager-email-smtp
+        subPath: ""
+        secretName: alertmanager-email-secret
+        readOnly: true
+      - name: web-config
+        mountPath: /tmp/alertmanager-web-config
+        subPath: ""
+        secretName: alertmanager-web-config
+        readOnly: true
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 10m
+        memory: 32Mi
 
   grafana:
-    # image: 
-    #   repository: "registry.cn-hangzhou.aliyuncs.com/ack-cos/grafana"
-    # initChownData: 
-    #   image: 
-    #     "repository": "registry.cn-hangzhou.aliyuncs.com/ack-cos/busybox"
-    # sidecar: 
-    #   image: 
-    #     repository: "registry.cn-hangzhou.aliyuncs.com/ack-cos/k8s-sidecar"
+    image:
+      repository: docker.io/grafana/grafana
+      tag: 10.1.6
+    initChownData: 
+      image:
+        repository: docker.io/library/busybox
+        tag: 1.31.1
+    sidecar: 
+      image:
+        repository: quay.io/kiwigrid/k8s-sidecar
+        tag: 1.25.1
       
     replicas: 1
     enabled: true
@@ -470,7 +547,7 @@ mo-ruler-stack:
     persistence: 
       enabled:          true
       type:             "statefulset"
-      storageClassName: ""
+      storageClassName: 
       size:             "5Gi"
     
     # static passwd
@@ -485,8 +562,7 @@ mo-ruler-stack:
     
     service:
       enabled: true
-      type: ClusterIP
-      port: 80
+      type: NodePort
       targetPort: 3000
       labels: {}
       portName: service
