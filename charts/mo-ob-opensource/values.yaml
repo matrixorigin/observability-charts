@@ -365,6 +365,11 @@ kube-prometheus-stack:
         enabled: false
     tolerations:
     - operator: Exists
+    rbac:
+      create: true
+    serviceAccount:
+      create: true
+      name:
   kubeStateMetrics:
     enabled: true
   kube-state-metrics:
@@ -372,6 +377,9 @@ kube-prometheus-stack:
     prometheus:
       monitor:
         enabled: false
+    serviceAccount:
+      create: true
+      name:
 
   prometheusOperator:
     enabled: true

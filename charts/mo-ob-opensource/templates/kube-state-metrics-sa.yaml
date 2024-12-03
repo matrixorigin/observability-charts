@@ -1,0 +1,9 @@
+{{- with .Values.kube-prometheus-stack -}}
+{{- if .kube-state-metrics.serviceAccount.create - }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .kube-state-metrics.serviceAccount.name }}
+  namespace: {{ .Release.Name }}
+{{- end -}}
+{{- end -}}
