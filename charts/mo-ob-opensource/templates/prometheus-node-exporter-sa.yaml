@@ -1,9 +1,9 @@
 {{- with .Values.kube-prometheus-stack -}}
-{{- if and .prometheus-node-exporter.rbac.create not .Values.serviceAccount.create -}}
+{{- if and .prometheus-node-exporter.rbac.create not .prometheus-node-exporter.serviceAccount.create -}}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ .prometheus-node-exporter.serviceAccountName }}
-  namespace: {{ .Release.Name }}
+  name: {{ .prometheus-node-exporter.serviceAccount.name }}
+  namespace: {{ $.Release.Name }}
 {{- end -}}
 {{- end -}}
