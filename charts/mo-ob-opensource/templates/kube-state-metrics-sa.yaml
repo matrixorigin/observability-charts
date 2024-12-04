@@ -1,9 +1,7 @@
-{{- with .Values.kube-prometheus-stack -}}
-{{- if .kube-state-metrics.serviceAccount.create - }}
+{{- if not .Values.serviceAccount.kubeStateMetrics.create -}}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ .kube-state-metrics.serviceAccount.name }}
+  name: {{ default "mo-ob-opensource-kube-state-metrics" .Values.serviceAccount.kubeStateMetrics.name }}
   namespace: {{ .Release.Name }}
-{{- end -}}
 {{- end -}}

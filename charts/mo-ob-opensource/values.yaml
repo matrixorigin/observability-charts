@@ -8,6 +8,28 @@ alerting:
 alertrules:
   enabled: false
 
+## handle chart kube-prometheus-stack's sub-chart serviceAccount create with imagePullSecrets case
+## cc https://github.com/matrixorigin/MO-Cloud/issues/4464
+## ---- IMPORTANT ----
+## this section MUST eq the 'kube-prometheus-stack' section, like:
+# kube-prometheus-stack:
+#   prometheus-node-exporter:
+#     serviceAccount:
+#       create: true
+#       name:
+#   kube-state-metrics:
+#     enabled: true
+#     serviceAccount:
+#       create: true
+#       name:
+serviceAccount:
+  prometheusNodeExporter:
+    create: true
+    name: "mo-ob-opensource-prometheus-node-exporter"
+  kubeStateMetrics:
+    create: true
+    name: "mo-ob-opensource-kube-state-metrics"
+
 defaultDatasource:
   # from matrixorigin/ops
   # cooperate with template templates/loki-datasource.yaml
@@ -15,7 +37,6 @@ defaultDatasource:
 
 # alloy for k8s events
 alloy:
-  
   image:
     registry: "docker.io"
     repository: grafana/alloy
