@@ -21,6 +21,7 @@ alertrules:
 serviceAccount:
   kubeStateMetrics:
     handle: false
+    ## if handle = ture, pls sync this value with kube-state-metrics.serviceAccount.name
     name: "mo-ob-opensource-kube-state-metrics"
 
 defaultDatasource:
