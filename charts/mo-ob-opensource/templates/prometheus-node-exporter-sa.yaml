@@ -1,7 +1,0 @@
-{{- if not .Values.serviceAccount.prometheusNodeExporter.create -}}
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: {{ default "mo-ob-opensource-prometheus-node-exporter" .Values.serviceAccount.prometheusNodeExporter.name }}
-  namespace: {{ $.Release.Name }}
-{{- end -}}
