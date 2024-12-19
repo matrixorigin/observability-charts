@@ -1,7 +1,9 @@
-{{- if not .Values.serviceAccount.kubeStateMetrics.create -}}
+{{- if .Values.serviceAccount.kubeStateMetrics.handle -}}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ default "mo-ob-opensource-kube-state-metrics" .Values.serviceAccount.kubeStateMetrics.name }}
-  namespace: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "mo-ob-opensource.labels" . | indent 4 }}
 {{- end -}}
