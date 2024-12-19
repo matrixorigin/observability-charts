@@ -4,4 +4,6 @@ kind: ServiceAccount
 metadata:
   name: {{ default "mo-ob-opensource-kube-state-metrics" .Values.serviceAccount.kubeStateMetrics.name }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "mo-ob-opensource.labels" . | indent 4 }}
 {{- end -}}
