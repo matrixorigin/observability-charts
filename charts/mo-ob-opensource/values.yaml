@@ -29,6 +29,13 @@ defaultDatasource:
   # cooperate with template templates/loki-datasource.yaml
   loki: true
 
+## common
+nameOverride: ""
+namespaceOverride: ""
+selectorOverride: {}
+customLabels: []
+releaseLabel: []
+
 # alloy for k8s events
 alloy:
   image:
