@@ -53,7 +53,7 @@ entries:
       repository: https://grafana.github.io/helm-charts
       version: 0.6.1
     description: mo-ob-opensource's Helm chart for Kubernetes
-    digest: ad204addc9e3d7b0afe0cd2fe4f118a26675204980b797a427160d3acd98e701
+    digest: 3a67f7a6a7dbb7e8fb3af6c5af7f1fccb175f151c0c1ab5792b39fa6f07e1e6f
     name: mo-ob-opensource
     type: application
     urls:
