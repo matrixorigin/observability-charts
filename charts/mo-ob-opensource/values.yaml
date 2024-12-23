@@ -390,6 +390,7 @@ victoria-metrics-k8s-stack:
     operator:
       # -- By default, operator converts prometheus-operator objects.
       disable_prometheus_converter: false
+      enable_converter_ownership: true
 
   defaultDashboards:
     # -- Enable custom dashboards installation
