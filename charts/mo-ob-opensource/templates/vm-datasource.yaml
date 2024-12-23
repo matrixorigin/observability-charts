@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mo-vm-datasource
+  labels:
+    app: victoriametrics
+    grafana_datasource: "1"
+data:
+  vm-datasource.yaml: |-
+    apiVersion: 1
+    datasources:
+    - name: MO-VictoriaMetrics
+      type: prometheus
+      uid: victoriametrics
+      url: http://vmsingle-{{ .Release.Name }}-victoria-metrics-k8s-stack:8429
+      access: proxy

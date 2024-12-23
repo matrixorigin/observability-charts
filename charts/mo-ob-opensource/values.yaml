@@ -372,7 +372,7 @@ loki:
       enabled: false
 
 
-vm:
+victoria-metrics-k8s-stack:
   enabled: true
 
   # -- VictoriaMetrics Operator dependency chart configuration. More values can be found [here](https://docs.victoriametrics.com/helm/victoriametrics-operator#parameters). Also checkout [here](https://docs.victoriametrics.com/operator/vars) possible ENV variables to configure operator behaviour
@@ -381,7 +381,7 @@ vm:
     crds:
       plain: true
       cleanup:
-        enabled: true
+        enabled: false
         image:
           repository: bitnami/kubectl
           pullPolicy: IfNotPresent
@@ -439,7 +439,6 @@ vm:
           requests:
             storage: 40Gi      
 
-
   alertmanager:
     # -- Create VMAlertmanager CR
     enabled: false
@@ -459,28 +458,17 @@ vm:
       evaluationInterval: 15s
       extraArgs:
         http.pathPrefix: "/"
-
+      notifier:
+        url: http://mo-ob-alertmanager.mo-ob:9093
+        basicAuth:
+          username: 
+            key: username
+            name: alertmanager-auth-secret
+          password: 
+            key: password
+            name: alertmanager-auth-secret 
       # External labels to add to all generated recording rules and alerts
       externalLabels: {}
-
-    # -- (object) Extra VMAlert annotation templates
-    templateFiles:
-      {}
-      # template_1.tmpl: |-
-      #   {{ define "hello" -}}
-      #   hello, Victoria!
-      #   {{- end }}
-      # template_2.tmpl: ""
-
-    # -- Allows to configure static notifiers, discover notifiers via Consul and DNS,
-    # see specification [here](https://docs.victoriametrics.com/vmalert/#notifier-configuration-file).
-    # This configuration will be created as separate secret and mounted to VMAlert pod.
-    additionalNotifierConfigs: {}
-      # dns_sd_configs:
-      #   - names:
-      #       - my.domain.com
-      #     type: 'A'
-      #     port: 9093
 
   vmagent:
     # -- Create VMAgent CR
@@ -491,6 +479,9 @@ vm:
     spec:
       port: "8429"
       selectAllByDefault: true
+      additionalScrapeConfigs:
+        name: vm-additional-scrape-configs
+        key: prometheus-additional.yaml
       scrapeInterval: 20s
       externalLabels: {}
         # For multi-cluster setups it is useful to use "cluster" label to identify the metrics source.
@@ -502,22 +493,10 @@ vm:
         # but makes vmagent debugging UI less informative. See: https://docs.victoriametrics.com/vmagent/#relabel-debug
         promscrape.dropOriginalLabels: "true"
 
-      hosts:
-        - vmagent.domain.com
-      extraPaths: []
-      # - path: /*
-      #   pathType: Prefix
-      #   backend:
-      #     service:
-      #       name: ssl-redirect
-      #       port:
-      #         name: service
-
-
   defaultDatasources:
     victoriametrics:
       # -- Create per replica prometheus compatible datasource
-      perReplica: false
+      perReplica: true
       # -- List of prometheus compatible datasource configurations.
       # VM `url` will be added to each of them in templates.
       datasources:
@@ -539,6 +518,9 @@ vm:
   # -- kube-state-metrics dependency chart configuration. For possible values check [here](https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-state-metrics/values.yaml)
   kube-state-metrics:
     enabled: false
+    serviceAccount:
+      create: false
+
 
   # -- Component scraping the kubelets
   kubelet:

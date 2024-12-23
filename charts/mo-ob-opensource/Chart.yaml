@@ -21,7 +21,7 @@ dependencies:
   name: alloy
   repository: https://grafana.github.io/helm-charts
   version: 0.6.1
-- condition: vm.enabled
+- condition: victoria-metrics-k8s-stack.enabled
   name: victoria-metrics-k8s-stack
   repository: https://victoriametrics.github.io/helm-charts
   version: 0.33.0
