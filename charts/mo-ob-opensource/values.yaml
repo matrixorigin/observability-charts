@@ -371,6 +371,214 @@ loki:
     lokiCanary:
       enabled: false
 
+
+vm:
+  enabled: true
+
+  # -- VictoriaMetrics Operator dependency chart configuration. More values can be found [here](https://docs.victoriametrics.com/helm/victoriametrics-operator#parameters). Also checkout [here](https://docs.victoriametrics.com/operator/vars) possible ENV variables to configure operator behaviour
+  victoria-metrics-operator:
+    enabled: true
+    crds:
+      plain: true
+      cleanup:
+        enabled: true
+        image:
+          repository: bitnami/kubectl
+          pullPolicy: IfNotPresent
+    serviceMonitor:
+      enabled: true
+    operator:
+      # -- By default, operator converts prometheus-operator objects.
+      disable_prometheus_converter: false
+
+  defaultDashboards:
+    # -- Enable custom dashboards installation
+    enabled: true
+    defaultTimezone: utc
+    labels: {}
+    annotations: {}
+    grafanaOperator:
+      # -- Create dashboards as CRDs (requires grafana-operator to be installed)
+      enabled: false
+      spec:
+        instanceSelector:
+          matchLabels:
+            dashboards: grafana
+        allowCrossNamespaceImport: false
+    # -- Create dashboards as ConfigMap despite dependency it requires is not installed
+    dashboards:
+      victoriametrics-vmalert:
+        enabled: true
+      victoriametrics-operator:
+        enabled: true
+      # -- In ArgoCD using client-side apply this dashboard reaches annotations size limit and causes k8s issues without server side apply
+      # See [this issue](https://github.com/VictoriaMetrics/helm-charts/tree/disable-node-exporter-dashboard-by-default/charts/victoria-metrics-k8s-stack#metadataannotations-too-long-must-have-at-most-262144-bytes-on-dashboards)
+      node-exporter-full:
+        enabled: false
+
+  # -- Create default rules for monitoring the cluster
+  defaultRules:
+    create: false
+
+  # Configures vmsingle params
+  vmsingle:
+    # -- VMSingle annotations
+    annotations: {}
+    # -- Create VMSingle CR
+    enabled: true
+    # -- Full spec for VMSingle CRD. Allowed values describe [here](https://docs.victoriametrics.com/operator/api#vmsinglespec)
+    spec:
+      port: "8429"
+      # -- Data retention period. Possible units character: h(ours), d(ays), w(eeks), y(ears), if no unit character specified - month. The minimum retention period is 24h. See these [docs](https://docs.victoriametrics.com/single-server-victoriametrics/#retention)
+      retentionPeriod: "5d"
+      replicaCount: 1
+      storage:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 40Gi      
+
+
+  alertmanager:
+    # -- Create VMAlertmanager CR
+    enabled: false
+
+  vmalert:
+    # -- VMAlert annotations
+    annotations: {}
+    # -- Create VMAlert CR
+    enabled: true
+
+    # -- Controls whether VMAlert should use VMAgent or VMInsert as a target for remotewrite
+    remoteWriteVMAgent: false
+    # -- (object) Full spec for VMAlert CRD. Allowed values described [here](https://docs.victoriametrics.com/operator/api#vmalertspec)
+    spec:
+      port: "8080"
+      selectAllByDefault: true
+      evaluationInterval: 15s
+      extraArgs:
+        http.pathPrefix: "/"
+
+      # External labels to add to all generated recording rules and alerts
+      externalLabels: {}
+
+    # -- (object) Extra VMAlert annotation templates
+    templateFiles:
+      {}
+      # template_1.tmpl: |-
+      #   {{ define "hello" -}}
+      #   hello, Victoria!
+      #   {{- end }}
+      # template_2.tmpl: ""
+
+    # -- Allows to configure static notifiers, discover notifiers via Consul and DNS,
+    # see specification [here](https://docs.victoriametrics.com/vmalert/#notifier-configuration-file).
+    # This configuration will be created as separate secret and mounted to VMAlert pod.
+    additionalNotifierConfigs: {}
+      # dns_sd_configs:
+      #   - names:
+      #       - my.domain.com
+      #     type: 'A'
+      #     port: 9093
+
+  vmagent:
+    # -- Create VMAgent CR
+    enabled: true
+    # -- VMAgent annotations
+    annotations: {}
+    # -- (object) Full spec for VMAgent CRD. Allowed values described [here](https://docs.victoriametrics.com/operator/api#vmagentspec)
+    spec:
+      port: "8429"
+      selectAllByDefault: true
+      scrapeInterval: 20s
+      externalLabels: {}
+        # For multi-cluster setups it is useful to use "cluster" label to identify the metrics source.
+        # For example:
+        # cluster: cluster-name
+      extraArgs:
+        promscrape.streamParse: "true"
+        # Do not store original labels in vmagent's memory by default. This reduces the amount of memory used by vmagent
+        # but makes vmagent debugging UI less informative. See: https://docs.victoriametrics.com/vmagent/#relabel-debug
+        promscrape.dropOriginalLabels: "true"
+
+      hosts:
+        - vmagent.domain.com
+      extraPaths: []
+      # - path: /*
+      #   pathType: Prefix
+      #   backend:
+      #     service:
+      #       name: ssl-redirect
+      #       port:
+      #         name: service
+
+
+  defaultDatasources:
+    victoriametrics:
+      # -- Create per replica prometheus compatible datasource
+      perReplica: false
+      # -- List of prometheus compatible datasource configurations.
+      # VM `url` will be added to each of them in templates.
+      datasources:
+        - name: VictoriaMetrics
+          type: prometheus
+          isDefault: true
+        - name: VictoriaMetrics (DS)
+          isDefault: false
+          type: victoriametrics-datasource
+
+  # -- Grafana dependency chart configuration. For possible values refer [here](https://github.com/grafana/helm-charts/tree/main/charts/grafana#configuration)
+  grafana:
+    enabled: false
+
+  # -- prometheus-node-exporter dependency chart configuration. For possible values check [here](https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus-node-exporter/values.yaml)
+  prometheus-node-exporter:
+    enabled: false
+
+  # -- kube-state-metrics dependency chart configuration. For possible values check [here](https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-state-metrics/values.yaml)
+  kube-state-metrics:
+    enabled: false
+
+  # -- Component scraping the kubelets
+  kubelet:
+    enabled: false
+
+  # Component scraping the kube api server
+  kubeApiServer:
+    # -- Enable Kube Api Server metrics scraping
+    enabled: false
+
+  # Component scraping the kube controller manager
+  kubeControllerManager:
+    # -- Enable kube controller manager metrics scraping
+    enabled: false
+
+  # Component scraping kubeDns. Use either this or coreDns
+  kubeDns:
+    # -- Enabled KubeDNS metrics scraping
+    enabled: false
+
+  # Component scraping coreDns. Use either this or kubeDns
+  coreDns:
+    # -- Enabled CoreDNS metrics scraping
+    enabled: false
+
+  # Component scraping etcd
+  kubeEtcd:
+    # -- Enabled KubeETCD metrics scraping
+    enabled: false
+
+  # Component scraping kube scheduler
+  kubeScheduler:
+    # -- Enable KubeScheduler metrics scraping
+    enabled: false
+
+  # Component scraping kube proxy
+  kubeProxy:
+    # -- Enable kube proxy metrics scraping
+    enabled: false
+
 kube-prometheus-stack:
   enabled: true
   alertmanager:
