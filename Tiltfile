@@ -65,6 +65,8 @@ def deploy_ob_private():
 if command == 'moc':
     deploy_minio()
     deploy_moc_ob()
+elif command == 'ob-single':
+    deploy_moc_ob()
 elif command == 'private':
     deploy_minio()
     deploy_ob_private()

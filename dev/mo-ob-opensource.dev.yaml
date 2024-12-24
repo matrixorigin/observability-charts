@@ -1,9 +1,9 @@
 
 promtail:
-  enabled: true
+  enabled: false
 
 loki:
-  enabled: true
+  enabled: false
   tableManager:
     enabled: false
   monitoring:
@@ -90,6 +90,12 @@ loki:
       limits:
         memory: "2Gi"
         cpu: "2000m"
+
+alloy:
+  enabled: false
+
+victoria-metrics-k8s-stack: 
+  enabled: true
 
 kube-prometheus-stack:
   enabled: true

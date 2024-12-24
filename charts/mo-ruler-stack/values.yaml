@@ -350,7 +350,7 @@ moRuler:
 
 # webhook adapter for alertmanger to send alert to wecom
 alertmanagerWebhookAdapter:
-  enabled: true
+  enabled: false
   image:
     repository: ez4bruce3280/alertmanager-webhook-adapter
     tag: v1.1.7
