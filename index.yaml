@@ -34,6 +34,37 @@ entries:
   mo-ob-opensource:
   - apiVersion: v2
     appVersion: 0.9.0
+    created: "2024-12-25T07:53:43.21104836Z"
+    dependencies:
+    - condition: kube-prometheus-stack.enabled
+      name: kube-prometheus-stack
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 45.9.1
+    - condition: loki.enabled
+      name: loki
+      repository: https://grafana.github.io/helm-charts
+      version: 6.19.0
+    - condition: promtail.enabled
+      name: promtail
+      repository: https://grafana.github.io/helm-charts
+      version: 6.15.1
+    - condition: alloy.enabled
+      name: alloy
+      repository: https://grafana.github.io/helm-charts
+      version: 0.6.1
+    - condition: victoria-metrics-k8s-stack.enabled
+      name: victoria-metrics-k8s-stack
+      repository: https://victoriametrics.github.io/helm-charts
+      version: 0.33.0
+    description: mo-ob-opensource's Helm chart for Kubernetes
+    digest: a1531f8c1e54407cf7244af9d4d9344501665ad01bcb67a172f5567d4bbbe74e
+    name: mo-ob-opensource
+    type: application
+    urls:
+    - https://github.com/matrixorigin/observability-charts/releases/download/chart-mo-ob-opensource-1.0.9-alpha1/mo-ob-opensource-1.0.9-alpha1.tgz
+    version: 1.0.9-alpha1
+  - apiVersion: v2
+    appVersion: 0.9.0
     created: "2024-12-24T03:04:07.306519335Z"
     dependencies:
     - condition: kube-prometheus-stack.enabled
@@ -219,29 +250,6 @@ entries:
     version: 1.0.3-alpha.2
   - apiVersion: v2
     appVersion: 0.9.0
-    created: "2024-05-30T09:54:51.164650988Z"
-    dependencies:
-    - condition: kube-prometheus-stack.enabled
-      name: kube-prometheus-stack
-      repository: https://prometheus-community.github.io/helm-charts
-      version: 45.9.1
-    - condition: loki.enabled
-      name: loki
-      repository: https://grafana.github.io/helm-charts
-      version: 6.4.1
-    - condition: promtail.enabled
-      name: promtail
-      repository: https://grafana.github.io/helm-charts
-      version: 6.15.1
-    description: mo-ob-opensource's Helm chart for Kubernetes
-    digest: 0582916f4e62f3a54eb53025f5cac404d4ab2c5c90d22d2f3aa5a36d0531fe60
-    name: mo-ob-opensource
-    type: application
-    urls:
-    - https://github.com/matrixone-cloud/observability-charts/releases/download/chart-mo-ob-opensource-1.0.3-alpha.1/mo-ob-opensource-1.0.3-alpha.1.tgz
-    version: 1.0.3-alpha.1
-  - apiVersion: v2
-    appVersion: 0.9.0
     created: "2024-06-28T10:08:00.33043594Z"
     dependencies:
     - condition: kube-prometheus-stack.enabled
@@ -258,6 +266,29 @@ entries:
       version: 6.15.1
     description: mo-ob-opensource's Helm chart for Kubernetes
     digest: 854287e56230b9d06ad55b9463f26b853d7c2267f4f55efbf32aece5ebfdb256
+    name: mo-ob-opensource
+    type: application
+    urls:
+    - https://github.com/matrixone-cloud/observability-charts/releases/download/chart-mo-ob-opensource-1.0.3-alpha.1/mo-ob-opensource-1.0.3-alpha.1.tgz
+    version: 1.0.3-alpha.1
+  - apiVersion: v2
+    appVersion: 0.9.0
+    created: "2024-05-30T09:54:51.164650988Z"
+    dependencies:
+    - condition: kube-prometheus-stack.enabled
+      name: kube-prometheus-stack
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 45.9.1
+    - condition: loki.enabled
+      name: loki
+      repository: https://grafana.github.io/helm-charts
+      version: 6.4.1
+    - condition: promtail.enabled
+      name: promtail
+      repository: https://grafana.github.io/helm-charts
+      version: 6.15.1
+    description: mo-ob-opensource's Helm chart for Kubernetes
+    digest: 0582916f4e62f3a54eb53025f5cac404d4ab2c5c90d22d2f3aa5a36d0531fe60
     name: mo-ob-opensource
     type: application
     urls:
@@ -719,4 +750,4 @@ entries:
     urls:
     - https://github.com/matrixone-cloud/observability-charts/releases/download/chart-mo-ruler-stack-1.0.0-alpha.12/mo-ruler-stack-1.0.0-alpha.12.tgz
     version: 1.0.0-alpha.12
-generated: "2024-12-24T03:04:07.479072898Z"
+generated: "2024-12-25T07:53:43.21124044Z"
