@@ -371,8 +371,12 @@ loki:
     lokiCanary:
       enabled: false
 
+vmDatasource:
+  vmService: "mo-ob-victoria-metrics"
 
 victoria-metrics-k8s-stack:
+  fullnameOverride: "mo-ob-victoria-metrics"
+
   enabled: true
 
   # -- VictoriaMetrics Operator dependency chart configuration. More values can be found [here](https://docs.victoriametrics.com/helm/victoriametrics-operator#parameters). Also checkout [here](https://docs.victoriametrics.com/operator/vars) possible ENV variables to configure operator behaviour
