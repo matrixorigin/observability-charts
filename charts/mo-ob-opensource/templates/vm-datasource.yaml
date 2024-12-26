@@ -12,5 +12,5 @@ data:
     - name: MO-VictoriaMetrics
       type: prometheus
       uid: victoriametrics
-      url: http://{{ .Values.vmDatasource.vmService }}:8429
+      url: http://vmsingle-{{ .Values.vmDatasource.vmService }}:8429
       access: proxy
