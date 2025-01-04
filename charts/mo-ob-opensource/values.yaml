@@ -382,6 +382,10 @@ victoria-metrics-k8s-stack:
   # -- VictoriaMetrics Operator dependency chart configuration. More values can be found [here](https://docs.victoriametrics.com/helm/victoriametrics-operator#parameters). Also checkout [here](https://docs.victoriametrics.com/operator/vars) possible ENV variables to configure operator behaviour
   victoria-metrics-operator:
     enabled: true
+    image:
+      registry: ""
+      repository: victoriametrics/operator
+      tag: "v0.51.1"
     crds:
       plain: true
       cleanup:
@@ -433,6 +437,9 @@ victoria-metrics-k8s-stack:
     enabled: true
     # -- Full spec for VMSingle CRD. Allowed values describe [here](https://docs.victoriametrics.com/operator/api#vmsinglespec)
     spec:
+      image:
+        repository: victoriametrics/victoria-metrics
+        tag: "v1.108.1"
       port: "8429"
       # -- Data retention period. Possible units character: h(ours), d(ays), w(eeks), y(ears), if no unit character specified - month. The minimum retention period is 24h. See these [docs](https://docs.victoriametrics.com/single-server-victoriametrics/#retention)
       retentionPeriod: "5d"
@@ -440,6 +447,7 @@ victoria-metrics-k8s-stack:
       storage:
         accessModes:
           - ReadWriteOnce
+        storageClassName:
         resources:
           requests:
             storage: 40Gi      
@@ -458,7 +466,11 @@ victoria-metrics-k8s-stack:
     remoteWriteVMAgent: false
     # -- (object) Full spec for VMAlert CRD. Allowed values described [here](https://docs.victoriametrics.com/operator/api#vmalertspec)
     spec:
+      image:
+        repository: victoriametrics/vmalert
+        tag: "v1.108.1"
       port: "8080"
+      configReloaderImageTag: jimmidyson/configmap-reload:v0.3.0
       selectAllByDefault: true
       evaluationInterval: 15s
       extraArgs:
@@ -473,7 +485,8 @@ victoria-metrics-k8s-stack:
             key: password
             name: alertmanager-auth-secret 
       # External labels to add to all generated recording rules and alerts
-      externalLabels: {}
+      externalLabels: 
+        clusterDetail: dev-controlplane
 
   vmagent:
     # -- Create VMAgent CR
@@ -482,7 +495,11 @@ victoria-metrics-k8s-stack:
     annotations: {}
     # -- (object) Full spec for VMAgent CRD. Allowed values described [here](https://docs.victoriametrics.com/operator/api#vmagentspec)
     spec:
+      image:
+        repository: victoriametrics/vmagent
+        tag: "v1.108.1"
       port: "8429"
+      configReloaderImageTag: quay.io/prometheus-operator/prometheus-config-reloader:v0.68.0
       selectAllByDefault: true
       additionalScrapeConfigs:
         name: vm-additional-scrape-configs
