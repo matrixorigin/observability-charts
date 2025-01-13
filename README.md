@@ -139,6 +139,20 @@ kubectl get secret -n ${OBNS} grafana-admin-secret  -o jsonpath="{.data['admin-p
 # 进阶配置
 
 
+## mo-ob-opensource 从 1.0.8 升级到 1.0.9+
+
+从 1.0.9 开始引入了 victoria-metrics-k8s-stack 组件，如果需要从现有的 mo-ob 升级，则为了避免 [#4699](https://github.com/matrixorigin/MO-Cloud/issues/4699) 的问题，在 upgrade 前需要先手动 apply vm 的 crd
+
+
+![alt text](docs/chart/images/image.png)
+
+etc/crds/vm-crd.yaml 来自 victoria-metrics-operator 0.40.1 内，且已经以在 namespace=mo-ob，release=mo-ob-opensource 下设置好了相应的 annotate 和 label，可以直接 apply，如上图所示，如果有定制需求，需要修改上图中的 namespace 和 release 的值
+
+
+```
+kubectl apply -f etc/crds/vm-crd.yaml
+```
+
 ## 需要替换的镜像源
 
 如果部署的时候发现 image pull failed 等错误，需要替换镜像源（如阿里云），这些被替换的镜像都已经显示的写在了 chart 的 values.yaml 下，如 `charts/mo-ob-opensource/values.yaml` 下
