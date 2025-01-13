@@ -146,7 +146,8 @@ kubectl get secret -n ${OBNS} grafana-admin-secret  -o jsonpath="{.data['admin-p
 
 ![alt text](docs/chart/images/image.png)
 
-> etc/crds/vm-crd.yaml 已经以在 namespace=mo-ob，release=mo-ob-opensource 下设置好了，可以直接 apply，如上图所示，如果有定制需求，需要修改上图中的 namespace 和 release 的值
+etc/crds/vm-crd.yaml 来自 victoria-metrics-operator 0.40.1 内，且已经以在 namespace=mo-ob，release=mo-ob-opensource 下设置好了相应的 annotate 和 label，可以直接 apply，如上图所示，如果有定制需求，需要修改上图中的 namespace 和 release 的值
+
 
 ```
 kubectl apply -f etc/crds/vm-crd.yaml
