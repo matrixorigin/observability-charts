@@ -12,6 +12,12 @@ mo-ob-opensource:
         runAsGroup: 1000670000
         runAsNonRoot: true
         runAsUser: 1000670000
+    gateway:
+      podSecurityContext:
+        fsGroup: 1000670000
+        runAsGroup: 1000670000
+        runAsNonRoot: true
+        runAsUser: 1000670000
   kube-prometheus-stack:
     kube-state-metrics:
       securityContext:
