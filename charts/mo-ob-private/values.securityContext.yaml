@@ -13,8 +13,24 @@ mo-ob-opensource:
         runAsNonRoot: true
         runAsUser: 1000
   kube-prometheus-stack:
-    prometheus-node-exporter: {}
-    prometheusOperator: {}
+    kube-state-metrics:
+      securityContext:
+        enabled: true
+        runAsGroup: 65534
+        runAsUser: 65534
+        fsGroup: 65534
+    prometheus-node-exporter:
+      securityContext:
+        fsGroup: 65534
+        runAsGroup: 65534
+        runAsNonRoot: true
+        runAsUser: 65534
+    prometheusOperator:
+      securityContext:
+        fsGroup: 65534
+        runAsGroup: 65534
+        runAsNonRoot: true
+        runAsUser: 65534
     prometheus:
       prometheusSpec:
         securityContext:
