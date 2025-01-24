@@ -3,41 +3,41 @@ mo-ob-opensource:
   promtail:
     ## 这个不确定能否修改，需要验证一下
     podSecurityContext:
-      runAsUser: 0
-      runAsGroup: 0
+      runAsUser: 1000670000
+      runAsGroup: 1000670000
   loki:
     loki:
       podSecurityContext:
-        fsGroup: 10001
-        runAsGroup: 10001
+        fsGroup: 1000670000
+        runAsGroup: 1000670000
         runAsNonRoot: true
-        runAsUser: 1000
+        runAsUser: 1000670000
   kube-prometheus-stack:
     kube-state-metrics:
       securityContext:
         enabled: true
-        runAsGroup: 65534
-        runAsUser: 65534
-        fsGroup: 65534
+        runAsGroup: 1000670000
+        runAsUser: 1000670000
+        fsGroup: 1000670000
     prometheus-node-exporter:
       securityContext:
-        fsGroup: 65534
-        runAsGroup: 65534
+        fsGroup: 1000670000
+        runAsGroup: 1000670000
         runAsNonRoot: true
-        runAsUser: 65534
+        runAsUser: 1000670000
     prometheusOperator:
       securityContext:
-        fsGroup: 65534
-        runAsGroup: 65534
+        fsGroup: 1000670000
+        runAsGroup: 1000670000
         runAsNonRoot: true
-        runAsUser: 65534
+        runAsUser: 1000670000
     prometheus:
       prometheusSpec:
         securityContext:
-          runAsGroup: 2000
+          runAsGroup: 1000670000
           runAsNonRoot: true
-          runAsUser: 1000
-          fsGroup: 200
+          runAsUser: 1000670000
+          fsGroup: 1000670000
 
 mo-ruler-stack:
   alertmanagerWebhookAdapter: {}
