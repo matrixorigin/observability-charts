@@ -40,6 +40,55 @@ mo-ob-opensource:
           fsGroup: 1000670000
 
 mo-ruler-stack:
-  alertmanagerWebhookAdapter: {}
-  alertmanager: {}
-  grafana: {}
+  alertmanager:
+    podSecurityContext:
+      fsGroup: 1000670000
+    securityContext:
+      # capabilities:
+      #   drop:
+      #   - ALL
+      # readOnlyRootFilesystem: true
+      runAsUser: 1000670000
+      runAsNonRoot: true
+      runAsGroup: 1000670000
+    configmapReload:
+      capabilities:
+        drop:
+        - ALL
+      readOnlyRootFilesystem: true
+      runAsUser: 1000670000
+      runAsNonRoot: true
+      runAsGroup: 1000670000
+  grafana: 
+    testFramework:
+      enabled: false
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000670000
+      runAsGroup: 1000670000
+      fsGroup: 1000670000
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      seccompProfile:
+        type: RuntimeDefault
+    initChownData:
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 1000670000
+        seccompProfile:
+          type: RuntimeDefault
+        capabilities:
+          add:
+            - CHOWN
+    sidecar:
+      securityContext:
+        allowPrivilegeEscalation: false
+        runAsUser: 1000670000
+        capabilities:
+          drop:
+          - ALL
+        seccompProfile:
+          type: RuntimeDefault

@@ -522,6 +522,8 @@ mo-ruler-stack:
         memory: 32Mi
 
   grafana:
+    testFramework:
+      enabled: false
     image:
       repository: docker.io/grafana/grafana
       tag: 10.1.6

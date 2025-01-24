@@ -121,6 +121,8 @@ mo-ob-opensource:
           cpu: "1000m"
 
   kube-prometheus-stack:
+    nodeExporter:
+      enabled: true
     prometheus-node-exporter: 
       image:
         registry: quay.io
@@ -182,6 +184,8 @@ mo-ruler-stack:
       tag: v0.27.0
 
   grafana:
+    testFramework:
+      enabled: false
     image:
       repository: docker.io/grafana/grafana
       tag: 10.1.6
