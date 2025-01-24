@@ -1,0 +1,29 @@
+mo-ob-opensource:
+  alloy: {}
+  promtail:
+    ## 这个不确定能否修改，需要验证一下
+    podSecurityContext:
+      runAsUser: 0
+      runAsGroup: 0
+  loki:
+    loki:
+      podSecurityContext:
+        fsGroup: 10001
+        runAsGroup: 10001
+        runAsNonRoot: true
+        runAsUser: 1000
+  kube-prometheus-stack:
+    prometheus-node-exporter: {}
+    prometheusOperator: {}
+    prometheus:
+      prometheusSpec:
+        securityContext:
+          runAsGroup: 2000
+          runAsNonRoot: true
+          runAsUser: 1000
+          fsGroup: 200
+
+mo-ruler-stack:
+  alertmanagerWebhookAdapter: {}
+  alertmanager: {}
+  grafana: {}
