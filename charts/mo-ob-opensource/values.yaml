@@ -475,8 +475,8 @@ victoria-metrics-k8s-stack:
       evaluationInterval: 15s
       extraArgs:
         http.pathPrefix: "/"
-      notifier:
-        url: http://mo-ob-alertmanager.mo-ob:9093
+      notifiers:
+      - url: http://mo-ob-alertmanager.mo-ob:9093
         basicAuth:
           username: 
             key: username
