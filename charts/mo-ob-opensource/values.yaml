@@ -46,11 +46,37 @@ serviceMonitor:
     selector:
       matchLabels:
         k8s-app: node-exporter
-    # -- Namespace selector to specify which namespaces to m
-nitor
+    # -- Namespace selector to specify which namespaces to monitor
     namespaceSelector:
       matchNames:
         - arms-prom
+    # -- Relabeling configurations for metrics endpoints
+    # Common replace relabelings to add standard labels:
+    relabelings:
+      # Replace namespace label
+      - action: replace
+        sourceLabels:
+          - __meta_kubernetes_namespace
+        targetLabel: namespace
+      # Replace node label
+      - action: replace
+        sourceLabels:
+          - __meta_kubernetes_pod_node_name
+        targetLabel: node
+      # Replace service label
+      - action: replace
+        sourceLabels:
+          - __meta_kubernetes_service_name
+        targetLabel: service
+      - action: replace
+        sourceLabels:
+          - __meta_kubernetes_pod_name
+        target_label: pod
+      - action: replace
+        sourceLabels:
+          - __meta_kubernetes_service_annotation_prometheus_io_path
+        targetLabel: __metrics_path__
+        regex: (.+)
 
 # alloy for k8s events
 alloy:
@@ -66,7 +92,7 @@ alloy:
       tag: v0.12.0
   enabled: true
   alloy:
-    resources: 
+    resources:
       limits:
         cpu: 500m
         memory: 512Mi
@@ -90,8 +116,8 @@ promtail:
   enabled: true
   serviceMonitor:
     enabled: true
-  tolerations: 
-  - operator: Exists
+  tolerations:
+    - operator: Exists
   extraArgs:
     - -config.expand-env=true
   config:
@@ -152,16 +178,16 @@ promtail:
               node_name: '${HOSTNAME}'
   # Extra volumes to be added in addition to those specified under `defaultVolumes`.
   extraVolumes:
-  - name: local
-    hostPath:
-      # path: /var/log/messages
-      path: /var/log
+    - name: local
+      hostPath:
+        # path: /var/log/messages
+        path: /var/log
 
   # Extra volume mounts together. Corresponds to `extraVolumes`.
   extraVolumeMounts:
-  - name: local
-    mountPath: /var/log/host
-    readOnly: true
+    - name: local
+      mountPath: /var/log/host
+      readOnly: true
 
 loki:
   enabled: true
@@ -172,13 +198,13 @@ loki:
     retention_period: 720h
   lokiCanary:
     enabled: false
-  
+
   chunksCache:
     enabled: false
-  
+
   resultsCache:
     enabled: false
-  
+
   loki:
     # -- Defines what kind of object stores the configuration, a ConfigMap or a Secret.
     # In order to move sensitive information (such as credentials) from the ConfigMap/Secret to a more secure location (e.g. vault), it is possible to use [environment variables in the configuration](https://grafana.com/docs/loki/latest/configuration/#use-environment-variables-in-the-configuration).
@@ -188,7 +214,7 @@ loki:
     auth_enabled: false
     # -- Check https://grafana.com/docs/loki/latest/configuration/#server for more info on the server configuration.
     server:
-    # these timeout should smaller than grafana's dataproxy timeout
+      # these timeout should smaller than grafana's dataproxy timeout
       http_server_read_timeout: 300s
       http_server_write_timeout: 300s
     # -- Limits config
@@ -215,34 +241,33 @@ loki:
         s3ForcePathStyle: true
         insecure: true
     # -- Check https://grafana.com/docs/loki/latest/configuration/#schema_config for more info on how to configure schemas
-    schemaConfig: 
+    schemaConfig:
       configs:
-      - from: 2024-04-01
-        object_store: s3
-        store: tsdb
-        schema: v13
-        index:
-          prefix: index_
-          period: 24h
+        - from: 2024-04-01
+          object_store: s3
+          store: tsdb
+          schema: v13
+          index:
+            prefix: index_
+            period: 24h
     # -- Check https://grafana.com/docs/loki/latest/configuration/#ruler for more info on configuring ruler
-    rulerConfig: 
+    rulerConfig:
       evaluation_interval: 1m
       poll_interval: 1m
-      storage: 
+      storage:
         type: local
-        local: 
+        local:
           directory: /rules
       # alertmanager 单节点
       alertmanager_url: http://mo-ob-alertmanager.mo-ob:9093
       # alertmanager 3节点集群使用：
-      # alertmanager_url: http://mo-ob-alertmanager-0.mo-ob:9093,http://mo-ob-alertmanager-1.mo-ob:9093,http://mo-ob-alertmanager-2.mo-ob:9093 
+      # alertmanager_url: http://mo-ob-alertmanager-0.mo-ob:9093,http://mo-ob-alertmanager-1.mo-ob:9093,http://mo-ob-alertmanager-2.mo-ob:9093
       enable_alertmanager_v2: true
       enable_api: true
       alertmanager_client:
         type: "Basic"
         credentials_file: "/tmp/loki/alertmanager-loki-credentials"
 
-    
     # -- Additional query scheduler config
     ### use default config, old config not work in loki 3.0.0
     storage_config:
@@ -284,7 +309,7 @@ loki:
       storageClass: null
       # -- Selector for persistent disk
       selector: null
-    resources: 
+    resources:
       requests:
         memory: "4Gi"
         cpu: "250m"
@@ -299,7 +324,7 @@ loki:
       size: 10Gi
       storageClass: null
       selector: null
-    resources: 
+    resources:
       requests:
         memory: "2Gi"
         cpu: "250m"
@@ -314,7 +339,7 @@ loki:
       size: 10Gi
       storageClass: null
       selector: null
-    resources: 
+    resources:
       requests:
         memory: "2Gi"
         cpu: "250m"
@@ -323,26 +348,25 @@ loki:
         cpu: "2000m"
     # -- Volume mounts to add to the backend pods
     extraVolumeMounts:
-    - name: alertmanager-credentials
-      mountPath: /tmp/loki
-      readOnly: true
-    extraVolumes: 
-    - name: alertmanager-credentials
-      secret:
-        secretName: alertmanager-loki-credentials
+      - name: alertmanager-credentials
+        mountPath: /tmp/loki
+        readOnly: true
+    extraVolumes:
+      - name: alertmanager-credentials
+        secret:
+          secretName: alertmanager-loki-credentials
 
   # Configuration for the gateway
   gateway:
     enabled: true
     replicas: 1
-    resources: 
+    resources:
       requests:
         memory: "250Mi"
         cpu: "250m"
       limits:
         memory: "2Gi"
         cpu: "2000m"
-
 
   test:
     enabled: false
@@ -466,7 +490,7 @@ victoria-metrics-k8s-stack:
         storageClassName:
         resources:
           requests:
-            storage: 40Gi      
+            storage: 40Gi
 
   alertmanager:
     # -- Create VMAlertmanager CR
@@ -494,14 +518,14 @@ victoria-metrics-k8s-stack:
       notifiers: {}
       # - url: http://mo-ob-alertmanager.mo-ob:9093
       #   basicAuth:
-      #     username: 
+      #     username:
       #       key: username
       #       name: alertmanager-auth-secret
-      #     password: 
+      #     password:
       #       key: password
-      #       name: alertmanager-auth-secret 
+      #       name: alertmanager-auth-secret
       # External labels to add to all generated recording rules and alerts
-      externalLabels: 
+      externalLabels:
         clusterDetail: dev-controlplane
 
   vmagent:
@@ -559,7 +583,6 @@ victoria-metrics-k8s-stack:
     serviceAccount:
       create: false
 
-
   # -- Component scraping the kubelets
   kubelet:
     enabled: false
@@ -614,7 +637,7 @@ kube-prometheus-stack:
       monitor:
         enabled: false
     tolerations:
-    - operator: Exists
+      - operator: Exists
   kubeStateMetrics:
     enabled: true
   kube-state-metrics:
@@ -680,7 +703,7 @@ kube-prometheus-stack:
             resources:
               requests:
                 storage: 40Gi
-      additionalScrapeConfigs: 
+      additionalScrapeConfigs:
         # Scrape config for service endpoints.
         #
         # The relabeling allows the actual service scrape endpoint to be configured
@@ -695,26 +718,34 @@ kube-prometheus-stack:
         # service then set this appropriately.
         # * `prometheus.io/param_<parameter>`: If the metrics endpoint uses parameters
         # then you can set any parameter
-        - job_name: 'kubernetes-service-endpoints'
+        - job_name: "kubernetes-service-endpoints"
           honor_labels: true
           kubernetes_sd_configs:
             - role: endpoints
           relabel_configs:
-            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+            - source_labels:
+                [__meta_kubernetes_service_annotation_prometheus_io_scrape]
               action: keep
               regex: true
-            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape_slow]
+            - source_labels:
+                [__meta_kubernetes_service_annotation_prometheus_io_scrape_slow]
               action: drop
               regex: true
-            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+            - source_labels:
+                [__meta_kubernetes_service_annotation_prometheus_io_scheme]
               action: replace
               target_label: __scheme__
               regex: (https?)
-            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+            - source_labels:
+                [__meta_kubernetes_service_annotation_prometheus_io_path]
               action: replace
               target_label: __metrics_path__
               regex: (.+)
-            - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+            - source_labels:
+                [
+                  __address__,
+                  __meta_kubernetes_service_annotation_prometheus_io_port,
+                ]
               action: replace
               target_label: __address__
               regex: (.+?)(?::\d+)?;(\d+)
@@ -753,7 +784,7 @@ kube-prometheus-stack:
         # service then set this appropriately.
         # * `prometheus.io/param_<parameter>`: If the metrics endpoint uses parameters
         # then you can set any parameter
-        - job_name: 'kubernetes-service-endpoints-slow'
+        - job_name: "kubernetes-service-endpoints-slow"
           honor_labels: true
 
           scrape_interval: 5m
@@ -763,18 +794,25 @@ kube-prometheus-stack:
             - role: endpoints
 
           relabel_configs:
-            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape_slow]
+            - source_labels:
+                [__meta_kubernetes_service_annotation_prometheus_io_scrape_slow]
               action: keep
               regex: true
-            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+            - source_labels:
+                [__meta_kubernetes_service_annotation_prometheus_io_scheme]
               action: replace
               target_label: __scheme__
               regex: (https?)
-            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+            - source_labels:
+                [__meta_kubernetes_service_annotation_prometheus_io_path]
               action: replace
               target_label: __metrics_path__
               regex: (.+)
-            - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+            - source_labels:
+                [
+                  __address__,
+                  __meta_kubernetes_service_annotation_prometheus_io_port,
+                ]
               action: replace
               target_label: __address__
               regex: (.+?)(?::\d+)?;(\d+)
@@ -807,9 +845,9 @@ kube-prometheus-stack:
             - action: keep
               regex: "mo-ob"
               source_labels:
-              - __meta_kubernetes_namespace
+                - __meta_kubernetes_namespace
             - source_labels:
-              - __meta_kubernetes_endpoints_label_need_metrics
+                - __meta_kubernetes_endpoints_label_need_metrics
               action: keep
               regex: true
             - action: labelmap
@@ -818,15 +856,15 @@ kube-prometheus-stack:
               regex: __meta_kubernetes_endpoints_label_(.+)
             - action: replace
               source_labels:
-              - __meta_kubernetes_namespace
+                - __meta_kubernetes_namespace
               target_label: namespace
             - action: replace
               source_labels:
-              - __meta_kubernetes_service_name
+                - __meta_kubernetes_service_name
               target_label: service
             - action: replace
               source_labels:
-              - __meta_kubernetes_pod_node_name
+                - __meta_kubernetes_pod_node_name
               target_label: node
             - action: replace
               source_labels: [__meta_kubernetes_pod_name]
@@ -836,17 +874,24 @@ kube-prometheus-stack:
           kubernetes_sd_configs:
             - role: pod
           relabel_configs:
-            - source_labels: [__meta_kubernetes_pod_labelpresent_matrixorigin_io_component]
+            - source_labels:
+                [__meta_kubernetes_pod_labelpresent_matrixorigin_io_component]
               action: keep
               regex: true
-            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            - source_labels:
+                [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
               action: keep
               regex: "true"
-            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            - source_labels:
+                [__meta_kubernetes_pod_annotation_prometheus_io_path]
               action: replace
               target_label: __metrics_path__
               regex: (.+)
-            - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            - source_labels:
+                [
+                  __address__,
+                  __meta_kubernetes_pod_annotation_prometheus_io_port,
+                ]
               action: replace
               target_label: __address__
               regex: (.+?)(?::\d+)?;(\d+)
@@ -864,7 +909,7 @@ kube-prometheus-stack:
               target_label: pod
 
       alertingEndpoints:
-      # 单节点部署
+        # 单节点部署
         - name: "mo-ob-alertmanager"
           # 如果跨ns，需要修改
           namespace: "mo-ob"
@@ -873,13 +918,13 @@ kube-prometheus-stack:
           pathPrefix: ""
           apiVersion: v2
           basicAuth:
-            username: 
+            username:
               key: username
               name: alertmanager-auth-secret
-            password: 
+            password:
               key: password
               name: alertmanager-auth-secret
-      #集群部署
+        #集群部署
         # - name: "mo-ob-alertmanager-0"
         #   # 如果跨ns，需要修改
         #   namespace: "mo-ob"
@@ -888,10 +933,10 @@ kube-prometheus-stack:
         #   pathPrefix: ""
         #   apiVersion: v2
         #   basicAuth:
-        #     username: 
+        #     username:
         #       key: username
         #       name: alertmanager-auth-secret
-        #     password: 
+        #     password:
         #       key: password
         #       name: alertmanager-auth-secret
         # - name: "mo-ob-alertmanager-1"
@@ -902,10 +947,10 @@ kube-prometheus-stack:
         #   pathPrefix: ""
         #   apiVersion: v2
         #   basicAuth:
-        #     username: 
+        #     username:
         #       key: username
         #       name: alertmanager-auth-secret
-        #     password: 
+        #     password:
         #       key: password
         #       name: alertmanager-auth-secret
         # - name: "mo-ob-alertmanager-2"
@@ -916,13 +961,12 @@ kube-prometheus-stack:
         #   pathPrefix: ""
         #   apiVersion: v2
         #   basicAuth:
-        #     username: 
+        #     username:
         #       key: username
         #       name: alertmanager-auth-secret
-        #     password: 
+        #     password:
         #       key: password
         #       name: alertmanager-auth-secret
-
 
   thanosRuler:
     enabled: false
