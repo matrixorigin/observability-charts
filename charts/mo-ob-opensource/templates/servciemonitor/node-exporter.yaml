@@ -1,0 +1,42 @@
+## example of a ServiceMonitor for the node-exporter
+# apiVersion: monitoring.coreos.com/v1
+# kind: ServiceMonitor
+# metadata:
+#   name: mo-ob-node-exporter
+#   namespace: mo-ob
+# spec:
+#   selector:
+#     matchLabels:
+#       k8s-app: node-exporter
+#   namespaceSelector:
+#     matchNames:
+#       - arms-prom
+#   endpoints:
+#     - port: https
+#       path: /metrics
+#       scheme: http
+#       interval: 15s
+#       scrapeTimeout: 5s
+{{- if .Values.serviceMonitor.nodeExporter.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "mo-ob-opensource.name" . }}-node-exporter
+  namespace: {{ include "mo-ob-opensource.namespace" . }}
+  labels:
+    {{- include "mo-ob-opensource.labels" . | nindent 4 }}
+    {{- with .Values.serviceMonitor.nodeExporter.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    {{- toYaml .Values.serviceMonitor.nodeExporter.selector | nindent 4 }}
+  namespaceSelector:
+    {{- toYaml .Values.serviceMonitor.nodeExporter.namespaceSelector | nindent 4 }}
+  endpoints:
+    - port: https
+      path: /metrics
+      scheme: http
+      interval: 30s
+      scrapeTimeout: 10s
+{{- end }}

@@ -36,6 +36,22 @@ selectorOverride: {}
 customLabels: []
 releaseLabel: []
 
+# ServiceMonitor configuration
+serviceMonitor:
+  nodeExporter:
+    enabled: false
+    # -- Labels for the ServiceMonitor metadata
+    labels: {}
+    # -- Selector to match the Service labels
+    selector:
+      matchLabels:
+        k8s-app: node-exporter
+    # -- Namespace selector to specify which namespaces to m
+nitor
+    namespaceSelector:
+      matchNames:
+        - arms-prom
+
 # alloy for k8s events
 alloy:
   image:
