@@ -208,7 +208,16 @@ grafana:
       defaultMode: 0440
       mountPath: /etc/secrets/auth_generic_oauth
       readOnly: true
+  ## Grafana's primary configuration
+  ## NOTE: values in map will be converted to ini format
+  ## ref: http://docs.grafana.org/installation/configuration/
+  ##
   grafana.ini:
+    analytics:
+      enabled: false
+      check_for_plugin_updates: false
+      check_for_updates: false
+      reporting_enabled: false
     auth.generic_oauth:
       name: dex
       enabled: true
