@@ -250,7 +250,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "(topk(1, sum(minio_cluster_capacity_usable_total_bytes{job=~\"minio-cluster\"}) by (instance)) - topk(1, sum(minio_cluster_capacity_usable_free_bytes{job=~\"minio-cluster\"}) by (instance)))/topk(1, sum(minio_cluster_capacity_usable_total_bytes{job=~\"minio-cluster\"}) by (instance)) * 100",
+          "expr": "(topk(1, sum(minio_cluster_capacity_usable_total_bytes{job=~\".*minio.*\"}) by (instance)) - topk(1, sum(minio_cluster_capacity_usable_free_bytes{job=~\".*minio.*\"}) by (instance)))/topk(1, sum(minio_cluster_capacity_usable_total_bytes{job=~\".*minio.*\"}) by (instance)) * 100",
           "hide": false,
           "instant": false,
           "legendFormat": "__auto",
