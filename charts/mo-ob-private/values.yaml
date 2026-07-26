@@ -43,10 +43,8 @@ mo-ob-opensource:
       tag: "3.2.0"
     enabled: true
     tableManager:
-      enabled: true
-      # retention related issue: https://github.com/matrixone-cloud/observability/issues/86
-      retention_deletes_enabled: true
-      retention_period: 720h
+      # TSDB v13 uses the compactor for retention instead of table-manager.
+      enabled: false
     # loki monolithic mode
     # singleBinary:
     #   replicas: 2
@@ -129,6 +127,11 @@ mo-ob-opensource:
         tag: 1.27-alpine
       enabled: true
       replicas: 1
+      deploymentStrategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxSurge: 0
+          maxUnavailable: 1
       resources:
         requests:
           memory: "250Mi"

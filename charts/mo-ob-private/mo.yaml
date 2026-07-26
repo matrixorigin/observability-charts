@@ -37,9 +37,8 @@ mo-ob-opensource:
       tag: "3.2.0"
     enabled: true
     tableManager:
-      enabled: true
-      retention_deletes_enabled: true
-      retention_period: 720h
+      # TSDB v13 uses the compactor for retention instead of table-manager.
+      enabled: false
 
     loki:
       # disable log alert in paivate env
@@ -112,6 +111,11 @@ mo-ob-opensource:
         tag: 1.27-alpine
       enabled: true
       replicas: 1
+      deploymentStrategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxSurge: 0
+          maxUnavailable: 1
       resources:
         requests:
           memory: "500Mi"
