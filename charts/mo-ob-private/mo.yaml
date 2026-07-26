@@ -191,8 +191,12 @@ mo-ruler-stack:
         tag: 1.31.1
     sidecar: 
       image:
-        repository: quay.io/kiwigrid/k8s-sidecar
-        tag: 1.25.1
+        repository: docker.io/kiwigrid/k8s-sidecar
+        tag: 2.7.3
+      dashboards:
+        watchMethod: SLEEP
+        env:
+          SLEEP_TIME: "30"
 
     persistence: 
       enabled:          true

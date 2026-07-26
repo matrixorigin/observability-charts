@@ -76,3 +76,10 @@ ConfigMaps. The base stack keeps only the generic annotation-based scrape jobs
 in `additionalScrapeConfigs`; dedicated `matrixone-cluster`, `minio-cluster`
 and `minio-bucket` jobs are intentionally not enabled by default, so customer
 deployments do not scrape the same targets twice.
+
+The dedicated MinIO dashboard is also owned by the integration chart. The base
+chart no longer provisions a second copy. Grafana's dashboard sidecar uses
+periodic full reconciliation so Helm uninstall removes both the ConfigMaps and
+the corresponding provisioned dashboards even if a Kubernetes watch event was
+missed. `k8s-sidecar` 2.7.3 or later is required because earlier releases do
+not reliably remove files in list-based mode when folder annotations are used.

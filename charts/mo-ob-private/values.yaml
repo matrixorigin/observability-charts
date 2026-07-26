@@ -408,8 +408,14 @@ mo-ruler-stack:
         tag: 1.31.1
     sidecar: 
       image:
-        repository: quay.io/kiwigrid/k8s-sidecar
-        tag: 1.25.1
+        repository: docker.io/kiwigrid/k8s-sidecar
+        tag: 2.7.3
+      dashboards:
+        # Periodic full reconciliation removes dashboard files when a
+        # ConfigMap deletion event is missed during an API interruption.
+        watchMethod: SLEEP
+        env:
+          SLEEP_TIME: "30"
       
     replicas: 1
     enabled: true
