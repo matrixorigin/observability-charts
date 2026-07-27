@@ -36,9 +36,18 @@ mo-ob-opensource:
       repository: grafana/loki
       tag: "3.2.0"
     enabled: true
+    monitoring:
+      dashboards:
+        enabled: false
+      rules:
+        enabled: false
     tableManager:
       # TSDB v13 uses the compactor for retention instead of table-manager.
       enabled: false
+    memberlist:
+      service:
+        # Make member discovery resolvable while Loki pods are becoming ready.
+        publishNotReadyAddresses: true
 
     loki:
       # disable log alert in paivate env
@@ -49,6 +58,13 @@ mo-ob-opensource:
       #   replication_factor: 1
       storage_config:
         object_prefix: loki-controlplane
+        # Keep index-gateway discovery independent of namespace and cluster DNS.
+        boltdb_shipper:
+          index_gateway_client:
+            server_address: dns+loki-backend-headless:9095
+        tsdb_shipper:
+          index_gateway_client:
+            server_address: dns+loki-backend-headless:9095
       storage:
         bucketNames:
           chunks: test-bucket
@@ -59,6 +75,11 @@ mo-ob-opensource:
           secretAccessKey: obtest-secret
           s3ForcePathStyle: true
           insecure: true
+      limits_config:
+        retention_period: 720h
+      compactor:
+        retention_enabled: true
+        delete_request_store: s3
 
     write:
       # -- Number of replicas for the write
@@ -125,6 +146,11 @@ mo-ob-opensource:
           cpu: "1000m"
 
   kube-prometheus-stack:
+    defaultRules:
+      create: false
+    grafana:
+      enabled: false
+      forceDeployDashboards: false
     prometheus-node-exporter: 
       image:
         registry: quay.io
@@ -196,11 +222,13 @@ mo-ruler-stack:
     sidecar: 
       image:
         repository: docker.io/kiwigrid/k8s-sidecar
-        tag: 2.7.3
+        tag: 2.8.1
       dashboards:
+        # Periodic list reconciliation guarantees convergence after bulk deletes.
         watchMethod: SLEEP
         env:
-          SLEEP_TIME: "30"
+          SLEEP_TIME: "10"
+        skipReload: true
 
     persistence: 
       enabled:          true

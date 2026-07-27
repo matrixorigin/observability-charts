@@ -65,26 +65,36 @@ These component are enabled defalut in chart:
 | node-exporter (not set, avg. 10/20M) * x       | CPU: 200 MEM: 100M |
 | grafana (not set, avg. 50/400M) *1             | CPU: 500 MEM: 1G   |
 
-## Business metrics integration
+## Monitoring content integration
 
 `mo-ob-private` is the base observability stack. It installs Prometheus,
 Grafana, Alertmanager, Loki and infrastructure collectors.
 
-MatrixOne, MOI and MinIO business metrics should be installed by their
-integration chart using `ServiceMonitor`, `PrometheusRule` and dashboard
-ConfigMaps. The base stack keeps only the generic annotation-based scrape jobs
-in `additionalScrapeConfigs`; dedicated `matrixone-cluster`, `minio-cluster`
-and `minio-bucket` jobs are intentionally not enabled by default, so customer
-deployments do not scrape the same targets twice. The generic jobs also drop
-services carrying the standard MatrixOne (`matrixorigin.io/component`), MOI
-(`app.kubernetes.io/name=moi-*`) or MinIO Tenant (`v1.min.io/tenant`) labels.
-Those targets are collected only by the integration chart. Per-replica
-Alertmanager Services are also excluded because the stable Alertmanager
-Service already discovers every replica.
+The companion `ob-ops` integration chart owns Kubernetes/Loki dashboards and
+rules, plus MatrixOne, MOI and MinIO business `ServiceMonitor`,
+`PrometheusRule` and dashboard resources. This base chart owns the monitoring
+workloads and infrastructure ServiceMonitors, but intentionally does not render
+dashboard ConfigMaps or PrometheusRules. That split gives every resource one
+Helm owner and lets the content release be enabled, upgraded or removed without
+restarting Prometheus, Grafana or Loki.
 
-The dedicated MinIO dashboard is also owned by the integration chart. The base
-chart no longer provisions a second copy. Grafana's dashboard sidecar uses
-periodic full reconciliation so Helm uninstall removes both the ConfigMaps and
-the corresponding provisioned dashboards even if a Kubernetes watch event was
-missed. `k8s-sidecar` 2.7.3 or later is required because earlier releases do
-not reliably remove files in list-based mode when folder annotations are used.
+The base stack keeps only the generic annotation-based scrape jobs in
+`additionalScrapeConfigs`; dedicated `matrixone-cluster`, `minio-cluster` and
+`minio-bucket` jobs are intentionally not enabled by default. The generic jobs
+also drop services carrying the standard MatrixOne
+(`matrixorigin.io/component`), MOI (`app.kubernetes.io/name=moi-*`) or MinIO
+Tenant (`v1.min.io/tenant`) labels. Those targets are collected only by the
+integration chart. Per-replica Alertmanager Services are also excluded because
+the stable Alertmanager Service already discovers every replica.
+
+Grafana's dashboard sidecar remains enabled and honors the `grafana_folder`
+annotation on ConfigMaps created by the integration chart. It uses
+`k8s-sidecar 2.8.1` with 10-second list reconciliation, while Grafana's file
+provider reconciles every 30 seconds. Helm uninstall therefore removes the
+corresponding provisioned dashboards even if Kubernetes watch events are
+missed. Grafana API/UI cleanup may take 40-60 seconds after the Helm resources
+have been deleted.
+
+Loki uses TSDB schema v13. Table Manager stays disabled; 30-day retention is
+implemented by the compactor with `retention_period: 720h`. Override that value
+for customer-specific retention requirements.
