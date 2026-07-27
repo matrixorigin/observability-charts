@@ -220,6 +220,19 @@ mo-ob-opensource:
               - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape_slow]
                 action: drop
                 regex: true
+              # Business targets are owned by the integration chart.
+              - source_labels: [__meta_kubernetes_service_label_matrixorigin_io_component]
+                action: drop
+                regex: .+
+              - source_labels: [__meta_kubernetes_service_label_app_kubernetes_io_name]
+                action: drop
+                regex: moi-.+
+              - source_labels: [__meta_kubernetes_service_label_v1_min_io_tenant]
+                action: drop
+                regex: .+
+              - source_labels: [__meta_kubernetes_service_name]
+                action: drop
+                regex: .+-alertmanager-[0-9]+
               - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
                 action: replace
                 target_label: __scheme__
@@ -266,6 +279,19 @@ mo-ob-opensource:
               - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape_slow]
                 action: keep
                 regex: true
+              # Business targets are owned by the integration chart.
+              - source_labels: [__meta_kubernetes_service_label_matrixorigin_io_component]
+                action: drop
+                regex: .+
+              - source_labels: [__meta_kubernetes_service_label_app_kubernetes_io_name]
+                action: drop
+                regex: moi-.+
+              - source_labels: [__meta_kubernetes_service_label_v1_min_io_tenant]
+                action: drop
+                regex: .+
+              - source_labels: [__meta_kubernetes_service_name]
+                action: drop
+                regex: .+-alertmanager-[0-9]+
               - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
                 action: replace
                 target_label: __scheme__

@@ -75,7 +75,12 @@ integration chart using `ServiceMonitor`, `PrometheusRule` and dashboard
 ConfigMaps. The base stack keeps only the generic annotation-based scrape jobs
 in `additionalScrapeConfigs`; dedicated `matrixone-cluster`, `minio-cluster`
 and `minio-bucket` jobs are intentionally not enabled by default, so customer
-deployments do not scrape the same targets twice.
+deployments do not scrape the same targets twice. The generic jobs also drop
+services carrying the standard MatrixOne (`matrixorigin.io/component`), MOI
+(`app.kubernetes.io/name=moi-*`) or MinIO Tenant (`v1.min.io/tenant`) labels.
+Those targets are collected only by the integration chart. Per-replica
+Alertmanager Services are also excluded because the stable Alertmanager
+Service already discovers every replica.
 
 The dedicated MinIO dashboard is also owned by the integration chart. The base
 chart no longer provisions a second copy. Grafana's dashboard sidecar uses
