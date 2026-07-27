@@ -1,6 +1,8 @@
 mo-ob-opensource:
 
   alloy:
+    serviceMonitor:
+      enabled: false
     image:
       registry: "docker.io"
       repository: grafana/alloy
@@ -15,6 +17,8 @@ mo-ob-opensource:
           memory: 200Mi
 
   promtail:
+    serviceMonitor:
+      enabled: false
     image:
       registry: docker.io
       repository: grafana/promtail
@@ -40,6 +44,8 @@ mo-ob-opensource:
       dashboards:
         enabled: false
       rules:
+        enabled: false
+      serviceMonitor:
         enabled: false
     tableManager:
       # TSDB v13 uses the compactor for retention instead of table-manager.
@@ -151,13 +157,24 @@ mo-ob-opensource:
     grafana:
       enabled: false
       forceDeployDashboards: false
+    coreDns:
+      enabled: false
+    kubeApiServer:
+      enabled: false
+    kubelet:
+      enabled: false
     prometheus-node-exporter: 
       image:
         registry: quay.io
         repository: prometheus/node-exporter
         tag: v1.5.0
+      prometheus:
+        monitor:
+          enabled: false
     
     prometheusOperator:
+      serviceMonitor:
+        selfMonitor: false
       image: 
         registry: quay.io
         repository: prometheus-operator/prometheus-operator
@@ -170,6 +187,8 @@ mo-ob-opensource:
           tag: v0.63.0
     
     prometheus:
+      serviceMonitor:
+        selfMonitor: false
       prometheusSpec:
         image:
           registry: quay.io
@@ -201,6 +220,12 @@ mo-ob-opensource:
         registry: registry.k8s.io
         repository: kube-state-metrics/kube-state-metrics
         tag: v2.8.2
+      prometheus:
+        monitor:
+          enabled: false
+      service:
+        annotations:
+          prometheus.io/scrape: "false"
 
 
 mo-ruler-stack:
@@ -210,11 +235,19 @@ mo-ruler-stack:
       repository: quay.io/prometheus/alertmanager
       pullPolicy: IfNotPresent
       tag: v0.27.0
+    service:
+      annotations:
+        prometheus.io/scrape: "false"
+    servicePerReplica:
+      annotations:
+        prometheus.io/scrape: "false"
 
   grafana:
     image:
       repository: docker.io/grafana/grafana
       tag: 10.1.6
+    serviceMonitor:
+      enabled: false
     initChownData: 
       image:
         repository: docker.io/library/busybox

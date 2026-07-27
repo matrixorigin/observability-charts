@@ -46,10 +46,14 @@ To Set up a private ob:
 
 ## Detail
 
-This is a helm chart for mo ob in private deployment environment, support basic feature but not alerting:
+This is a Helm chart for the private observability runtime:
 
-- logs / metrics data scraping
-- general dashboards are provisioned (in grafana) for monitoring
+- Prometheus, Grafana, Alertmanager and Loki workloads
+- infrastructure exporters and log collectors
+- storage, Services and Prometheus Operator CRDs
+
+Scrape definitions, dashboards and alert rules are installed by the companion
+`ob-ops` integration Chart.
 
 These component are enabled defalut in chart:
 
@@ -70,22 +74,19 @@ These component are enabled defalut in chart:
 `mo-ob-private` is the base observability stack. It installs Prometheus,
 Grafana, Alertmanager, Loki and infrastructure collectors.
 
-The companion `ob-ops` integration chart owns Kubernetes/Loki dashboards and
-rules, plus MatrixOne, MOI and MinIO business `ServiceMonitor`,
-`PrometheusRule` and dashboard resources. This base chart owns the monitoring
-workloads and infrastructure ServiceMonitors, but intentionally does not render
-dashboard ConfigMaps or PrometheusRules. That split gives every resource one
-Helm owner and lets the content release be enabled, upgraded or removed without
-restarting Prometheus, Grafana or Loki.
+The companion `ob-ops` integration Chart owns every scrape and content
+resource: Kubernetes, monitoring-stack, Loki, MatrixOne, MOI and MinIO
+`ServiceMonitor` resources, all `PrometheusRule` resources and all dashboard
+ConfigMaps. This base Chart owns only workloads, Services, storage and the
+Prometheus Operator CRDs. It intentionally renders no `ServiceMonitor`,
+`PodMonitor`, `PrometheusRule`, dashboard ConfigMap or
+`additionalScrapeConfigs`.
 
-The base stack keeps only the generic annotation-based scrape jobs in
-`additionalScrapeConfigs`; dedicated `matrixone-cluster`, `minio-cluster` and
-`minio-bucket` jobs are intentionally not enabled by default. The generic jobs
-also drop services carrying the standard MatrixOne
-(`matrixorigin.io/component`), MOI (`app.kubernetes.io/name=moi-*`) or MinIO
-Tenant (`v1.min.io/tenant`) labels. Those targets are collected only by the
-integration chart. Per-replica Alertmanager Services are also excluded because
-the stable Alertmanager Service already discovers every replica.
+The Services created by this Chart keep stable labels and named metrics ports
+so the integration Chart can discover them without hard-coded ClusterIP
+addresses. This split gives every scrape and content resource one Helm owner
+and lets the integration release be enabled, upgraded or removed without
+restarting Prometheus, Grafana or Loki.
 
 Grafana's dashboard sidecar remains enabled and honors the `grafana_folder`
 annotation on ConfigMaps created by the integration chart. It uses
