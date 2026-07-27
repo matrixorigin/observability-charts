@@ -37,9 +37,8 @@ mo-ob-opensource:
       tag: "3.2.0"
     enabled: true
     tableManager:
-      enabled: true
-      retention_deletes_enabled: true
-      retention_period: 720h
+      # TSDB v13 uses the compactor for retention instead of table-manager.
+      enabled: false
 
     loki:
       # disable log alert in paivate env
@@ -112,6 +111,11 @@ mo-ob-opensource:
         tag: 1.27-alpine
       enabled: true
       replicas: 1
+      deploymentStrategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxSurge: 0
+          maxUnavailable: 1
       resources:
         requests:
           memory: "500Mi"
@@ -191,8 +195,12 @@ mo-ruler-stack:
         tag: 1.31.1
     sidecar: 
       image:
-        repository: quay.io/kiwigrid/k8s-sidecar
-        tag: 1.25.1
+        repository: docker.io/kiwigrid/k8s-sidecar
+        tag: 2.7.3
+      dashboards:
+        watchMethod: SLEEP
+        env:
+          SLEEP_TIME: "30"
 
     persistence: 
       enabled:          true

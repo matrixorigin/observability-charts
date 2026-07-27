@@ -64,3 +64,22 @@ These component are enabled defalut in chart:
 | promtail (not set, avg. 10/100M) * x           | CPU: 200 MEM: 200M |
 | node-exporter (not set, avg. 10/20M) * x       | CPU: 200 MEM: 100M |
 | grafana (not set, avg. 50/400M) *1             | CPU: 500 MEM: 1G   |
+
+## Business metrics integration
+
+`mo-ob-private` is the base observability stack. It installs Prometheus,
+Grafana, Alertmanager, Loki and infrastructure collectors.
+
+MatrixOne, MOI and MinIO business metrics should be installed by their
+integration chart using `ServiceMonitor`, `PrometheusRule` and dashboard
+ConfigMaps. The base stack keeps only the generic annotation-based scrape jobs
+in `additionalScrapeConfigs`; dedicated `matrixone-cluster`, `minio-cluster`
+and `minio-bucket` jobs are intentionally not enabled by default, so customer
+deployments do not scrape the same targets twice.
+
+The dedicated MinIO dashboard is also owned by the integration chart. The base
+chart no longer provisions a second copy. Grafana's dashboard sidecar uses
+periodic full reconciliation so Helm uninstall removes both the ConfigMaps and
+the corresponding provisioned dashboards even if a Kubernetes watch event was
+missed. `k8s-sidecar` 2.7.3 or later is required because earlier releases do
+not reliably remove files in list-based mode when folder annotations are used.

@@ -43,10 +43,8 @@ mo-ob-opensource:
       tag: "3.2.0"
     enabled: true
     tableManager:
-      enabled: true
-      # retention related issue: https://github.com/matrixone-cloud/observability/issues/86
-      retention_deletes_enabled: true
-      retention_period: 720h
+      # TSDB v13 uses the compactor for retention instead of table-manager.
+      enabled: false
     # loki monolithic mode
     # singleBinary:
     #   replicas: 2
@@ -129,6 +127,11 @@ mo-ob-opensource:
         tag: 1.27-alpine
       enabled: true
       replicas: 1
+      deploymentStrategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxSurge: 0
+          maxUnavailable: 1
       resources:
         requests:
           memory: "250Mi"
@@ -202,133 +205,10 @@ mo-ob-opensource:
               resources:
                 requests:
                   storage: 40Gi
+        # Keep mo-ob-private focused on the base observability stack.
+        # MatrixOne, MOI and MinIO business metrics should be installed by
+        # their integration chart via ServiceMonitor and PrometheusRule.
         additionalScrapeConfigs: 
-          - job_name: minio-cluster
-            # metrics_path: /minio/v2/metrics/cluster
-            scheme: http
-            # static_configs:
-            # - targets: [minio.mo-ob.svc.cluster.local]
-            metrics_path: /minio/v2/metrics/cluster
-            honor_labels: true
-            kubernetes_sd_configs:
-              - role: endpoints
-            relabel_configs:
-              - source_labels: [__meta_kubernetes_service_labelpresent_v1_min_io_tenant]
-                action: keep
-                regex: "true"
-              - source_labels: [__meta_kubernetes_service_name]
-                action: keep
-                regex: "minio"
-              - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
-                action: replace
-                target_label: __metrics_path__
-                regex: (.+)
-              - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
-                action: replace
-                target_label: __address__
-                regex: (.+?)(?::\d+)?;(\d+)
-                replacement: $1:$2
-              - action: labelmap
-                regex: __meta_kubernetes_service_annotation_prometheus_io_param_(.+)
-                replacement: __param_$1
-              - action: labelmap
-                regex: __meta_kubernetes_pod_label_(.+)
-              - action: labelmap
-                regex: __meta_kubernetes_service_label_(.+)
-              - source_labels: [__meta_kubernetes_namespace]
-                action: replace
-                target_label: namespace
-              - source_labels: [__meta_kubernetes_service_name]
-                action: replace
-                target_label: service
-              - source_labels: [__meta_kubernetes_pod_node_name]
-                action: replace
-                target_label: node
-              - source_labels: [__meta_kubernetes_pod_name]
-                action: replace
-                target_label: pod
-          
-          - job_name: minio-bucket
-            metrics_path: /minio/v2/metrics/bucket
-            scheme: http
-            honor_labels: true
-            kubernetes_sd_configs:
-              - role: endpoints
-            relabel_configs:
-              - source_labels: [__meta_kubernetes_service_labelpresent_v1_min_io_tenant]
-                action: keep
-                regex: "true"
-              - source_labels: [__meta_kubernetes_service_name]
-                action: keep
-                regex: "minio"
-              - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
-                action: replace
-                target_label: __metrics_path__
-                regex: (.+)
-              - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
-                action: replace
-                target_label: __address__
-                regex: (.+?)(?::\d+)?;(\d+)
-                replacement: $1:$2
-              - action: labelmap
-                regex: __meta_kubernetes_service_annotation_prometheus_io_param_(.+)
-                replacement: __param_$1
-              - action: labelmap
-                regex: __meta_kubernetes_pod_label_(.+)
-              - action: labelmap
-                regex: __meta_kubernetes_service_label_(.+)
-              - source_labels: [__meta_kubernetes_namespace]
-                action: replace
-                target_label: namespace
-              - source_labels: [__meta_kubernetes_service_name]
-                action: replace
-                target_label: service
-              - source_labels: [__meta_kubernetes_pod_node_name]
-                action: replace
-                target_label: node
-              - source_labels: [__meta_kubernetes_pod_name]
-                action: replace
-                target_label: pod
-
-          - job_name: matrixone-cluster
-            metrics_path: /metrics
-            scheme: http
-            honor_labels: true
-            kubernetes_sd_configs:
-              - role: endpoints
-            relabel_configs:
-              - source_labels: [__meta_kubernetes_pod_labelpresent_matrixorigin_io_namespace]
-                action: keep
-                regex: "true"
-              - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
-                action: replace
-                target_label: __metrics_path__
-                regex: (.+)
-              - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
-                action: replace
-                target_label: __address__
-                regex: (.+?)(?::\d+)?;(\d+)
-                replacement: $1:$2
-              - action: labelmap
-                regex: __meta_kubernetes_service_annotation_prometheus_io_param_(.+)
-                replacement: __param_$1
-              - action: labelmap
-                regex: __meta_kubernetes_pod_label_(.+)
-              - action: labelmap
-                regex: __meta_kubernetes_service_label_(.+)
-              - source_labels: [__meta_kubernetes_namespace]
-                action: replace
-                target_label: namespace
-              - source_labels: [__meta_kubernetes_service_name]
-                action: replace
-                target_label: service
-              - source_labels: [__meta_kubernetes_pod_node_name]
-                action: replace
-                target_label: node
-              - source_labels: [__meta_kubernetes_pod_name]
-                action: replace
-                target_label: pod
-
           - job_name: 'kubernetes-service-endpoints'
             honor_labels: true
             kubernetes_sd_configs:
@@ -531,8 +411,14 @@ mo-ruler-stack:
         tag: 1.31.1
     sidecar: 
       image:
-        repository: quay.io/kiwigrid/k8s-sidecar
-        tag: 1.25.1
+        repository: docker.io/kiwigrid/k8s-sidecar
+        tag: 2.7.3
+      dashboards:
+        # Periodic full reconciliation removes dashboard files when a
+        # ConfigMap deletion event is missed during an API interruption.
+        watchMethod: SLEEP
+        env:
+          SLEEP_TIME: "30"
       
     replicas: 1
     enabled: true
