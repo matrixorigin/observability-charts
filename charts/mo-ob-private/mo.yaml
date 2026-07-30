@@ -50,6 +50,26 @@ mo-ob-opensource:
     tableManager:
       # TSDB v13 uses the compactor for retention instead of table-manager.
       enabled: false
+    minio:
+      enabled: true
+      mode: standalone
+      replicas: 1
+      drivesPerNode: 1
+      buckets: []
+      users: []
+      policies: []
+      rootUser: mo-ob-loki
+      rootPassword: mo-ob-loki-change-me
+      image:
+        repository: quay.io/minio/minio
+        tag: RELEASE.2022-09-17T00-09-45Z
+      mcImage:
+        repository: quay.io/minio/mc
+        tag: RELEASE.2022-09-16T09-16-47Z
+      persistence:
+        enabled: true
+        storageClass: ""
+        size: 20Gi
     memberlist:
       service:
         # Make member discovery resolvable while Loki pods are becoming ready.
@@ -73,12 +93,13 @@ mo-ob-opensource:
             server_address: dns+loki-backend-headless:9095
       storage:
         bucketNames:
-          chunks: test-bucket
+          chunks: chunks
         type: s3
         s3:
-          endpoint: minio.loki-tenant
-          accessKeyId: obtest-access
-          secretAccessKey: obtest-secret
+          # Used only when minio.enabled=false.
+          endpoint: ""
+          accessKeyId: ""
+          secretAccessKey: ""
           s3ForcePathStyle: true
           insecure: true
       limits_config:
@@ -195,6 +216,15 @@ mo-ob-opensource:
           repository: prometheus/prometheus
           tag: v2.42.0
         retention: 14d
+        serviceMonitorSelectorNilUsesHelmValues: false
+        serviceMonitorSelector: {}
+        serviceMonitorNamespaceSelector: {}
+        podMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelector: {}
+        podMonitorNamespaceSelector: {}
+        ruleSelectorNilUsesHelmValues: false
+        ruleSelector: {}
+        ruleNamespaceSelector: {}
         externalLabels:
           clusterDetail: mo-ob-private-cluster
         resources:
@@ -249,6 +279,7 @@ mo-ruler-stack:
     serviceMonitor:
       enabled: false
     initChownData: 
+      enabled: false
       image:
         repository: docker.io/library/busybox
         tag: 1.31.1
@@ -262,6 +293,8 @@ mo-ruler-stack:
         env:
           SLEEP_TIME: "10"
         skipReload: true
+        provider:
+          foldersFromFilesStructure: true
 
     persistence: 
       enabled:          true

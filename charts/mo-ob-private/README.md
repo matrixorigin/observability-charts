@@ -7,42 +7,68 @@ original issue: https://github.com/matrixorigin/MO-Cloud/issues/2266
 
 ## Quick Start
 
-To Set up a private ob:
+`1.0.4` supports two explicit Loki object-storage modes.
 
-1. clone this repo
+### Kubernetes with a default dynamic StorageClass
 
-2. set env:
-   
-    ```
-    OBNS=mo-ob
-    S3_ENDPOINT=s3-endpoint
-    S3_ACCESS_KEY=s3-access-key
-    S3_SECRET_KEY=s3-secret-key
-    S3_BUCKET=bucket_name
-    STORAGE_CLASS=storage_class
-    PROM_STORAGE_SIZE=40Gi
-    GRAFANA_USER=admin
-    GRAFANA_PWD=matrixorigin2021
-    ```
+The default values deploy a standalone MinIO instance for Loki. MinIO,
+Prometheus, Grafana, and Loki state use the cluster's default dynamic
+StorageClass.
 
-3. run
-
+```bash
+helm upgrade --install mo-ob-private charts/mo-ob-private \
+  --namespace mo-ob \
+  --create-namespace \
+  --set-string mo-ob-opensource.loki.minio.rootPassword='replace-with-16-or-more-characters' \
+  --set-string mo-ruler-stack.grafana.adminPassword='replace-this-password' \
+  --atomic \
+  --wait \
+  --timeout 20m
 ```
-	helm install -n ${OBNS} \
-		--set mo-ob-opensource.loki.loki.storage.bucketNames.chunks=${S3_BUCKET} \
-		--set mo-ob-opensource.loki.loki.storage.s3.endpoint=${S3_ENDPOINT} \
-		--set mo-ob-opensource.loki.loki.storage.s3.accessKeyId=${S3_ACCESS_KEY} \
-		--set mo-ob-opensource.loki.loki.storage.s3.secretAccessKey=${S3_SECRET_KEY} \
-		--set mo-ob-opensource.loki.write.persistence.storageClass=${STORAGE_CLASS} \
-		--set mo-ob-opensource.loki.read.persistence.storageClass=${STORAGE_CLASS} \
-		--set mo-ob-opensource.loki.backend.persistence.storageClass=${STORAGE_CLASS} \
-		--set mo-ob-opensource.kube-prometheus-stack.prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.storageClassName=${STORAGE_CLASS} \
-		--set mo-ruler-stack.grafana.persistence.storageClassName=${STORAGE_CLASS} \
-		--set mo-ruler-stack.grafana.adminUser=${GRAFANA_USER} \
-		--set mo-ruler-stack.grafana.adminPassword=${GRAFANA_PWD} \
-		--set mo-ob-opensource.kube-prometheus-stack.prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage=${PROM_STORAGE_SIZE} \
-		mo-ob-private charts/mo-ob-private
+
+When the cluster has no default StorageClass, set the same class on every
+persistent component:
+
+```bash
+STORAGE_CLASS=customer-csi
+
+helm upgrade --install mo-ob-private charts/mo-ob-private \
+  --namespace mo-ob \
+  --create-namespace \
+  --set-string mo-ob-opensource.loki.minio.persistence.storageClass="${STORAGE_CLASS}" \
+  --set-string mo-ob-opensource.loki.write.persistence.storageClass="${STORAGE_CLASS}" \
+  --set-string mo-ob-opensource.loki.read.persistence.storageClass="${STORAGE_CLASS}" \
+  --set-string mo-ob-opensource.loki.backend.persistence.storageClass="${STORAGE_CLASS}" \
+  --set-string mo-ob-opensource.kube-prometheus-stack.prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.storageClassName="${STORAGE_CLASS}" \
+  --set-string mo-ruler-stack.grafana.persistence.storageClassName="${STORAGE_CLASS}" \
+  --set-string mo-ob-opensource.loki.minio.rootPassword='replace-with-16-or-more-characters' \
+  --set-string mo-ruler-stack.grafana.adminPassword='replace-this-password' \
+  --atomic \
+  --wait \
+  --timeout 20m
 ```
+
+### Existing S3 or MinIO
+
+The bucket must exist before installation.
+
+```bash
+helm upgrade --install mo-ob-private charts/mo-ob-private \
+  --namespace mo-ob \
+  --create-namespace \
+  --set mo-ob-opensource.loki.minio.enabled=false \
+  --set-string mo-ob-opensource.loki.loki.storage.bucketNames.chunks=customer-loki \
+  --set-string mo-ob-opensource.loki.loki.storage.s3.endpoint=https://s3.example.com \
+  --set-string mo-ob-opensource.loki.loki.storage.s3.accessKeyId="${S3_ACCESS_KEY}" \
+  --set-string mo-ob-opensource.loki.loki.storage.s3.secretAccessKey="${S3_SECRET_KEY}" \
+  --atomic \
+  --wait \
+  --timeout 20m
+```
+
+The companion `ob-ops/customer-installer/mo-kube-monitoring` helper provides
+preflight checks and a single command that installs this base Chart followed
+by the monitoring-content Chart. The helper stays outside both Chart packages.
 
 ## Detail
 
@@ -99,3 +125,19 @@ have been deleted.
 Loki uses TSDB schema v13. Table Manager stays disabled; 30-day retention is
 implemented by the compactor with `retention_period: 720h`. Override that value
 for customer-specific retention requirements.
+
+## Customer compatibility contract
+
+A portable installation requires:
+
+- a working Kubernetes API and Helm 3;
+- at least one dynamic `ReadWriteOnce` StorageClass;
+- reachable images or a customer-provided offline image mirror;
+- enough schedulable CPU, memory, and storage for the selected profile;
+- an existing S3/MinIO bucket only when bundled MinIO is disabled.
+
+The Chart no longer assumes a StorageClass named `standard`. Prometheus accepts
+ServiceMonitor, PodMonitor, and PrometheusRule resources from the companion
+content Chart without requiring duplicated release labels. Alertmanager does
+not mount undeclared site Secrets, and Grafana's sidecar honors
+`grafana_folder` annotations by default.
