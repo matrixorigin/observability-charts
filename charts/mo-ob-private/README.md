@@ -46,10 +46,14 @@ To Set up a private ob:
 
 ## Detail
 
-This is a helm chart for mo ob in private deployment environment, support basic feature but not alerting:
+This is a Helm chart for the private observability runtime:
 
-- logs / metrics data scraping
-- general dashboards are provisioned (in grafana) for monitoring
+- Prometheus, Grafana, Alertmanager and Loki workloads
+- infrastructure exporters and log collectors
+- storage, Services and Prometheus Operator CRDs
+
+Scrape definitions, dashboards and alert rules are installed by the companion
+`ob-ops` integration Chart.
 
 These component are enabled defalut in chart:
 
@@ -65,21 +69,33 @@ These component are enabled defalut in chart:
 | node-exporter (not set, avg. 10/20M) * x       | CPU: 200 MEM: 100M |
 | grafana (not set, avg. 50/400M) *1             | CPU: 500 MEM: 1G   |
 
-## Business metrics integration
+## Monitoring content integration
 
 `mo-ob-private` is the base observability stack. It installs Prometheus,
 Grafana, Alertmanager, Loki and infrastructure collectors.
 
-MatrixOne, MOI and MinIO business metrics should be installed by their
-integration chart using `ServiceMonitor`, `PrometheusRule` and dashboard
-ConfigMaps. The base stack keeps only the generic annotation-based scrape jobs
-in `additionalScrapeConfigs`; dedicated `matrixone-cluster`, `minio-cluster`
-and `minio-bucket` jobs are intentionally not enabled by default, so customer
-deployments do not scrape the same targets twice.
+The companion `ob-ops` integration Chart owns every scrape and content
+resource: Kubernetes, monitoring-stack, Loki, MatrixOne, MOI and MinIO
+`ServiceMonitor` resources, all `PrometheusRule` resources and all dashboard
+ConfigMaps. This base Chart owns only workloads, Services, storage and the
+Prometheus Operator CRDs. It intentionally renders no `ServiceMonitor`,
+`PodMonitor`, `PrometheusRule`, dashboard ConfigMap or
+`additionalScrapeConfigs`.
 
-The dedicated MinIO dashboard is also owned by the integration chart. The base
-chart no longer provisions a second copy. Grafana's dashboard sidecar uses
-periodic full reconciliation so Helm uninstall removes both the ConfigMaps and
-the corresponding provisioned dashboards even if a Kubernetes watch event was
-missed. `k8s-sidecar` 2.7.3 or later is required because earlier releases do
-not reliably remove files in list-based mode when folder annotations are used.
+The Services created by this Chart keep stable labels and named metrics ports
+so the integration Chart can discover them without hard-coded ClusterIP
+addresses. This split gives every scrape and content resource one Helm owner
+and lets the integration release be enabled, upgraded or removed without
+restarting Prometheus, Grafana or Loki.
+
+Grafana's dashboard sidecar remains enabled and honors the `grafana_folder`
+annotation on ConfigMaps created by the integration chart. It uses
+`k8s-sidecar 2.8.1` with 10-second list reconciliation, while Grafana's file
+provider reconciles every 30 seconds. Helm uninstall therefore removes the
+corresponding provisioned dashboards even if Kubernetes watch events are
+missed. Grafana API/UI cleanup may take 40-60 seconds after the Helm resources
+have been deleted.
+
+Loki uses TSDB schema v13. Table Manager stays disabled; 30-day retention is
+implemented by the compactor with `retention_period: 720h`. Override that value
+for customer-specific retention requirements.

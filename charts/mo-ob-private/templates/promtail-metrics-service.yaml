@@ -1,0 +1,23 @@
+{{- $stack := index .Values "mo-ob-opensource" -}}
+{{- if and $stack.enabled $stack.promtail.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-promtail-metrics
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: promtail
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version }}
+spec:
+  clusterIP: None
+  ports:
+    - name: http-metrics
+      port: 3101
+      protocol: TCP
+      targetPort: http-metrics
+  selector:
+    app.kubernetes.io/name: promtail
+    app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
