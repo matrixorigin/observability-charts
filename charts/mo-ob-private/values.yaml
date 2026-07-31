@@ -57,37 +57,10 @@ mo-ob-opensource:
     tableManager:
       # TSDB v13 uses the compactor for retention instead of table-manager.
       enabled: false
-    # The default customer profile is self-contained: Loki uses a single
-    # MinIO instance backed by the cluster's dynamic StorageClass. Disable
-    # this block and configure loki.storage.s3 to use an existing S3/MinIO
-    # service instead.
+    # Object storage is an external dependency. This chart never installs
+    # MinIO; provide the existing S3/MinIO endpoint and bucket at install time.
     minio:
-      enabled: true
-      mode: standalone
-      replicas: 1
-      drivesPerNode: 1
-      # The bundled MinIO subchart's legacy user/policy hooks are not
-      # compatible with current mc releases. Loki needs only the root
-      # credentials; the parent chart owns idempotent bucket creation.
-      buckets: []
-      users: []
-      policies: []
-      rootUser: mo-ob-loki
-      rootPassword: mo-ob-loki-change-me
-      image:
-        repository: quay.io/minio/minio
-        tag: RELEASE.2022-09-17T00-09-45Z
-      mcImage:
-        repository: quay.io/minio/mc
-        tag: RELEASE.2022-09-16T09-16-47Z
-      persistence:
-        enabled: true
-        storageClass: ""
-        size: 20Gi
-      resources:
-        requests:
-          cpu: 100m
-          memory: 128Mi
+      enabled: false
     memberlist:
       service:
         # Make member discovery resolvable while Loki pods are becoming ready.
@@ -114,13 +87,12 @@ mo-ob-opensource:
             server_address: dns+loki-backend-headless:9095
       storage:
         bucketNames:
-          chunks: chunks
+          chunks: test-bucket
         type: s3
         s3:
-          # Used only when minio.enabled=false.
-          endpoint: ""
-          accessKeyId: ""
-          secretAccessKey: ""
+          endpoint: minio.loki-tenant
+          accessKeyId: obtest-access
+          secretAccessKey: obtest-secret
           s3ForcePathStyle: true
           insecure: true
       schemaConfig:
@@ -291,19 +263,6 @@ mo-ob-opensource:
           repository: prometheus/prometheus
           tag: v2.42.0
         retention: 21d
-        # The companion content Chart may be installed in this or another
-        # namespace and owns all ServiceMonitor/PodMonitor/PrometheusRule
-        # resources. Empty selectors make that ownership model work without
-        # release-label coupling.
-        serviceMonitorSelectorNilUsesHelmValues: false
-        serviceMonitorSelector: {}
-        serviceMonitorNamespaceSelector: {}
-        podMonitorSelectorNilUsesHelmValues: false
-        podMonitorSelector: {}
-        podMonitorNamespaceSelector: {}
-        ruleSelectorNilUsesHelmValues: false
-        ruleSelector: {}
-        ruleNamespaceSelector: {}
         externalLabels:
           clusterDetail: mo-ob-private-cluster
         resources:
@@ -317,7 +276,7 @@ mo-ob-opensource:
         storageSpec:
           volumeClaimTemplate:
             spec:
-              storageClassName: ""
+              storageClassName: standard
               accessModes: ["ReadWriteOnce"]
               resources:
                 requests:
@@ -383,9 +342,18 @@ mo-ruler-stack:
       receivers:
         - name: "null"
 
-    # Notification credentials are supplied by the companion integration
-    # Chart. Do not make the base Alertmanager depend on site-specific Secrets.
-    extraSecretMounts: []
+    extraSecretMounts:
+      # kubectl -n mo-ob create secret generic alertmanager-email-secret --from-literal=smtp-authorization=[your-smtp-password]
+      - name: smtp-authorization
+        mountPath: /tmp/alertmanager-email-smtp
+        subPath: ""
+        secretName: alertmanager-email-secret
+        readOnly: true
+      - name: web-config
+        mountPath: /tmp/alertmanager-web-config
+        subPath: ""
+        secretName: alertmanager-web-config
+        readOnly: true
     resources:
       limits:
         cpu: 100m
@@ -401,7 +369,6 @@ mo-ruler-stack:
     serviceMonitor:
       enabled: false
     initChownData: 
-      enabled: false
       image:
         repository: docker.io/library/busybox
         tag: 1.31.1
@@ -418,8 +385,6 @@ mo-ruler-stack:
           SLEEP_TIME: "10"
         # Grafana's file provider reconciles every 30s.
         skipReload: true
-        provider:
-          foldersFromFilesStructure: true
       
     replicas: 1
     enabled: true

@@ -7,60 +7,42 @@ original issue: https://github.com/matrixorigin/MO-Cloud/issues/2266
 
 ## Quick Start
 
-`1.0.4` supports two explicit Loki object-storage modes.
+`mo-ob-private` installs the observability stack only. It does not install or
+manage DirectPV, a StorageClass, MinIO, S3, or object-storage buckets.
 
-### Kubernetes with a default dynamic StorageClass
+Before installation, prepare:
 
-The default values deploy a standalone MinIO instance for Loki. MinIO,
-Prometheus, Grafana, and Loki state use the cluster's default dynamic
-StorageClass.
+- an existing dynamic `ReadWriteOnce` StorageClass, such as the class provided
+  by DirectPV;
+- an independently deployed S3-compatible service and an existing Loki bucket;
+- credentials that can read and write that bucket.
 
-```bash
-helm upgrade --install mo-ob-private charts/mo-ob-private \
-  --namespace mo-ob \
-  --create-namespace \
-  --set-string mo-ob-opensource.loki.minio.rootPassword='replace-with-16-or-more-characters' \
-  --set-string mo-ruler-stack.grafana.adminPassword='replace-this-password' \
-  --atomic \
-  --wait \
-  --timeout 20m
-```
-
-When the cluster has no default StorageClass, set the same class on every
-persistent component:
+Pass those site-specific values explicitly:
 
 ```bash
-STORAGE_CLASS=customer-csi
+STORAGE_CLASS=directpv-storage-class
+S3_ENDPOINT=http://minio.minio-tenant.svc.cluster.local:80
+S3_BUCKET=loki
+S3_ACCESS_KEY=replace-me
+S3_SECRET_KEY=replace-me
+GRAFANA_USER=admin
+GRAFANA_PASSWORD=replace-me
 
 helm upgrade --install mo-ob-private charts/mo-ob-private \
   --namespace mo-ob \
   --create-namespace \
-  --set-string mo-ob-opensource.loki.minio.persistence.storageClass="${STORAGE_CLASS}" \
+  --set mo-ob-opensource.loki.minio.enabled=false \
+  --set-string mo-ob-opensource.loki.loki.storage.bucketNames.chunks="${S3_BUCKET}" \
+  --set-string mo-ob-opensource.loki.loki.storage.s3.endpoint="${S3_ENDPOINT}" \
+  --set-string mo-ob-opensource.loki.loki.storage.s3.accessKeyId="${S3_ACCESS_KEY}" \
+  --set-string mo-ob-opensource.loki.loki.storage.s3.secretAccessKey="${S3_SECRET_KEY}" \
   --set-string mo-ob-opensource.loki.write.persistence.storageClass="${STORAGE_CLASS}" \
   --set-string mo-ob-opensource.loki.read.persistence.storageClass="${STORAGE_CLASS}" \
   --set-string mo-ob-opensource.loki.backend.persistence.storageClass="${STORAGE_CLASS}" \
   --set-string mo-ob-opensource.kube-prometheus-stack.prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.storageClassName="${STORAGE_CLASS}" \
   --set-string mo-ruler-stack.grafana.persistence.storageClassName="${STORAGE_CLASS}" \
-  --set-string mo-ob-opensource.loki.minio.rootPassword='replace-with-16-or-more-characters' \
-  --set-string mo-ruler-stack.grafana.adminPassword='replace-this-password' \
-  --atomic \
-  --wait \
-  --timeout 20m
-```
-
-### Existing S3 or MinIO
-
-The bucket must exist before installation.
-
-```bash
-helm upgrade --install mo-ob-private charts/mo-ob-private \
-  --namespace mo-ob \
-  --create-namespace \
-  --set mo-ob-opensource.loki.minio.enabled=false \
-  --set-string mo-ob-opensource.loki.loki.storage.bucketNames.chunks=customer-loki \
-  --set-string mo-ob-opensource.loki.loki.storage.s3.endpoint=https://s3.example.com \
-  --set-string mo-ob-opensource.loki.loki.storage.s3.accessKeyId="${S3_ACCESS_KEY}" \
-  --set-string mo-ob-opensource.loki.loki.storage.s3.secretAccessKey="${S3_SECRET_KEY}" \
+  --set-string mo-ruler-stack.grafana.adminUser="${GRAFANA_USER}" \
+  --set-string mo-ruler-stack.grafana.adminPassword="${GRAFANA_PASSWORD}" \
   --atomic \
   --wait \
   --timeout 20m
@@ -128,16 +110,15 @@ for customer-specific retention requirements.
 
 ## Customer compatibility contract
 
-A portable installation requires:
+A portable installation requires the site to provide:
 
 - a working Kubernetes API and Helm 3;
-- at least one dynamic `ReadWriteOnce` StorageClass;
+- a dynamic `ReadWriteOnce` StorageClass, passed explicitly to every persistent
+  component;
+- an independently managed S3/MinIO endpoint and pre-created Loki bucket;
 - reachable images or a customer-provided offline image mirror;
-- enough schedulable CPU, memory, and storage for the selected profile;
-- an existing S3/MinIO bucket only when bundled MinIO is disabled.
+- enough schedulable CPU, memory, and storage for the selected profile.
 
-The Chart no longer assumes a StorageClass named `standard`. Prometheus accepts
-ServiceMonitor, PodMonitor, and PrometheusRule resources from the companion
-content Chart without requiring duplicated release labels. Alertmanager does
-not mount undeclared site Secrets, and Grafana's sidecar honors
-`grafana_folder` annotations by default.
+The Chart never creates, modifies, or deletes DirectPV, StorageClass, MinIO,
+S3, or bucket resources. The installation values are the contract between the
+site infrastructure and the monitoring stack.
