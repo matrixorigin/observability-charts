@@ -106,6 +106,10 @@ mo-ob-opensource:
             store: tsdb
       limits_config:
         retention_period: 720h
+      query_range:
+        # A single read replica can stall while planning TSDB query shards.
+        # Larger installations may override this after scaling the read tier.
+        parallelise_shardable_queries: false
       compactor:
         retention_enabled: true
         delete_request_store: s3
