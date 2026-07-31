@@ -198,6 +198,15 @@ mo-ob-opensource:
           repository: prometheus/prometheus
           tag: v2.42.0
         retention: 14d
+        serviceMonitorSelectorNilUsesHelmValues: false
+        serviceMonitorSelector: {}
+        serviceMonitorNamespaceSelector: {}
+        podMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelector: {}
+        podMonitorNamespaceSelector: {}
+        ruleSelectorNilUsesHelmValues: false
+        ruleSelector: {}
+        ruleNamespaceSelector: {}
         externalLabels:
           clusterDetail: mo-ob-private-cluster
         resources:
@@ -252,6 +261,7 @@ mo-ruler-stack:
     serviceMonitor:
       enabled: false
     initChownData: 
+      enabled: false
       image:
         repository: docker.io/library/busybox
         tag: 1.31.1
@@ -265,6 +275,8 @@ mo-ruler-stack:
         env:
           SLEEP_TIME: "10"
         skipReload: true
+        provider:
+          foldersFromFilesStructure: true
 
     persistence: 
       enabled:          true

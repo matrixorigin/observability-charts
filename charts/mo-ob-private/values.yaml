@@ -106,10 +106,6 @@ mo-ob-opensource:
             store: tsdb
       limits_config:
         retention_period: 720h
-      query_range:
-        # A single read replica can stall while planning TSDB query shards.
-        # Larger installations may override this after scaling the read tier.
-        parallelise_shardable_queries: false
       compactor:
         retention_enabled: true
         delete_request_store: s3
@@ -267,6 +263,17 @@ mo-ob-opensource:
           repository: prometheus/prometheus
           tag: v2.42.0
         retention: 21d
+        # Monitoring content is managed by the companion ob-ops Chart and may
+        # live in a different namespace without sharing this release label.
+        serviceMonitorSelectorNilUsesHelmValues: false
+        serviceMonitorSelector: {}
+        serviceMonitorNamespaceSelector: {}
+        podMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelector: {}
+        podMonitorNamespaceSelector: {}
+        ruleSelectorNilUsesHelmValues: false
+        ruleSelector: {}
+        ruleNamespaceSelector: {}
         externalLabels:
           clusterDetail: mo-ob-private-cluster
         resources:
@@ -280,7 +287,7 @@ mo-ob-opensource:
         storageSpec:
           volumeClaimTemplate:
             spec:
-              storageClassName: standard
+              storageClassName: ""
               accessModes: ["ReadWriteOnce"]
               resources:
                 requests:
@@ -346,18 +353,9 @@ mo-ruler-stack:
       receivers:
         - name: "null"
 
-    extraSecretMounts:
-      # kubectl -n mo-ob create secret generic alertmanager-email-secret --from-literal=smtp-authorization=[your-smtp-password]
-      - name: smtp-authorization
-        mountPath: /tmp/alertmanager-email-smtp
-        subPath: ""
-        secretName: alertmanager-email-secret
-        readOnly: true
-      - name: web-config
-        mountPath: /tmp/alertmanager-web-config
-        subPath: ""
-        secretName: alertmanager-web-config
-        readOnly: true
+    # Notification credentials are supplied by the companion integration
+    # Chart. The base stack must not require site-specific Secrets.
+    extraSecretMounts: []
     resources:
       limits:
         cpu: 100m
@@ -373,6 +371,7 @@ mo-ruler-stack:
     serviceMonitor:
       enabled: false
     initChownData: 
+      enabled: false
       image:
         repository: docker.io/library/busybox
         tag: 1.31.1
@@ -389,6 +388,8 @@ mo-ruler-stack:
           SLEEP_TIME: "10"
         # Grafana's file provider reconciles every 30s.
         skipReload: true
+        provider:
+          foldersFromFilesStructure: true
       
     replicas: 1
     enabled: true
