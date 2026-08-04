@@ -22,3 +22,4 @@ bin
 Chart.lock
 charts/*/charts
 charts/mo-ob-opensource/rules
+/dist/

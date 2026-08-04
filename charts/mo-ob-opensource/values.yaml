@@ -1,5 +1,7 @@
 alerting:
-  namespace: "mo-ob"
+  # Empty means the Helm release namespace. Set an explicit namespace only
+  # when alert rules are intentionally installed elsewhere.
+  namespace: ""
 
 # swith for generate alertrules which defined in `rules` folder
 # - cooperate with template templates/mo-alerting-rules.yaml
@@ -149,6 +151,10 @@ promtail:
 
 loki:
   enabled: true
+  # Object storage is an external dependency. Credentials are injected from
+  # the namespace-local mo-ob-loki-s3 Secret; this chart never installs MinIO.
+  minio:
+    enabled: false
   tableManager:
     enabled: true
     # retention related issue: https://github.com/matrixone-cloud/observability/issues/86
@@ -190,14 +196,16 @@ loki:
     # -- Storage config. Providing this will automatically populate all necessary storage configs in the templated config.
     storage:
       bucketNames:
-        chunks: test-bucket
+        chunks: ${LOKI_S3_BUCKET}
+        ruler: ${LOKI_S3_BUCKET}
+        admin: ${LOKI_S3_BUCKET}
       type: s3
       s3:
-        endpoint: minio.loki-tenant
-        accessKeyId: obtest-access
-        secretAccessKey: obtest-secret
-        s3ForcePathStyle: true
-        insecure: true
+        endpoint: ${LOKI_S3_ENDPOINT}
+        accessKeyId: ${LOKI_S3_ACCESS_KEY}
+        secretAccessKey: ${LOKI_S3_SECRET_KEY}
+        s3ForcePathStyle: ${LOKI_S3_FORCE_PATH_STYLE}
+        insecure: ${LOKI_S3_INSECURE}
     # -- Check https://grafana.com/docs/loki/latest/configuration/#schema_config for more info on how to configure schemas
     schemaConfig: 
       configs:
@@ -217,15 +225,13 @@ loki:
         local: 
           directory: /rules
       # alertmanager 单节点
-      alertmanager_url: http://mo-ob-alertmanager.mo-ob:9093
-      # alertmanager 3节点集群使用：
-      # alertmanager_url: http://mo-ob-alertmanager-0.mo-ob:9093,http://mo-ob-alertmanager-1.mo-ob:9093,http://mo-ob-alertmanager-2.mo-ob:9093 
+      # The short Service name follows the Helm release namespace. Override
+      # this URL only when Alertmanager is intentionally in another namespace.
+      alertmanager_url: http://mo-ob-alertmanager:9093
+      # For an external or per-replica Alertmanager deployment, provide the
+      # explicitly reviewed service endpoints in site values.
       enable_alertmanager_v2: true
       enable_api: true
-      alertmanager_client:
-        type: "Basic"
-        credentials_file: "/tmp/loki/alertmanager-loki-credentials"
-
     
     # -- Additional query scheduler config
     ### use default config, old config not work in loki 3.0.0
@@ -255,6 +261,11 @@ loki:
   write:
     # -- Number of replicas for the write
     replicas: 3
+    extraArgs:
+      - -config.expand-env=true
+    extraEnvFrom:
+      - secretRef:
+          name: mo-ob-loki-s3
     persistence:
       # -- Enable StatefulSetAutoDeletePVC feature
       enableStatefulSetAutoDeletePVC: false
@@ -278,6 +289,12 @@ loki:
 
   read:
     replicas: 1
+    extraArgs:
+      - -common.compactor-grpc-address=
+      - -config.expand-env=true
+    extraEnvFrom:
+      - secretRef:
+          name: mo-ob-loki-s3
     persistence:
       enableStatefulSetAutoDeletePVC: true
       size: 10Gi
@@ -293,6 +310,11 @@ loki:
 
   backend:
     replicas: 1
+    extraArgs:
+      - -config.expand-env=true
+    extraEnvFrom:
+      - secretRef:
+          name: mo-ob-loki-s3
     persistence:
       enableStatefulSetAutoDeletePVC: true
       size: 10Gi
@@ -306,14 +328,8 @@ loki:
         memory: "2Gi"
         cpu: "2000m"
     # -- Volume mounts to add to the backend pods
-    extraVolumeMounts:
-    - name: alertmanager-credentials
-      mountPath: /tmp/loki
-      readOnly: true
-    extraVolumes: 
-    - name: alertmanager-credentials
-      secret:
-        secretName: alertmanager-loki-credentials
+    extraVolumeMounts: []
+    extraVolumes: []
 
   # Configuration for the gateway
   gateway:
@@ -377,7 +393,9 @@ vmDatasource:
 victoria-metrics-k8s-stack:
   fullnameOverride: "mo-ob-victoria-metrics"
 
-  enabled: true
+  # Prometheus is the safe standalone default for this chart. Enable the
+  # VictoriaMetrics stack only with an explicitly configured vmalert notifier.
+  enabled: false
 
   # -- VictoriaMetrics Operator dependency chart configuration. More values can be found [here](https://docs.victoriametrics.com/helm/victoriametrics-operator#parameters). Also checkout [here](https://docs.victoriametrics.com/operator/vars) possible ENV variables to configure operator behaviour
   victoria-metrics-operator:
@@ -486,7 +504,7 @@ victoria-metrics-k8s-stack:
       #       name: alertmanager-auth-secret 
       # External labels to add to all generated recording rules and alerts
       externalLabels: 
-        clusterDetail: dev-controlplane
+        clusterDetail: customer-cluster
 
   vmagent:
     # -- Create VMAgent CR
@@ -633,8 +651,7 @@ kube-prometheus-stack:
   prometheus:
     prometheusSpec:
       externalLabels:
-        # cluster provider
-        clusterDetail: aliyun-new-dev-controlplane
+        clusterDetail: customer-cluster
       logLevel: debug
       ruleSelectorNilUsesHelmValues: false
       serviceMonitorSelectorNilUsesHelmValues: false
@@ -656,10 +673,8 @@ kube-prometheus-stack:
         ##
         volumeClaimTemplate:
           spec:
-            # aws使用gp3存储
-            # storageClassName: "gp3"
-            # alicloud使用以下sc
-            storageClassName: "alicloud-disk-essd"
+            # Set storageClassName in the customer values when the cluster does
+            # not have one suitable default ReadWriteOnce StorageClass.
             accessModes: ["ReadWriteOnce"]
             resources:
               requests:
@@ -856,13 +871,6 @@ kube-prometheus-stack:
           scheme: http
           pathPrefix: ""
           apiVersion: v2
-          basicAuth:
-            username: 
-              key: username
-              name: alertmanager-auth-secret
-            password: 
-              key: password
-              name: alertmanager-auth-secret
       #集群部署
         # - name: "mo-ob-alertmanager-0"
         #   # 如果跨ns，需要修改

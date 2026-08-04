@@ -1,4 +1,10 @@
+# Optional high-capacity profile. Do not use this file without sizing it for
+# the customer environment. External object-storage credentials are read from
+# the namespace-local mo-ob-loki-s3 Secret.
 mo-ob-opensource:
+
+  victoria-metrics-k8s-stack:
+    enabled: false
 
   alloy:
     serviceMonitor:
@@ -76,14 +82,16 @@ mo-ob-opensource:
             server_address: dns+loki-backend-headless:9095
       storage:
         bucketNames:
-          chunks: test-bucket
+          chunks: ${LOKI_S3_BUCKET}
+          ruler: ${LOKI_S3_BUCKET}
+          admin: ${LOKI_S3_BUCKET}
         type: s3
         s3:
-          endpoint: minio.loki-tenant
-          accessKeyId: obtest-access
-          secretAccessKey: obtest-secret
-          s3ForcePathStyle: true
-          insecure: true
+          endpoint: ${LOKI_S3_ENDPOINT}
+          accessKeyId: ${LOKI_S3_ACCESS_KEY}
+          secretAccessKey: ${LOKI_S3_SECRET_KEY}
+          s3ForcePathStyle: ${LOKI_S3_FORCE_PATH_STYLE}
+          insecure: ${LOKI_S3_INSECURE}
       limits_config:
         retention_period: 720h
       compactor:
@@ -93,10 +101,14 @@ mo-ob-opensource:
     write:
       # -- Number of replicas for the write
       replicas: 3
+      extraArgs:
+        - -config.expand-env=true
+      extraEnvFrom:
+        - secretRef:
+            name: mo-ob-loki-s3
       persistence:
         enableStatefulSetAutoDeletePVC: false
         size: 20Gi
-        storageClass: 
       resources:
         requests:
           memory: "2Gi"
@@ -107,10 +119,15 @@ mo-ob-opensource:
 
     read:
       replicas: 3
+      extraArgs:
+        - -common.compactor-grpc-address=
+        - -config.expand-env=true
+      extraEnvFrom:
+        - secretRef:
+            name: mo-ob-loki-s3
       persistence:
         enableStatefulSetAutoDeletePVC: true
         size: 20Gi
-        storageClass: 
       resources:
         requests:
           memory: "2Gi"
@@ -121,10 +138,14 @@ mo-ob-opensource:
 
     backend:
       replicas: 1
+      extraArgs:
+        - -config.expand-env=true
+      extraEnvFrom:
+        - secretRef:
+            name: mo-ob-loki-s3
       persistence:
         enableStatefulSetAutoDeletePVC: true
         size: 20Gi
-        storageClass: 
       resources:
         requests:
           memory: "2Gi"
@@ -220,7 +241,6 @@ mo-ob-opensource:
         storageSpec:
           volumeClaimTemplate:
             spec:
-              storageClassName: ""
               accessModes: ["ReadWriteOnce"]
               resources:
                 requests:
@@ -281,7 +301,6 @@ mo-ruler-stack:
     persistence: 
       enabled:          true
       type:             "statefulset"
-      storageClassName: 
       size:             "5Gi"
     resources: 
       limits: 
@@ -292,6 +311,7 @@ mo-ruler-stack:
         memory: "2Gi"
     service:
       enabled: true
-      type: NodePort
+      type: ClusterIP
       targetPort: 3000
+      annotations: {}
       portName: service

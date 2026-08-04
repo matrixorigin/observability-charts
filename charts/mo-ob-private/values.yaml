@@ -1,5 +1,17 @@
+customerSizingApproved: true
+
 mo-ob-opensource:
   enabled: true
+
+  # Dashboards, rules and scrape integration are owned by the companion
+  # ob-ops content Chart.
+  alertrules:
+    enabled: false
+
+  # mo-ob-private uses Prometheus for this base profile. Keep the optional
+  # VictoriaMetrics stack out of the customer installation.
+  victoria-metrics-k8s-stack:
+    enabled: false
 
   alloy:
     enabled: true
@@ -72,7 +84,9 @@ mo-ob-opensource:
       # disable log alert in paivate env
       rulerConfig: 
         storage: 
-          type: ""  
+          type: ""
+        # The bundled base does not run Loki alert rules.
+        alertmanager_url: ""
       commonConfig:
         replication_factor: 1
       storage_config:
@@ -87,14 +101,18 @@ mo-ob-opensource:
             server_address: dns+loki-backend-headless:9095
       storage:
         bucketNames:
-          chunks: test-bucket
+          # These placeholders are expanded by Loki at runtime from the
+          # namespace-local mo-ob-loki-s3 Secret.
+          chunks: ${LOKI_S3_BUCKET}
+          ruler: ${LOKI_S3_BUCKET}
+          admin: ${LOKI_S3_BUCKET}
         type: s3
         s3:
-          endpoint: minio.loki-tenant
-          accessKeyId: obtest-access
-          secretAccessKey: obtest-secret
-          s3ForcePathStyle: true
-          insecure: true
+          endpoint: ${LOKI_S3_ENDPOINT}
+          accessKeyId: ${LOKI_S3_ACCESS_KEY}
+          secretAccessKey: ${LOKI_S3_SECRET_KEY}
+          s3ForcePathStyle: ${LOKI_S3_FORCE_PATH_STYLE}
+          insecure: ${LOKI_S3_INSECURE}
       schemaConfig:
         configs:
           - from: "2024-01-01"
@@ -112,10 +130,14 @@ mo-ob-opensource:
     write:
       # -- Number of replicas for the write
       replicas: 1
+      extraArgs:
+        - -config.expand-env=true
+      extraEnvFrom:
+        - secretRef:
+            name: mo-ob-loki-s3
       persistence:
         enableStatefulSetAutoDeletePVC: false
         size: 10Gi
-        storageClass: 
       resources:
         requests:
           memory: "1Gi"
@@ -130,10 +152,13 @@ mo-ob-opensource:
       # cache generations. Use the configured HTTP compactor address instead.
       extraArgs:
         - -common.compactor-grpc-address=
+        - -config.expand-env=true
+      extraEnvFrom:
+        - secretRef:
+            name: mo-ob-loki-s3
       persistence:
         enableStatefulSetAutoDeletePVC: true
         size: 10Gi
-        storageClass: 
       resources:
         requests:
           memory: "3Gi"
@@ -144,10 +169,18 @@ mo-ob-opensource:
 
     backend:
       replicas: 1
+      extraArgs:
+        - -config.expand-env=true
+      extraEnvFrom:
+        - secretRef:
+            name: mo-ob-loki-s3
+      # The base stack does not use the legacy alertmanager-loki-credentials
+      # Secret. Notification integrations are installed separately.
+      extraVolumeMounts: []
+      extraVolumes: []
       persistence:
         enableStatefulSetAutoDeletePVC: true
         size: 10Gi
-        storageClass: 
       resources:
         requests:
           memory: "250Mi"
@@ -287,13 +320,22 @@ mo-ob-opensource:
         storageSpec:
           volumeClaimTemplate:
             spec:
-              storageClassName: ""
               accessModes: ["ReadWriteOnce"]
               resources:
                 requests:
                   storage: 40Gi
         # Scrape definitions are lifecycle-managed by the ob-ops content Chart.
         additionalScrapeConfigs: []
+        alertingEndpoints:
+          - name: mo-ob-alertmanager
+            # When the release namespace is customized, override this field
+            # with the same namespace. The ob-ops installer writes it at
+            # runtime from EXISTING_MONITORING_NAMESPACE.
+            namespace: mo-ob
+            port: 9093
+            scheme: http
+            pathPrefix: ""
+            apiVersion: v2
     
     kube-state-metrics:
       enabled: true
@@ -310,8 +352,19 @@ mo-ob-opensource:
 
 mo-ruler-stack:
   enabled: true
+  dashboards:
+    enabled: false
+  alertrules:
+    enabled: false
   moRuler:
     enabled: false
+
+  managedSecrets:
+    alertmanagerWebAuth: false
+    alertmanagerEmail: false
+    instanceServiceWebhook: false
+    grafanaOAuth: false
+    grafanaAdmin: false
 
   # webhook adapter for alertmanger to send alert to wecom
   alertmanagerWebhookAdapter:
@@ -334,15 +387,17 @@ mo-ruler-stack:
         prometheus.io/scrape: "false"
     persistence:
       enabled: false
+    livenessProbe:
+      httpGet:
+        httpHeaders: []
+    readinessProbe:
+      httpGet:
+        httpHeaders: []
     config:
-      global:
-        resolve_timeout: 5m
-        smtp_from: "it@matrixorigin.cn"
-        smtp_hello: "smtp.exmail.qq.com:465"
-        smtp_smarthost: "smtp.exmail.qq.com:465"
-        smtp_auth_username: "it@matrixorigin.cn"
-        smtp_auth_password_file: "/tmp/alertmanager-email-smtp/smtp-authorization"
-        smtp_require_tls: false
+      # The bundled standalone Alertmanager intentionally uses a null receiver.
+      # Keep ob-ops notifications disabled with this base. Notifications require
+      # a separately managed Operator Alertmanager that selects AlertmanagerConfig.
+      global: {}
       route:
         group_by: ["alertname"] # 分组标签
         group_wait: 10s # 告警等待时间。告警产生后等待10s，如果有同组告警一起发出
@@ -353,8 +408,8 @@ mo-ruler-stack:
       receivers:
         - name: "null"
 
-    # Notification credentials are supplied by the companion integration
-    # Chart. The base stack must not require site-specific Secrets.
+    # The bundled standalone Alertmanager has no notification credentials.
+    # Do not mount site-specific notification Secrets into this base profile.
     extraSecretMounts: []
     resources:
       limits:
@@ -365,11 +420,16 @@ mo-ruler-stack:
         memory: 32Mi
 
   grafana:
+    rbac:
+      namespaced: true
+    testFramework:
+      enabled: false
     image:
       repository: docker.io/grafana/grafana
       tag: 10.1.6
     serviceMonitor:
       enabled: false
+    extraSecretMounts: []
     initChownData: 
       enabled: false
       image:
@@ -390,6 +450,9 @@ mo-ruler-stack:
         skipReload: true
         provider:
           foldersFromFilesStructure: true
+      datasources:
+        # Do not grant the Grafana ServiceAccount cluster-wide Secret access.
+        searchNamespace: null
       
     replicas: 1
     enabled: true
@@ -404,23 +467,25 @@ mo-ruler-stack:
     persistence: 
       enabled:          true
       type:             "statefulset"
-      storageClassName: 
       size:             "5Gi"
     
-    # static passwd
-    adminUser: admin
-    adminPassword: admin
     admin:
-      existingSecret: ""
-    
-      grafana.ini:
+      # Create this Secret in the release namespace before installing.
+      existingSecret: mo-ob-grafana-admin
+      userKey: admin-user
+      passwordKey: admin-password
+
+    grafana.ini:
       auth.generic_oauth:
         enabled: false
     
     service:
       enabled: true
-      type: NodePort
+      # Keep the customer default private. Configure NodePort, LoadBalancer or
+      # Grafana ingress explicitly in the site values when required.
+      type: ClusterIP
       targetPort: 3000
+      annotations: {}
       labels: {}
       portName: service
       # Adds the appProtocol field to the service. This allows to work with istio protocol selection. Ex: "http" or "tcp"

@@ -1,4 +1,8 @@
-{{- if .Values.serviceAccount.kubeStateMetrics.handle -}}
+{{- if and
+  .Values.serviceAccount.kubeStateMetrics.handle
+  (index .Values "kube-prometheus-stack" "enabled")
+  (index .Values "kube-prometheus-stack" "kube-state-metrics" "enabled")
+-}}
 apiVersion: v1
 kind: ServiceAccount
 metadata:

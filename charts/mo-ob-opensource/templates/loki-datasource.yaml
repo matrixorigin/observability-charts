@@ -1,4 +1,4 @@
-{{- if .Values.defaultDatasource.loki }}
+{{- if and .Values.defaultDatasource.loki .Values.loki.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

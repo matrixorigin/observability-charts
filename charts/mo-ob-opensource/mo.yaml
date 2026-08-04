@@ -61,13 +61,10 @@ kube-prometheus-stack:
         ##
         volumeClaimTemplate:
           spec:
-            # aws使用gp3存储
-            storageClassName: "gp3"
-            # alicloud使用以下sc
-            # storageClassName: "alicloud-ssd-ack-dev"
+            # Set storageClassName in the customer values when the cluster does
+            # not have one suitable default ReadWriteOnce StorageClass.
             accessModes: ["ReadWriteOnce"]
             resources:
               requests:
                 storage: 20Gi
-
 
