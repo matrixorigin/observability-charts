@@ -336,8 +336,11 @@ jobs:
             helm show chart "${EXPECTED_PACKAGE}" >/dev/null
 
             if [[ "${CHART_NAME}" == "mo-ob-private" ]]; then
-              tar -tzf "${EXPECTED_PACKAGE}" |
-                grep -Fqx 'mo-ob-private/customer-secrets.yaml.example'
+              PACKAGE_CONTENTS="${RUNNER_TEMP}/mo-ob-private-package-contents.txt"
+              tar -tzf "${EXPECTED_PACKAGE}" >"${PACKAGE_CONTENTS}"
+              grep -Fqx \
+                'mo-ob-private/customer-secrets.yaml.example' \
+                "${PACKAGE_CONTENTS}"
             fi
           done
 
