@@ -165,7 +165,47 @@ jobs:
               test "$(grep -c "^kind: ${KIND}$" "${STANDARD_FILE}" || true)" -eq 0
             done
             grep -q 'nodePort: 30081' "${STANDARD_FILE}"
+
+            # Standard currently renders five persistent-storage declarations:
+            # Loki write/backend, Prometheus, Alertmanager and Grafana. Every
+            # one must use the delivery-default DirectPV StorageClass.
+            test "$(
+              grep -Ec \
+                '^[[:space:]]+storageClass(Name)?: directpv-min-io$' \
+                "${STANDARD_FILE}" || true
+            )" -eq 5
           done
+
+          # HA adds the CloudNativePG storage declaration. The legacy customer
+          # alias must remain byte-for-byte equivalent to the explicit HA file.
+          for HA_FILE in "${CUSTOMER_RENDERED}" "${CUSTOMER_UPSTREAM_RENDERED}" \
+            "${LEGACY_CUSTOMER_RENDERED}"; do
+            test "$(
+              grep -Ec \
+                '^[[:space:]]+storageClass(Name)?: directpv-min-io$' \
+                "${HA_FILE}" || true
+            )" -eq 6
+          done
+
+          grep -q \
+            'resolver kube-dns.kube-system.svc.cluster.local.;' \
+            "${STANDARD_RENDERED}"
+
+          STANDARD_COREDNS_RENDERED="${RUNNER_TEMP}/mo-ob-private-customer-standard-coredns.yaml"
+
+          helm template mo-ob-private charts/mo-ob-private \
+            --namespace mo-ob \
+            --kube-version 1.34.3 \
+            --api-versions policy/v1/PodDisruptionBudget \
+            --values charts/mo-ob-private/values-customer-standard.yaml.example \
+            --values charts/mo-ob-private/values-images-domestic.yaml \
+            --set customerSizingApproved=true \
+            --set mo-ob-opensource.loki.global.dnsService=coredns \
+            >"${STANDARD_COREDNS_RENDERED}"
+
+          grep -q \
+            'resolver coredns.kube-system.svc.cluster.local.;' \
+            "${STANDARD_COREDNS_RENDERED}"
 
           if grep -Eq \
             "(^|[[:space:]=\"'])(docker\\.io|quay\\.io|ghcr\\.io|registry\\.k8s\\.io)/" \

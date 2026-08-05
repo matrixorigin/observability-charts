@@ -28,6 +28,15 @@ postgresql:
 
 mo-ob-opensource:
   loki:
+    global:
+      # 【必须确认】这里填写 kube-system Namespace 中实际的 DNS Service 名称，
+      # 不是 DNS 实现名称。常见集群为 kube-dns；部分 Kubespray 集群使用
+      # coredns。安装前执行：
+      #   kubectl -n kube-system get service | grep -E '(^| )(coredns|kube-dns)( |$)'
+      dnsService: kube-dns
+      dnsNamespace: kube-system
+      clusterDomain: cluster.local
+
     loki:
       commonConfig:
         # 单 write 副本必须保持 1。
@@ -57,8 +66,8 @@ mo-ob-opensource:
             name: mo-ob-loki-s3
       persistence:
         enableStatefulSetAutoDeletePVC: false
-        # 【必须修改】无默认 StorageClass 时取消注释并填写。
-        # storageClass: customer-rwo-storage-class
+        # 【必须确认】默认使用 DirectPV；现场名称不同时修改。
+        storageClass: directpv-min-io
         # 【按容量修改】Loki write 本地缓存盘。
         size: 10Gi
       resources:
@@ -94,8 +103,8 @@ mo-ob-opensource:
             name: mo-ob-loki-s3
       persistence:
         enableStatefulSetAutoDeletePVC: false
-        # 【必须修改】无默认 StorageClass 时取消注释并填写。
-        # storageClass: customer-rwo-storage-class
+        # 【必须确认】默认使用 DirectPV；现场名称不同时修改。
+        storageClass: directpv-min-io
         size: 10Gi
 
     gateway:
@@ -125,8 +134,8 @@ mo-ob-opensource:
         storageSpec:
           volumeClaimTemplate:
             spec:
-              # 【必须修改】无默认 StorageClass 时取消注释并填写。
-              # storageClassName: customer-rwo-storage-class
+              # 【必须确认】默认使用 DirectPV；现场名称不同时修改。
+              storageClassName: directpv-min-io
               accessModes:
                 - ReadWriteOnce
               resources:
@@ -139,8 +148,8 @@ mo-ruler-stack:
     replicaCount: 1
     persistence:
       enabled: true
-      # 【必须修改】无默认 StorageClass 时取消注释并填写。
-      # storageClass: customer-rwo-storage-class
+      # 【必须确认】默认使用 DirectPV；现场名称不同时修改。
+      storageClass: directpv-min-io
       size: 1Gi
     resources:
       requests:
@@ -160,8 +169,8 @@ mo-ruler-stack:
     persistence:
       enabled: true
       type: statefulset
-      # 【必须修改】无默认 StorageClass 时取消注释并填写。
-      # storageClassName: customer-rwo-storage-class
+      # 【必须确认】默认使用 DirectPV；现场名称不同时修改。
+      storageClassName: directpv-min-io
       # SQLite、插件和本地配置目录。
       size: 5Gi
     resources:

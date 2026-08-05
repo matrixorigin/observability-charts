@@ -80,8 +80,8 @@ postgresql:
       secret:
         name: mo-ob-postgresql-app
     storage:
-      # 【必须修改】没有合适的默认 StorageClass 时填写客户 RWO StorageClass。
-      storageClass: ""
+      # 【必须确认】默认使用 DirectPV；现场名称不同时修改。
+      storageClass: directpv-min-io
       # 【按容量修改】每个实例申请一个 PVC，总量为 3 × 20Gi。
       size: 20Gi
     resources:
@@ -130,6 +130,15 @@ postgresql:
 
 mo-ob-opensource:
   loki:
+    global:
+      # 【必须确认】这里填写 kube-system Namespace 中实际的 DNS Service 名称，
+      # 不是 DNS 实现名称。常见集群为 kube-dns；部分 Kubespray 集群使用
+      # coredns。安装前执行：
+      #   kubectl -n kube-system get service | grep -E '(^| )(coredns|kube-dns)( |$)'
+      dnsService: kube-dns
+      dnsNamespace: kube-system
+      clusterDomain: cluster.local
+
     loki:
       commonConfig:
         # 【通常保持】3 个 write 副本对应 3 副本数据复制；不要低于 3。
@@ -164,8 +173,8 @@ mo-ob-opensource:
       persistence:
         # 【通常保持】Helm 升级、缩容或删除 StatefulSet 时不自动删除客户 PVC。
         enableStatefulSetAutoDeletePVC: false
-        # 【必须修改】没有合适的默认 StorageClass 时，取消下一行注释并填写实际名称。
-        # storageClass: customer-rwo-storage-class
+        # 【必须确认】默认使用 DirectPV；现场名称不同时修改。
+        storageClass: directpv-min-io
         # 【按容量修改】每个 write 副本各申请一个 PVC，总量为 replicas × size。
         size: 10Gi
       resources:
@@ -205,8 +214,8 @@ mo-ob-opensource:
             name: mo-ob-loki-s3
       persistence:
         enableStatefulSetAutoDeletePVC: false
-        # 【必须修改】没有合适的默认 StorageClass 时取消注释并填写实际名称。
-        # storageClass: customer-rwo-storage-class
+        # 【必须确认】默认使用 DirectPV；现场名称不同时修改。
+        storageClass: directpv-min-io
         # 【按容量修改】每个 backend 副本各申请一个 PVC。
         size: 10Gi
       resources:
@@ -263,8 +272,8 @@ mo-ob-opensource:
         storageSpec:
           volumeClaimTemplate:
             spec:
-              # 【必须修改】没有合适的默认 StorageClass 时取消注释并填写实际名称。
-              # storageClassName: customer-rwo-storage-class
+              # 【必须确认】默认使用 DirectPV；现场名称不同时修改。
+              storageClassName: directpv-min-io
               accessModes:
                 - ReadWriteOnce
               resources:
@@ -282,8 +291,8 @@ mo-ruler-stack:
       minAvailable: 2
     persistence:
       enabled: true
-      # 【必须修改】没有合适的默认 StorageClass 时取消注释并填写实际名称。
-      # storageClass: customer-rwo-storage-class
+      # 【必须确认】默认使用 DirectPV；现场名称不同时修改。
+      storageClass: directpv-min-io
       # 【按容量修改】每个 Alertmanager 副本各申请一个 PVC。
       size: 1Gi
     resources:
@@ -340,8 +349,8 @@ mo-ruler-stack:
     persistence:
       enabled: true
       type: statefulset
-      # 【必须修改】没有合适的默认 StorageClass 时取消注释并填写实际名称。
-      # storageClassName: customer-rwo-storage-class
+      # 【必须确认】默认使用 DirectPV；现场名称不同时修改。
+      storageClassName: directpv-min-io
       # 【按容量修改】每个 Grafana 副本各申请一个 PVC。
       size: 5Gi
 

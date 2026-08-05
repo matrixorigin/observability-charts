@@ -51,6 +51,12 @@ Every profile requires:
 6. an unused NodePort `30081` and a reviewed firewall or security-group rule for
    the clients that may access Grafana.
 
+The customer examples explicitly use `directpv-min-io` for every PVC instead
+of relying on a cluster default StorageClass. Confirm that this StorageClass is
+installed and has enough capacity in every intended scheduling topology. If a
+customer uses another dynamic RWO provisioner, replace every `storageClass` and
+`storageClassName` value in the selected customer values file consistently.
+
 The HA profile additionally requires at least three suitable nodes, storage in
 every intended failure domain, a separate PostgreSQL-backup bucket and
 credential, and CloudNativePG Operator chart `0.29.0` / CloudNativePG `1.30.0`
@@ -108,6 +114,40 @@ installer. The customer values file must also set the complete
 object with that Namespace; do not override only its `namespace` field because
 Helm replaces list entries as a unit. Kubernetes Secrets are Namespace-scoped
 and cannot be reused from another Namespace.
+
+## Kubernetes DNS Service compatibility
+
+Loki's upstream Chart defaults to the DNS Service name `kube-dns` in the
+`kube-system` Namespace. The DNS implementation may still be CoreDNS while the
+Service remains named `kube-dns`; other distributions, including some
+Kubespray installations, name the Service `coredns`. Loki gateway startup
+fails with `host not found in resolver` when the configured Service name does
+not exist.
+
+Check the customer cluster before installation:
+
+```bash
+kubectl -n kube-system get service |
+grep -E '(^| )(coredns|kube-dns)( |$)'
+```
+
+Set the exact Service name in the selected customer values file. This is a
+cluster compatibility setting and is unrelated to domestic or upstream image
+profiles:
+
+```yaml
+mo-ob-opensource:
+  loki:
+    global:
+      # Use coredns only when the Service is actually named coredns.
+      dnsService: kube-dns
+      dnsNamespace: kube-system
+      clusterDomain: cluster.local
+```
+
+For example, change `dnsService` to `coredns` when the command above reports a
+Service named `coredns`. Keep `dnsNamespace` and `clusterDomain` unchanged
+unless the customer cluster deliberately uses different values.
 
 ## Release artifacts and reproducibility
 
