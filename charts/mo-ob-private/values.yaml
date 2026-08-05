@@ -179,10 +179,7 @@ mo-ob-opensource:
 
     read:
       replicas: 1
-      # Loki 3.2.0 can return gRPC EOFs when the read target loads compactor
-      # cache generations. Use the configured HTTP compactor address instead.
       extraArgs:
-        - -common.compactor-grpc-address=
         - -config.expand-env=true
       extraEnvFrom:
         - secretRef:

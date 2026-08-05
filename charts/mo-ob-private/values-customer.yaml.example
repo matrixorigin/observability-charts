@@ -193,7 +193,6 @@ mo-ob-opensource:
       # 当前 SimpleScalable 模式下 read 是 Deployment，不申请独立 RWO PVC。
       replicas: 2
       extraArgs:
-        - -common.compactor-grpc-address=
         - -config.expand-env=true
       extraEnvFrom:
         - secretRef:

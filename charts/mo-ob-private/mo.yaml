@@ -106,7 +106,6 @@ mo-ob-opensource:
     read:
       replicas: 3
       extraArgs:
-        - -common.compactor-grpc-address=
         - -config.expand-env=true
       extraEnvFrom:
         - secretRef:

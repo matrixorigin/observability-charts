@@ -495,22 +495,7 @@
               "$ref": "#/definitions/lokiCredentialConsumer"
             },
             "read": {
-              "allOf": [
-                {
-                  "$ref": "#/definitions/lokiCredentialConsumer"
-                },
-                {
-                  "type": "object",
-                  "properties": {
-                    "extraArgs": {
-                      "type": "array",
-                      "contains": {
-                        "const": "-common.compactor-grpc-address="
-                      }
-                    }
-                  }
-                }
-              ]
+              "$ref": "#/definitions/lokiCredentialConsumer"
             },
             "backend": {
               "$ref": "#/definitions/lokiCredentialConsumer"
