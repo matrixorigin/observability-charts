@@ -7,6 +7,7 @@ on:
     - private
     paths:
     - 'charts/**/Chart.yaml'
+    - '.github/workflows/release_chart.yml'
   release:
     types:
     - published
@@ -34,6 +35,16 @@ jobs:
       - name: Copy rules file for ob-opensource
         run: |
           cp -r ./charts/mo-ruler-stack/rules ./charts/mo-ob-opensource/rules
+
+      - name: Configure Helm repositories
+        run: |
+          set -euo pipefail
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo add grafana https://grafana.github.io/helm-charts
+          helm repo add victoriametrics https://victoriametrics.github.io/helm-charts
+          helm repo add fluent https://fluent.github.io/helm-charts
+          helm repo add ckotzbauer https://ckotzbauer.github.io/helm-charts
+          helm repo update
 
       - name: Build and lint Helm dependencies
         run: |
