@@ -192,6 +192,38 @@ jobs:
               --username "${HARBOR_USERNAME}" \
               --password-stdin
 
+      - name: Verify Harbor chart project access
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
+          HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          HTTP_BODY="${RUNNER_TEMP}/harbor-repository-check.json"
+          HTTP_CODE="$(
+            curl -sS \
+              -o "${HTTP_BODY}" \
+              -w '%{http_code}' \
+              --user "${HARBOR_USERNAME}:${HARBOR_PASSWORD}" \
+              "https://${HARBOR_REGISTRY}/v2/${HARBOR_CHART_PROJECT}/mo-ob-private/tags/list"
+          )"
+
+          case "${HTTP_CODE}" in
+            200)
+              echo "Harbor chart repository is readable"
+              ;;
+            404)
+              echo "Harbor project is reachable; mo-ob-private repository does not exist yet"
+              ;;
+            *)
+              echo "Cannot access Harbor chart project ${HARBOR_CHART_PROJECT}; HTTP ${HTTP_CODE}"
+              cat "${HTTP_BODY}"
+              exit 1
+              ;;
+          esac
+
       - name: Check Harbor chart version
         if: steps.changes.outputs.changed == 'true'
         shell: bash
@@ -211,6 +243,26 @@ jobs:
             echo "Please increment charts/mo-ob-private/Chart.yaml version before publishing changed chart content."
             exit 1
           fi
+
+          if grep -Eiq \
+            'unauthorized|forbidden|denied|authentication required|project .*not found' \
+            /tmp/existing-mo-ob-private-chart.err; then
+
+            echo "Cannot verify Harbor chart version because Harbor access failed:"
+            cat /tmp/existing-mo-ob-private-chart.err
+            exit 1
+          fi
+
+          if ! grep -Eiq \
+            'not found|manifest unknown|name unknown' \
+            /tmp/existing-mo-ob-private-chart.err; then
+
+            echo "Cannot determine whether mo-ob-private ${{ steps.package.outputs.chart_version }} exists:"
+            cat /tmp/existing-mo-ob-private-chart.err
+            exit 1
+          fi
+
+          echo "mo-ob-private ${{ steps.package.outputs.chart_version }} does not exist in Harbor; publishing may continue"
 
       - name: Push mo-ob-private to Harbor Chart repository
         if: steps.changes.outputs.changed == 'true'
