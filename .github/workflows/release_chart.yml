@@ -13,6 +13,10 @@ on:
     - published
   workflow_dispatch:
 
+concurrency:
+  group: chart-publish-${{ github.repository }}
+  cancel-in-progress: false
+
 permissions: read-all
 
 jobs:
@@ -34,7 +38,9 @@ jobs:
 
       - name: Copy rules file for ob-opensource
         run: |
-          cp -r ./charts/mo-ruler-stack/rules ./charts/mo-ob-opensource/rules
+          set -euo pipefail
+          rm -rf charts/mo-ob-opensource/rules
+          cp -R charts/mo-ruler-stack/rules charts/mo-ob-opensource/rules
 
       - name: Configure Helm repositories
         run: |
@@ -49,9 +55,11 @@ jobs:
       - name: Build and lint Helm dependencies
         run: |
           set -euo pipefail
+          helm dependency update charts/mo-agent-stack
           helm dependency update charts/mo-ob-opensource
           helm dependency update charts/mo-ruler-stack
           helm dependency update charts/mo-ob-private
+          helm lint charts/mo-agent-stack
           helm lint charts/mo-ob-opensource
           helm lint charts/mo-ruler-stack
           helm lint charts/mo-ob-private
@@ -72,8 +80,62 @@ jobs:
           ./ah lint -p charts || exit 1
           rm -f ./ah
 
+      - name: Record charts expected for release
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git fetch --tags --force
+
+          LATEST_TAG="$(
+            git describe --tags --abbrev=0 2>/dev/null ||
+              git rev-list --max-parents=0 --first-parent HEAD
+          )"
+
+          EXPECTED_PACKAGES="${RUNNER_TEMP}/expected-chart-packages.txt"
+          : >"${EXPECTED_PACKAGES}"
+
+          git diff \
+            --find-renames \
+            --name-only \
+            "${LATEST_TAG}" \
+            -- charts |
+            awk -F/ 'NF >= 3 { print $1 "/" $2 }' |
+            sort -u |
+            while read -r CHART_DIR; do
+              if [[ ! -f "${CHART_DIR}/Chart.yaml" ]]; then
+                continue
+              fi
+
+              CHART_METADATA="$(helm show chart "${CHART_DIR}")"
+
+              CHART_NAME="$(
+                awk '/^name:/ { print $2; exit }' \
+                  <<<"${CHART_METADATA}"
+              )"
+
+              CHART_VERSION="$(
+                awk '/^version:/ { print $2; exit }' \
+                  <<<"${CHART_METADATA}"
+              )"
+
+              printf '%s-%s.tgz\n' \
+                "${CHART_NAME}" \
+                "${CHART_VERSION}" \
+                >>"${EXPECTED_PACKAGES}"
+            done
+
+          sort -u -o "${EXPECTED_PACKAGES}" "${EXPECTED_PACKAGES}"
+
+          echo "Charts expected for release since ${LATEST_TAG}:"
+          if [[ -s "${EXPECTED_PACKAGES}" ]]; then
+            cat "${EXPECTED_PACKAGES}"
+          else
+            echo "No changed charts"
+          fi
+
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.5.0
+        uses: helm/chart-releaser-action@be16258da8010256c6e82849661221415f031968 # tag=v1.5.0
         with:
           charts_dir: charts
         env:
@@ -81,3 +143,219 @@ jobs:
           ## PS: multi charts NEED diff release tag
           CR_RELEASE_NAME_TEMPLATE: "chart-{{ .Name }}-{{ .Version }}"
           CR_SKIP_EXISTING: true
+
+      - name: Publish and verify release integrity assets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -Eeuo pipefail
+          shopt -s nullglob
+
+          BUILD_REF="$(git rev-parse HEAD)"
+          EXPECTED_PACKAGES_FILE="${RUNNER_TEMP}/expected-chart-packages.txt"
+          PACKAGES=(.cr-release-packages/*.tgz)
+
+          if [[ ! "${BUILD_REF}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Invalid build commit: ${BUILD_REF}"
+            exit 1
+          fi
+
+          mapfile -t EXPECTED_PACKAGES <"${EXPECTED_PACKAGES_FILE}"
+
+          if (( ${#EXPECTED_PACKAGES[@]} == 0 )); then
+            if (( ${#PACKAGES[@]} != 0 )); then
+              echo "Unexpected Chart packages were generated"
+              printf '%s\n' "${PACKAGES[@]}"
+              exit 1
+            fi
+
+            echo "No changed charts to publish"
+            exit 0
+          fi
+
+          if (( ${#PACKAGES[@]} != ${#EXPECTED_PACKAGES[@]} )); then
+            echo "Expected ${#EXPECTED_PACKAGES[@]} packages, found ${#PACKAGES[@]}"
+            printf 'Expected: %s\n' "${EXPECTED_PACKAGES[@]}"
+            printf 'Found: %s\n' "${PACKAGES[@]}"
+            exit 1
+          fi
+
+          for EXPECTED_PACKAGE in "${EXPECTED_PACKAGES[@]}"; do
+            test -s ".cr-release-packages/${EXPECTED_PACKAGE}"
+          done
+
+          VERIFY_ROOT="${RUNNER_TEMP}/chart-release-verify"
+          MANIFEST="${VERIFY_ROOT}/released-charts.tsv"
+          mkdir -p "${VERIFY_ROOT}"
+          : >"${MANIFEST}"
+
+          retry() {
+            local ATTEMPT
+
+            for ATTEMPT in 1 2 3 4 5; do
+              if "$@"; then
+                return 0
+              fi
+
+              sleep "$((ATTEMPT * 2))"
+            done
+
+            return 1
+          }
+
+          for PACKAGE in "${PACKAGES[@]}"; do
+            PACKAGE_NAME="$(basename "${PACKAGE}")"
+            CHART_METADATA="$(helm show chart "${PACKAGE}")"
+
+            CHART_NAME="$(
+              awk '/^name:/ { print $2; exit }' \
+                <<<"${CHART_METADATA}"
+            )"
+
+            CHART_VERSION="$(
+              awk '/^version:/ { print $2; exit }' \
+                <<<"${CHART_METADATA}"
+            )"
+
+            if [[ ! "${CHART_NAME}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
+              echo "Invalid Chart name from ${PACKAGE_NAME}: ${CHART_NAME}"
+              exit 1
+            fi
+
+            if [[ ! "${CHART_VERSION}" =~ ^[A-Za-z0-9][A-Za-z0-9._+-]*$ ]]; then
+              echo "Invalid Chart version from ${PACKAGE_NAME}: ${CHART_VERSION}"
+              exit 1
+            fi
+
+            EXPECTED_PACKAGE="${CHART_NAME}-${CHART_VERSION}.tgz"
+            RELEASE_TAG="chart-${CHART_NAME}-${CHART_VERSION}"
+
+            if [[ "${PACKAGE_NAME}" != "${EXPECTED_PACKAGE}" ]]; then
+              echo "Package name mismatch: ${PACKAGE_NAME} != ${EXPECTED_PACKAGE}"
+              exit 1
+            fi
+
+            retry gh release view \
+              "${RELEASE_TAG}" \
+              --repo "${GH_REPO}" \
+              >/dev/null
+
+            retry git fetch \
+              --quiet \
+              --no-tags \
+              --force \
+              origin \
+              "refs/tags/${RELEASE_TAG}:refs/tags/${RELEASE_TAG}"
+
+            TAG_COMMIT="$(git rev-list -n 1 "refs/tags/${RELEASE_TAG}")"
+
+            if [[ "${TAG_COMMIT}" != "${BUILD_REF}" ]]; then
+              echo "Release ${RELEASE_TAG} points to ${TAG_COMMIT}, expected ${BUILD_REF}"
+              echo "The Chart version must be incremented before publishing new content"
+              exit 1
+            fi
+
+            RELEASE_DIR="${VERIFY_ROOT}/${CHART_NAME}-${CHART_VERSION}"
+            mkdir -p "${RELEASE_DIR}"
+
+            retry gh release download \
+              "${RELEASE_TAG}" \
+              --repo "${GH_REPO}" \
+              --pattern "${PACKAGE_NAME}" \
+              --dir "${RELEASE_DIR}" \
+              --clobber
+
+            PUBLISHED_PACKAGE="${RELEASE_DIR}/${PACKAGE_NAME}"
+            PUBLISHED_METADATA="$(helm show chart "${PUBLISHED_PACKAGE}")"
+
+            grep -Fqx "name: ${CHART_NAME}" <<<"${PUBLISHED_METADATA}"
+            grep -Fqx "version: ${CHART_VERSION}" <<<"${PUBLISHED_METADATA}"
+
+            CHECKSUM_FILE="${RELEASE_DIR}/${PACKAGE_NAME}.sha256"
+            RELEASE_REF_FILE="${RELEASE_DIR}/${PACKAGE_NAME%.tgz}.release-ref.txt"
+
+            (
+              cd "${RELEASE_DIR}"
+              sha256sum "${PACKAGE_NAME}" >"${PACKAGE_NAME}.sha256"
+            )
+
+            printf 'observability-charts-ref=%s\n' \
+              "${TAG_COMMIT}" \
+              >"${RELEASE_REF_FILE}"
+
+            retry gh release upload \
+              "${RELEASE_TAG}" \
+              "${CHECKSUM_FILE}" \
+              "${RELEASE_REF_FILE}" \
+              --repo "${GH_REPO}" \
+              --clobber
+
+            ASSET_VERIFY_DIR="${RELEASE_DIR}/downloaded-assets"
+            mkdir -p "${ASSET_VERIFY_DIR}"
+
+            retry gh release download \
+              "${RELEASE_TAG}" \
+              --repo "${GH_REPO}" \
+              --pattern "${PACKAGE_NAME}" \
+              --pattern "${PACKAGE_NAME}.sha256" \
+              --pattern "${PACKAGE_NAME%.tgz}.release-ref.txt" \
+              --dir "${ASSET_VERIFY_DIR}" \
+              --clobber
+
+            (
+              cd "${ASSET_VERIFY_DIR}"
+              sha256sum --check "${PACKAGE_NAME}.sha256"
+              grep -Fqx \
+                "observability-charts-ref=${TAG_COMMIT}" \
+                "${PACKAGE_NAME%.tgz}.release-ref.txt"
+            )
+
+            printf '%s\t%s\n' \
+              "${RELEASE_TAG}" \
+              "${PACKAGE_NAME}" \
+              >>"${MANIFEST}"
+          done
+
+          INDEX_VERIFIED=false
+          INDEX_FILE="${VERIFY_ROOT}/index.yaml"
+
+          for ATTEMPT in 1 2 3 4 5; do
+            if git fetch \
+              --quiet \
+              --no-tags \
+              --force \
+              origin \
+              "refs/heads/gh-pages:refs/remotes/origin/gh-pages" &&
+              git show \
+                refs/remotes/origin/gh-pages:index.yaml \
+                >"${INDEX_FILE}"; then
+
+              INDEX_VERIFIED=true
+
+              while IFS=$'\t' read -r RELEASE_TAG PACKAGE_NAME; do
+                if ! grep -Fq \
+                  "releases/download/${RELEASE_TAG}/${PACKAGE_NAME}" \
+                  "${INDEX_FILE}"; then
+                  INDEX_VERIFIED=false
+                  break
+                fi
+              done <"${MANIFEST}"
+
+              if [[ "${INDEX_VERIFIED}" == true ]]; then
+                break
+              fi
+            fi
+
+            sleep "$((ATTEMPT * 2))"
+          done
+
+          if [[ "${INDEX_VERIFIED}" != true ]]; then
+            echo "gh-pages/index.yaml does not contain every published Chart"
+            cat "${MANIFEST}"
+            exit 1
+          fi
+
+          echo "Release assets and gh-pages/index.yaml verified:"
+          cat "${MANIFEST}"

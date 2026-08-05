@@ -4,10 +4,13 @@ on:
   pull_request:
     types: [ opened, synchronize, reopened ]
     branches: [ main,'[0-9]+.[0-9]+.[0-9]+' ]
-    path:
+    paths:
       - 'charts/mo-ruler-stack/rules/**'
+      - '.github/workflows/alertrules-check.yaml'
   workflow_dispatch:
 
+permissions:
+  contents: read
 
 jobs:
   alertmanager-test:
@@ -28,6 +31,4 @@ jobs:
           ./promtool check rules ../charts/mo-ruler-stack/rules/*.yaml
           ./promtool test rules ../test/rule-check/*.yml
           ./promtool test rules ../test/rule-check/*.yaml
-
-
 
