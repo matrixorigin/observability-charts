@@ -1,0 +1,197 @@
+# 客户标准部署示例：单副本、易启动、由 Kubernetes 自动拉起故障 Pod。
+#
+# 适用场景：客户测试、普通私有化交付，以及明确接受短时中断的环境。
+# 本模式不是应用级零中断高可用：节点或本地 RWO 磁盘故障时，单副本组件可能
+# 暂时不可用。需要组件多副本和 Grafana PostgreSQL 时，请改用
+# values-customer-ha.yaml.example。
+#
+# 安装前只需准备两个 Namespace 级 Secret：
+# - mo-ob-loki-s3：Loki 使用的外部 S3/MinIO；
+# - mo-ob-grafana-admin：Grafana Web 管理员账号和密码。
+# 可从 customer-secrets-standard.yaml.example 复制填写。
+#
+# 标记说明：
+# - 【必须修改】必须按客户现场填写；
+# - 【必须确认】示例值可以保留，但必须先核对现场；
+# - 【按容量修改】根据指标基数、日志量和保留周期调整；
+# - 【通常保持】属于 Chart 与 ob-ops 的配套协议。
+
+# 【必须修改】完成 CPU、内存、PVC 和对象存储评审后改成 true。
+customerSizingApproved: false
+
+# 国内默认；国外现场在 Helm 命令最后追加 values-images-upstream.yaml。
+imageSource: domestic
+
+# 标准模式使用 Grafana 自带 SQLite，不安装 CloudNativePG/PostgreSQL。
+postgresql:
+  enabled: false
+
+mo-ob-opensource:
+  loki:
+    loki:
+      commonConfig:
+        # 单 write 副本必须保持 1。
+        replication_factor: 1
+      storage:
+        bucketNames:
+          chunks: ${LOKI_S3_BUCKET}
+          ruler: ${LOKI_S3_BUCKET}
+          admin: ${LOKI_S3_BUCKET}
+        type: s3
+        s3:
+          endpoint: ${LOKI_S3_ENDPOINT}
+          accessKeyId: ${LOKI_S3_ACCESS_KEY}
+          secretAccessKey: ${LOKI_S3_SECRET_KEY}
+          s3ForcePathStyle: ${LOKI_S3_FORCE_PATH_STYLE}
+          insecure: ${LOKI_S3_INSECURE}
+      limits_config:
+        # 【按容量修改】336h = 14 天。
+        retention_period: 336h
+
+    write:
+      replicas: 1
+      extraArgs:
+        - -config.expand-env=true
+      extraEnvFrom:
+        - secretRef:
+            name: mo-ob-loki-s3
+      persistence:
+        enableStatefulSetAutoDeletePVC: false
+        # 【必须修改】无默认 StorageClass 时取消注释并填写。
+        # storageClass: customer-rwo-storage-class
+        # 【按容量修改】Loki write 本地缓存盘。
+        size: 10Gi
+      resources:
+        requests:
+          cpu: 250m
+          memory: 1Gi
+        limits:
+          cpu: 1000m
+          memory: 1Gi
+
+    read:
+      replicas: 1
+      extraArgs:
+        - -common.compactor-grpc-address=
+        - -config.expand-env=true
+      extraEnvFrom:
+        - secretRef:
+            name: mo-ob-loki-s3
+      resources:
+        requests:
+          cpu: 250m
+          memory: 3Gi
+        limits:
+          cpu: 1000m
+          memory: 3Gi
+
+    backend:
+      replicas: 1
+      extraArgs:
+        - -config.expand-env=true
+      extraEnvFrom:
+        - secretRef:
+            name: mo-ob-loki-s3
+      persistence:
+        enableStatefulSetAutoDeletePVC: false
+        # 【必须修改】无默认 StorageClass 时取消注释并填写。
+        # storageClass: customer-rwo-storage-class
+        size: 10Gi
+
+    gateway:
+      replicas: 1
+
+  kube-prometheus-stack:
+    prometheus:
+      prometheusSpec:
+        replicas: 1
+        # 【必须修改】若安装 Namespace 不是 mo-ob，必须同步修改 namespace。
+        alertingEndpoints:
+          - name: mo-ob-alertmanager
+            namespace: mo-ob
+            port: 9093
+            scheme: http
+            pathPrefix: ""
+            apiVersion: v2
+        # 【按容量修改】指标保留 14 天。
+        retention: 14d
+        resources:
+          requests:
+            cpu: 2000m
+            memory: 6Gi
+          limits:
+            cpu: 2000m
+            memory: 6Gi
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              # 【必须修改】无默认 StorageClass 时取消注释并填写。
+              # storageClassName: customer-rwo-storage-class
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  # 【按容量修改】Prometheus 单副本 PVC。
+                  storage: 100Gi
+
+mo-ruler-stack:
+  alertmanager:
+    replicaCount: 1
+    persistence:
+      enabled: true
+      # 【必须修改】无默认 StorageClass 时取消注释并填写。
+      # storageClass: customer-rwo-storage-class
+      size: 1Gi
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+  grafana:
+    replicas: 1
+    # 管理员凭据只从 Secret 读取，不在 values 中写明文。
+    admin:
+      existingSecret: mo-ob-grafana-admin
+      userKey: admin-user
+      passwordKey: admin-password
+    persistence:
+      enabled: true
+      type: statefulset
+      # 【必须修改】无默认 StorageClass 时取消注释并填写。
+      # storageClassName: customer-rwo-storage-class
+      # SQLite、插件和本地配置目录。
+      size: 5Gi
+    resources:
+      requests:
+        cpu: 200m
+        memory: 1Gi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+    sidecar:
+      dashboards:
+        enabled: true
+        label: grafana_dashboard
+        labelValue: "1"
+        folderAnnotation: grafana_folder
+        watchMethod: SLEEP
+        env:
+          SLEEP_TIME: "10"
+        skipReload: true
+        provider:
+          # 【通常保持】按 MatrixOne、MOI、Kubernetes、Loki 创建目录。
+          foldersFromFilesStructure: true
+      datasources:
+        searchNamespace: null
+    service:
+      enabled: true
+      type: NodePort
+      port: 80
+      targetPort: 3000
+      # 【必须确认】30000-32767，部署前检查端口未占用。
+      nodePort: 30081
+      # 访问地址：http://<任一可达节点IP>:30081
+

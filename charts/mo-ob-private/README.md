@@ -5,37 +5,61 @@
 - Prometheus and Prometheus Operator;
 - Loki, Alloy and Promtail;
 - Grafana and standalone Alertmanager;
-- a three-instance CloudNativePG PostgreSQL Cluster used by Grafana;
+- an optional three-instance CloudNativePG PostgreSQL Cluster used only by the
+  high-availability Grafana profile;
 - node-exporter and kube-state-metrics.
 
 The Chart does not install the CloudNativePG Operator and does not create or
 manage a StorageClass, MinIO/S3 service, bucket, or business monitoring
-content. Install or reuse one compatible CloudNativePG Operator before this
-release. The companion `ob-ops` content Chart owns Kubernetes/Loki/MatrixOne/
-MOI/MinIO ServiceMonitors, rules and dashboards.
+content. CloudNativePG is needed only when the HA profile enables PostgreSQL.
+The companion `ob-ops` content Chart owns Kubernetes/Loki/MatrixOne/MOI/MinIO
+ServiceMonitors, rules and dashboards.
+
+## Deployment profiles
+
+Two customer examples are intentionally kept side by side:
+
+| Profile | Values | Secrets | Purpose |
+|---|---|---|---|
+| Standard | `values-customer-standard.yaml.example` | `customer-secrets-standard.yaml.example` | Simple single-replica deployment, Grafana SQLite, external S3/MinIO |
+| HA | `values-customer-ha.yaml.example` | `customer-secrets-ha.yaml.example` | Multi-replica components, Grafana on three-instance CloudNativePG |
+
+`values-customer.yaml.example` and `customer-secrets.yaml.example` remain HA
+compatibility aliases for existing delivery documents. New documents should
+use the explicit `-standard` or `-ha` names.
+
+Standard is the default delivery mode. Kubernetes restarts or reschedules a
+failed Pod when storage permits, but a single-replica component can still be
+unavailable during restart, node failure or RWO-volume recovery. Standard must
+not be described as zero-downtime application HA. HA is available for customers
+whose recovery objectives and infrastructure justify its extra database,
+storage and operational requirements.
+
+Do not convert an active HA release to Standard in place. Use a new release or
+Namespace, or first produce a reviewed data migration and rollback plan.
 
 ## Customer contract
 
-Before installation, the customer site must provide:
+Every profile requires:
 
-1. a reachable Kubernetes `>=1.29.0` cluster, Helm 3 and at least three
-   schedulable nodes;
-2. a dynamic `ReadWriteOnce` StorageClass available in every intended failure
-   domain;
-3. an external highly available S3-compatible service with separate,
-   pre-created Loki and PostgreSQL-backup buckets;
-4. separate least-privilege S3 credentials for the Loki bucket and the
-   PostgreSQL backup bucket;
-5. CloudNativePG Operator chart `0.29.0` / CloudNativePG `1.30.0`, installed as
-   an independent two-replica, cross-node Helm release with a PDB in `mo-ob`,
-   or one compatible existing cluster-wide Operator whose equivalent HA
-   controls are approved for reuse;
-6. network access to every rendered image, or a fully verified customer mirror;
-7. enough schedulable CPU, memory and persistent storage for the reviewed sizing;
-8. an unused NodePort `30081` and a reviewed firewall or security-group rule for
+1. a reachable Kubernetes `>=1.29.0` cluster and Helm 3;
+2. a dynamic `ReadWriteOnce` StorageClass;
+3. an external S3-compatible service with a pre-created Loki bucket and a
+   least-privilege credential;
+4. network access to every rendered image, or a fully verified customer mirror;
+5. enough schedulable CPU, memory and persistent storage for the reviewed sizing;
+6. an unused NodePort `30081` and a reviewed firewall or security-group rule for
    the clients that may access Grafana.
 
-The supplied `values-customer.yaml.example` is a high-availability sizing
+The HA profile additionally requires at least three suitable nodes, storage in
+every intended failure domain, a separate PostgreSQL-backup bucket and
+credential, and CloudNativePG Operator chart `0.29.0` / CloudNativePG `1.30.0`
+installed as
+   an independent two-replica, cross-node Helm release with a PDB in `mo-ob`,
+   or one compatible existing cluster-wide Operator whose equivalent HA
+   controls are approved for reuse.
+
+The supplied `values-customer-ha.yaml.example` is a high-availability sizing
 starting point, not a universal production recommendation. It runs Loki with
 three write replicas, two read replicas, three backend replicas and two gateway
 replicas; Prometheus and Grafana with two replicas each; and Alertmanager with
@@ -146,6 +170,13 @@ only to the release-maintainer workflow above.
 
 ## Prepare Namespace-local Secrets
 
+For Standard, copy `customer-secrets-standard.yaml.example`, fill all
+`FILL_THIS_VALUE` entries and apply it. It creates only `mo-ob-loki-s3` and
+`mo-ob-grafana-admin` in the selected Namespace. Standard does not require
+CloudNativePG or PostgreSQL backup Secrets.
+
+For HA, use the following workflow.
+
 The simplest customer workflow is to fill the packaged Secret manifest once.
 It contains every required credential location for this HA profile: Loki
 S3/MinIO, the Grafana Web administrator, the bundled PostgreSQL application
@@ -161,7 +192,7 @@ SECRET_FILE="/root/mo-ob-customer-secrets.yaml"
 
 tar -xzf "${PACKAGE}" -C "${WORK_DIR}"
 install -m 0600 \
-  "${WORK_DIR}/mo-ob-private/customer-secrets.yaml.example" \
+  "${WORK_DIR}/mo-ob-private/customer-secrets-ha.yaml.example" \
   "${SECRET_FILE}"
 
 printf 'Edit every FILL_THIS_VALUE in %s\n' "${SECRET_FILE}"
@@ -529,7 +560,7 @@ required credential Secrets.
 
 ## Size the customer values
 
-Copy `values-customer.yaml.example`, then replace every example with values
+For HA, copy `values-customer-ha.yaml.example`, then replace every example with values
 approved for the customer ingest rate, cardinality, retention and recovery
 objectives. The example deliberately contains this schema-enforced gate:
 
@@ -548,7 +579,7 @@ customerSizingApproved: true
 Do not quote `true` and do not use `--skip-schema-validation`. Helm validation
 rejects the customer values while this acknowledgement is absent or false.
 
-The example is deliberately a high-availability editing worksheet, not a
+The HA example is deliberately a high-availability editing worksheet, not a
 production recommendation. Its replica topology is:
 
 - Loki write/backend: 3 each; Loki read/gateway: 2 each;
@@ -634,6 +665,12 @@ Use exactly one profile after the customer values file, so the last file wins:
 ```bash
 PACKAGE=./mo-ob-private-1.0.5.tgz
 
+# Extract the selected customer worksheet and edit every marked value before
+# installation. Use values-customer-ha.yaml.example only for HA.
+tar -xOf "${PACKAGE}" \
+  mo-ob-private/values-customer-standard.yaml.example \
+  >./values-customer-standard.yaml
+
 # The profiles are files inside the Chart package. Extract them once before
 # using -f; this works even when the customer receives only the immutable tgz.
 for IMAGE_PROFILE in domestic upstream; do
@@ -642,17 +679,20 @@ for IMAGE_PROFILE in domestic upstream; do
     >"./values-images-${IMAGE_PROFILE}.yaml"
 done
 
-# Recommended domestic mode.
+# Standard domestic mode.
 helm upgrade --install mo-ob-private "${PACKAGE}" \
   --namespace mo-ob --create-namespace \
-  -f ./values-customer.yaml \
+  -f ./values-customer-standard.yaml \
   -f ./values-images-domestic.yaml
 
-# Foreign upstream mode; use only when the customer network can reach it.
+# Standard foreign-upstream mode; use only when the customer network can reach it.
 helm upgrade --install mo-ob-private "${PACKAGE}" \
   --namespace mo-ob --create-namespace \
-  -f ./values-customer.yaml \
+  -f ./values-customer-standard.yaml \
   -f ./values-images-upstream.yaml
+
+# HA uses values-customer-ha.yaml instead and additionally requires the
+# CloudNativePG Operator plus all four HA Secrets.
 ```
 
 The domestic profile is a public network accelerator, not an offline
