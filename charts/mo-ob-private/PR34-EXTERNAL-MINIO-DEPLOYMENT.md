@@ -21,6 +21,25 @@
 业务 ServiceMonitor、PrometheusRule 和 Dashboard 由配套的 `ob-ops` 内容
 Chart 单独管理。底座健康后再安装内容 Chart。
 
+随包提供的 `values-customer.yaml.example` 是高可用容量评审起点：Loki write、
+backend 各 3 副本，read、gateway 各 2 副本；Prometheus、Grafana 各 2 副本；
+Alertmanager 3 副本。硬反亲和要求至少 3 个合适的可调度节点。这些数值不是所有
+客户生产环境的统一推荐值，必须按客户写入量、指标基数、保留周期、故障域和恢复
+目标完成评审。
+
+这里的硬反亲和以 `kubernetes.io/hostname` 为拓扑键，只提供节点级可用性，不等于
+自动完成跨可用区或跨机房容灾。PDB 只约束计划维护等自愿驱逐，不能防止节点、磁盘、
+网络、对象存储或数据库硬故障，也不能解决 CPU、内存或 PVC 容量不足。
+
+Grafana 两副本不能分别使用本地 SQLite；那只是两个相互独立的实例，不是真正的
+高可用。两个副本必须通过 Namespace 级 Secret `mo-ob-grafana-database` 共用客户
+独立维护的高可用 PostgreSQL 或 MySQL。示例同时使用 NodePort `30081`，允许获准
+客户端通过 `http://<可达节点IP>:30081` 直接访问；客户必须确认端口未占用并限制
+节点防火墙或安全组的来源范围。示例关闭 Grafana Unified Alerting，告警由
+Prometheus 和 Alertmanager 负责；如需 Grafana Alerting 或 Grafana Live，必须另行
+完成其 HA 设计和验收。Grafana 插件必须通过同一镜像或 values 同步到两个副本，禁止
+只在单个 Pod 中手工安装。
+
 ## 2. 交付版本与完整性
 
 正式交付包含：
@@ -73,20 +92,26 @@ test -z "$(git status --porcelain)"
 | 是否为默认 StorageClass | |
 | 是否支持动态 RWO PVC | |
 | 是否支持 PVC 扩容 | |
-| Loki write PVC 大小/副本数 | |
-| Loki backend PVC 大小/副本数 | |
+| 可调度节点数和故障域 | 至少 3 个合适节点 |
+| Loki write PVC 大小/副本数 | 示例 10Gi × 3 |
+| Loki read 副本数 | 示例 2 |
+| Loki backend PVC 大小/副本数 | 示例 10Gi × 3 |
+| Loki gateway 副本数 | 示例 2 |
 | Loki 保留时间 | |
-| Prometheus PVC 大小/保留时间 | |
-| Grafana PVC 大小 | |
+| Prometheus PVC 大小/副本数/保留时间 | 示例 40Gi × 2 / 21d |
+| Grafana PVC 大小/副本数 | 示例 5Gi × 2 |
+| Alertmanager PVC 大小/副本数 | 示例 1Gi × 3 |
 | 各组件 CPU/内存 requests、limits | |
 | S3/MinIO Endpoint | |
 | Loki Bucket | |
 | S3 是否使用 HTTPS | |
 | 是否使用 Path Style | |
 | 镜像来源 | 上游公网 / 客户 Harbor |
-| Grafana Service 类型 | ClusterIP / NodePort / LoadBalancer |
-| 是否配置 Grafana Ingress | 是 / 否 |
-| Grafana NodePort（如使用） | |
+| Grafana 外部数据库类型 | PostgreSQL / MySQL |
+| Grafana 外部数据库 HA、备份和 TLS | |
+| Grafana 数据库地址（不含密码） | |
+| Grafana Service 类型 | 示例 NodePort |
+| Grafana NodePort | 示例 30081，部署前确认未占用 |
 
 当前 SimpleScalable 模式的持久化容量计算方式为：
 
@@ -95,12 +120,25 @@ Loki write 副本数 × write PVC
 + Loki backend 副本数 × backend PVC
 + Prometheus 副本数 × Prometheus PVC
 + Grafana 副本数 × Grafana PVC
-+ 现场预留空间
++ Alertmanager 副本数 × Alertmanager PVC
 ```
 
-容量总数只是第一步，还必须确认存储拓扑、失败域和每个可调度节点的实际
-可用空间。客户生产环境应根据日志写入量、指标基数、保留时间和故障恢复目标
-做容量评估。
+当前示例的计算结果为：
+
+```text
+(3 × 10Gi) + (3 × 10Gi) + (2 × 40Gi) + (2 × 5Gi) + (3 × 1Gi)
+= 约 153Gi，共 13 个 ReadWriteOnce PVC
+```
+
+`153Gi` 和 13 个 PVC 只是示例申请量，不包含客户预留、快照、存储系统开销和
+外部 Loki 对象存储。它不能证明客户存储系统的实际可用容量足够。还必须按客户
+存储厂商的流程确认 StorageClass 拓扑、扩容能力、失败域和每个可调度节点的容量；
+不得带入其他测试集群的节点名称、剩余空间或经验值。客户生产环境应根据日志
+写入量、指标基数、保留时间和故障恢复目标重新评估。
+
+如果 StorageClass 使用节点本地 `ReadWriteOnce` 磁盘，节点或磁盘故障后，既有 PVC
+通常不能自动漂移到其他节点。高可用依靠剩余副本继续服务；故障副本的磁盘恢复或
+重建必须按客户存储系统的正式流程执行。
 
 ## 4. 安装前检查
 
@@ -116,7 +154,7 @@ values 文件中完整覆盖
 export OBNS="${OBNS:-mo-ob}"
 
 for REQUIRED_COMMAND in \
-  kubectl helm mc jq openssl tar grep sha256sum; do
+  kubectl helm mc jq openssl tar grep sha256sum curl; do
   if ! command -v "${REQUIRED_COMMAND}" >/dev/null 2>&1; then
     echo "错误：缺少命令 ${REQUIRED_COMMAND}"
     exit 1
@@ -128,6 +166,15 @@ helm version
 kubectl get nodes -o wide
 kubectl get storageclass
 kubectl get pvc -A
+```
+
+高可用示例要求至少 3 个符合资源、污点和存储拓扑条件的可调度节点。还必须确认
+NodePort `30081` 未被其他 Service 使用，且客户网络能够按安全策略访问节点地址：
+
+```bash
+kubectl get service -A \
+  -o 'custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name,NODEPORT:.spec.ports[*].nodePort' |
+grep -w 30081 || true
 ```
 
 如果使用第 8 节的私有镜像流程，执行机还必须安装支持
@@ -318,7 +365,9 @@ LOKI_S3_FORCE_PATH_STYLE
 LOKI_S3_INSECURE
 ```
 
-## 7. 创建 Grafana 管理员 Secret
+## 7. 创建 Grafana 管理员和外部数据库 Secret
+
+### 7.1 Grafana 管理员 Secret
 
 先在客户密码管理系统中创建并保存一个不少于 16 个字符的密码。然后输入同一个
 密码创建或更新 Secret：
@@ -361,6 +410,108 @@ kubectl -n "${OBNS}" create secret generic mo-ob-grafana-admin \
 不要把密码写入 values、Shell 脚本、工单或交付文档。重复执行会使用本次
 输入值更新 Secret；轮换必须先更新密码管理系统，再更新 Secret，并在维护窗口内
 滚动重启和验证 Grafana。
+
+### 7.2 Grafana 高可用数据库 Secret
+
+两个 Grafana 副本必须连接同一个客户独立维护的高可用 PostgreSQL 或 MySQL。
+数据库必须已创建，专用用户必须具备 Grafana 初始化和迁移所需权限，并且地址可从
+两个 Grafana Pod 访问。数据库高可用、备份、恢复、监控和 TLS 均不由本 Chart
+管理。不要把两个 Pod 各自的本地 SQLite 当作高可用数据库。
+
+先在客户密码管理系统中保存数据库密码和一个长期固定的随机共享安全密钥，再创建
+Namespace 级 Secret：
+
+```bash
+(
+set -euo pipefail
+
+OBNS="${OBNS:-mo-ob}"
+read -rp 'Grafana 数据库类型 [postgres]：' GRAFANA_DATABASE_TYPE
+GRAFANA_DATABASE_TYPE="${GRAFANA_DATABASE_TYPE:-postgres}"
+read -rp 'Grafana 数据库地址（host:port）：' GRAFANA_DATABASE_HOST
+read -rp 'Grafana 数据库名 [grafana]：' GRAFANA_DATABASE_NAME
+GRAFANA_DATABASE_NAME="${GRAFANA_DATABASE_NAME:-grafana}"
+read -rp 'Grafana 数据库用户：' GRAFANA_DATABASE_USER
+read -rsp 'Grafana 数据库密码：' GRAFANA_DATABASE_PASSWORD
+printf '\n'
+read -rp 'Grafana 数据库 SSL mode（按数据库类型和客户 TLS 策略填写）：' \
+  GRAFANA_DATABASE_SSL_MODE
+read -rsp 'Grafana 全副本共享安全密钥（至少 32 个字符）：' \
+  GRAFANA_SECURITY_SECRET_KEY
+printf '\n'
+
+case "${GRAFANA_DATABASE_TYPE}" in
+  postgres|mysql) ;;
+  *) echo '错误：数据库类型只能是 postgres 或 mysql'; exit 1 ;;
+esac
+
+if [[ -z "${GRAFANA_DATABASE_HOST}" || \
+      -z "${GRAFANA_DATABASE_USER}" || \
+      -z "${GRAFANA_DATABASE_PASSWORD}" || \
+      -z "${GRAFANA_DATABASE_SSL_MODE}" ]]; then
+  echo '错误：数据库地址、用户、密码和 SSL mode 不能为空'
+  exit 1
+fi
+if (( ${#GRAFANA_SECURITY_SECRET_KEY} < 32 )); then
+  echo '错误：Grafana 全副本共享安全密钥不能少于 32 个字符'
+  exit 1
+fi
+
+DATABASE_SECRET_DIR="$(mktemp -d)"
+chmod 0700 "${DATABASE_SECRET_DIR}"
+cleanup_grafana_database_secret_files() {
+  rm -f -- \
+    "${DATABASE_SECRET_DIR}/GF_DATABASE_TYPE" \
+    "${DATABASE_SECRET_DIR}/GF_DATABASE_HOST" \
+    "${DATABASE_SECRET_DIR}/GF_DATABASE_NAME" \
+    "${DATABASE_SECRET_DIR}/GF_DATABASE_USER" \
+    "${DATABASE_SECRET_DIR}/GF_DATABASE_PASSWORD" \
+    "${DATABASE_SECRET_DIR}/GF_DATABASE_SSL_MODE" \
+    "${DATABASE_SECRET_DIR}/GF_SECURITY_SECRET_KEY"
+  rmdir -- "${DATABASE_SECRET_DIR}" 2>/dev/null || true
+}
+trap cleanup_grafana_database_secret_files EXIT
+
+printf '%s' "${GRAFANA_DATABASE_TYPE}" \
+  >"${DATABASE_SECRET_DIR}/GF_DATABASE_TYPE"
+printf '%s' "${GRAFANA_DATABASE_HOST}" \
+  >"${DATABASE_SECRET_DIR}/GF_DATABASE_HOST"
+printf '%s' "${GRAFANA_DATABASE_NAME}" \
+  >"${DATABASE_SECRET_DIR}/GF_DATABASE_NAME"
+printf '%s' "${GRAFANA_DATABASE_USER}" \
+  >"${DATABASE_SECRET_DIR}/GF_DATABASE_USER"
+printf '%s' "${GRAFANA_DATABASE_PASSWORD}" \
+  >"${DATABASE_SECRET_DIR}/GF_DATABASE_PASSWORD"
+printf '%s' "${GRAFANA_DATABASE_SSL_MODE}" \
+  >"${DATABASE_SECRET_DIR}/GF_DATABASE_SSL_MODE"
+printf '%s' "${GRAFANA_SECURITY_SECRET_KEY}" \
+  >"${DATABASE_SECRET_DIR}/GF_SECURITY_SECRET_KEY"
+
+kubectl -n "${OBNS}" create secret generic mo-ob-grafana-database \
+  --from-file="${DATABASE_SECRET_DIR}/GF_DATABASE_TYPE" \
+  --from-file="${DATABASE_SECRET_DIR}/GF_DATABASE_HOST" \
+  --from-file="${DATABASE_SECRET_DIR}/GF_DATABASE_NAME" \
+  --from-file="${DATABASE_SECRET_DIR}/GF_DATABASE_USER" \
+  --from-file="${DATABASE_SECRET_DIR}/GF_DATABASE_PASSWORD" \
+  --from-file="${DATABASE_SECRET_DIR}/GF_DATABASE_SSL_MODE" \
+  --from-file="${DATABASE_SECRET_DIR}/GF_SECURITY_SECRET_KEY" \
+  --dry-run=client -o yaml | kubectl apply -f -
+)
+```
+
+`GF_DATABASE_SSL_MODE` 的合法值取决于 PostgreSQL 或 MySQL 以及客户的 TLS
+策略，必须经过数据库负责人确认。不得为了绕过未知证书而关闭 TLS。
+`GF_SECURITY_SECRET_KEY` 必须由所有 Grafana 副本共用、存入客户密码管理系统并在
+升级期间保持不变；随意更换可能导致既有加密数据无法解密。只检查键名、不要显示值：
+
+```bash
+kubectl -n "${OBNS}" get secret mo-ob-grafana-database -o json |
+jq '{type: .type, keys: (.data | keys)}'
+```
+
+预期包含：`GF_DATABASE_TYPE`、`GF_DATABASE_HOST`、`GF_DATABASE_NAME`、
+`GF_DATABASE_USER`、`GF_DATABASE_PASSWORD`、`GF_DATABASE_SSL_MODE`、
+`GF_SECURITY_SECRET_KEY`。
 
 ## 8. 私有镜像 Secret（可选）
 
@@ -448,15 +599,18 @@ vi values-customer.yaml
 
 必须根据客户现场修改：
 
-- Loki、Prometheus、Grafana 的副本数、资源和保留时间；
+- Loki、Prometheus、Grafana、Alertmanager 的资源、保留时间和容量；
+- 至少 3 个可调度节点是否满足示例中的硬反亲和；
 - Loki write/backend StorageClass 和 PVC 大小；
 - Prometheus StorageClass、PVC 大小和 retention；
 - Grafana StorageClass 和 PVC 大小；
-- Grafana Service 类型或 Ingress；
-- NodePort（如果指定，必须先检查未占用）。
+- Alertmanager StorageClass 和 PVC 大小；
+- Grafana 外部高可用 PostgreSQL/MySQL 地址、TLS 和 Secret 是否就绪；
+- NodePort `30081` 是否未占用，以及防火墙或安全组的允许来源。
 
-Secret 值不在该文件中。values 中只保留 Loki 运行时环境变量占位符。
-示例中的单副本、容量和资源只是编辑工作表，不是生产推荐值。评审人必须将：
+Secret 值不在该文件中。values 中只引用 `mo-ob-loki-s3`、
+`mo-ob-grafana-admin` 和 `mo-ob-grafana-database`。示例中的高可用副本、容量和
+资源只是编辑工作表，不是所有生产环境的统一推荐值。评审人必须将：
 
 ```yaml
 customerSizingApproved: false
@@ -471,26 +625,43 @@ customerSizingApproved: true
 不要给 `true` 加引号，也不要使用 `--skip-schema-validation`。该字段由 Chart
 Schema 强制校验；未完成评审时，第 10 节会拒绝继续。
 
-默认 `ClusterIP` 最适合生产基线。如果要使用 NodePort 或 LoadBalancer，只能修改
-`mo-ruler-stack.grafana.service.type`。Ingress 不是 Service 类型；使用 Ingress 时
-保持 `service.type: ClusterIP`，并单独配置：
+本高可用示例使用以下直接访问配置：
 
 ```yaml
 mo-ruler-stack:
   grafana:
     service:
-      type: ClusterIP
-    ingress:
       enabled: true
-      hosts:
-        - grafana.customer.example
-      tls:
-        - secretName: grafana-customer-tls
-          hosts:
-            - grafana.customer.example
+      type: NodePort
+      port: 80
+      targetPort: 3000
+      nodePort: 30081
 ```
 
-Ingress 域名、TLS Secret 和 IngressClass 必须按客户现场调整。
+部署后，获准客户端使用 `http://<可达节点IP>:30081`。NodePort 本身不提供 HTTPS；
+必须通过客户网络边界限制访问。若客户改用 Ingress、LoadBalancer 或其他端口，必须
+作为现场 values 变更重新完成网络、安全和容量评审，不能同时保留冲突的暴露方式。
+
+Grafana Dashboard 目录配置不是容量参数。为兼容配套 `ob-ops` 内容 Chart，必须
+明确保留：
+
+```yaml
+mo-ruler-stack:
+  grafana:
+    sidecar:
+      dashboards:
+        enabled: true
+        label: grafana_dashboard
+        labelValue: "1"
+        folderAnnotation: grafana_folder
+        provider:
+          foldersFromFilesStructure: true
+```
+
+`folderAnnotation: grafana_folder` 让 sidecar 识别 Dashboard ConfigMap 的目录注解；
+`foldersFromFilesStructure: true` 让 Grafana 把 sidecar 创建的文件目录映射成 Dashboard
+目录。只保留其中一项或让注解键与内容 Chart 不一致，都会破坏 MatrixOne、MOI、
+K8s、Loki 的目录分层。
 
 ## 10. 渲染和安全检查
 
@@ -520,6 +691,16 @@ if ! grep -Eq '^customerSizingApproved:[[:space:]]+true[[:space:]]*$' \
   exit 1
 fi
 
+for REQUIRED_SECRET in \
+  mo-ob-loki-s3 \
+  mo-ob-grafana-admin \
+  mo-ob-grafana-database; do
+  if ! kubectl -n "${OBNS}" get secret "${REQUIRED_SECRET}" >/dev/null; then
+    echo "错误：缺少 Namespace 级 Secret ${REQUIRED_SECRET}"
+    exit 1
+  fi
+done
+
 HELM_VALUE_ARGS=(-f "${VALUES_FILE}")
 
 if [[ -f ./values-registry.yaml ]]; then
@@ -531,6 +712,7 @@ helm lint "${PACKAGE}" \
 
 helm template mo-ob-private "${PACKAGE}" \
   --namespace "${OBNS}" \
+  --api-versions policy/v1/PodDisruptionBudget \
   "${HELM_VALUE_ARGS[@]}" \
   >"${RENDERED_MANIFEST}"
 
@@ -561,6 +743,18 @@ if [[ -f ./values-registry.yaml ]] && \
   echo "错误：私有镜像 values 没有让工作负载引用 harbor-image-secret"
   exit 1
 fi
+
+for REQUIRED_GRAFANA_VALUE in \
+  'name: mo-ob-grafana-database' \
+  'foldersFromFilesStructure: true' \
+  'value: "grafana_folder"' \
+  'nodePort: 30081'; do
+  if ! grep -Fq "${REQUIRED_GRAFANA_VALUE}" \
+    "${RENDERED_MANIFEST}"; then
+    echo "错误：Grafana 高可用渲染缺少 ${REQUIRED_GRAFANA_VALUE}"
+    exit 1
+  fi
+done
 
 for REQUIRED_VALUE in \
   '${LOKI_S3_ENDPOINT}' \
@@ -641,25 +835,48 @@ kubectl -n "${OBNS}" logs statefulset/loki-backend \
   --all-containers \
   --tail=200
 
-# Grafana 默认是 ClusterIP，验收时可建立临时本地转发。
-kubectl -n "${OBNS}" port-forward \
-  service/mo-ob-private-grafana \
-  3000:80
+kubectl -n "${OBNS}" get service mo-ob-private-grafana -o wide
+kubectl get nodes -o wide
+
+# 在防火墙或安全组已放行的客户端执行。
+GRAFANA_NODE_IP="<可达节点IP>"
+curl --fail "http://${GRAFANA_NODE_IP}:30081/api/health"
+
+# 检查 Grafana 文件 provider 保留目录映射。
+kubectl -n "${OBNS}" get configmap \
+  mo-ob-private-grafana-config-dashboards \
+  -o jsonpath='{.data.provider\.yaml}'
+
+# 检查 Dashboard sidecar 的目录注解键，不输出 Secret 值。
+GRAFANA_POD="$(kubectl -n "${OBNS}" get pod \
+  -l app.kubernetes.io/name=grafana \
+  -o jsonpath='{.items[0].metadata.name}')"
+kubectl -n "${OBNS}" get pod "${GRAFANA_POD}" \
+  -o jsonpath='{range .spec.containers[?(@.name=="grafana-sc-dashboard")].env[*]}{.name}{"="}{.value}{"\n"}{end}'
 ```
 
 验收要求：
 
-1. 所有底座 Pod Ready；
-2. 所有 PVC Bound，且没有意外使用错误 StorageClass；
-3. Loki 日志没有鉴权、Bucket 不存在或对象写入失败；
-4. Prometheus、Grafana、Alertmanager Service 正常；
-5. 重启 Loki write/backend 后仍能查询重启前日志；
-6. Helm 使用相同 values 重复执行 upgrade 成功；
-7. MatrixOne、MOI、MinIO 等业务 Pod UID 未因安装监控发生变化。
+1. Loki write/backend 各 3 个 Pod、read/gateway 各 2 个 Pod Ready，并按硬反亲和
+   分散；
+2. Prometheus、Grafana 各 2 个 Pod，Alertmanager 3 个 Pod Ready；
+3. 当前示例在全新 Namespace 中创建约 153Gi、13 个 RWO PVC，全部 Bound 且没有
+   意外使用错误 StorageClass；该数字仍须与客户评审记录核对；
+4. Loki 日志没有鉴权、Bucket 不存在或对象写入失败；
+5. Grafana 两个副本都引用 `mo-ob-grafana-database`，数据库连接正常；停掉任一
+   Grafana Pod 后，NodePort `30081` 仍能访问并保留 Dashboard、用户和会话状态；
+6. provider 输出包含 `foldersFromFilesStructure: true`，sidecar 环境包含
+   `FOLDER_ANNOTATION=grafana_folder`；
+7. Prometheus、Grafana、Alertmanager Service 正常；
+8. 重启 Loki write/backend 后仍能查询重启前日志；
+9. Helm 使用相同 values 重复执行 upgrade 成功；
+10. MatrixOne、MOI、MinIO 等业务 Pod UID 未因安装监控发生变化。
 
 基础包的 Alertmanager receiver 默认为 `null`，不会发送邮件或 Webhook；这表示
 告警组件健康，不表示通知链路已经交付。`mo-ob-private 1.0.5` 内置的是
-standalone Alertmanager，它不会选择或消费 `AlertmanagerConfig`。与本底座配套时，
+standalone Alertmanager Chart；这里的 standalone 表示不由 Prometheus Operator
+管理，不表示单副本，高可用示例会运行 3 个集群副本。它不会选择或消费
+`AlertmanagerConfig`。与本底座配套时，
 `ob-ops` 内容 values 必须保持：
 
 ```yaml
@@ -670,8 +887,9 @@ notifications:
 
 只有客户另外提供了 Prometheus Operator-managed Alertmanager，并已验证
 `alertmanagerConfigSelector` 和 Namespace selector，才能开启 `ob-ops` 通知资源。
-Grafana 默认通过 ClusterIP 提供 HTTP，生产访问应由客户的 HTTPS Ingress
-或 LoadBalancer 统一保护。
+本示例中的 Grafana 通过 NodePort `30081` 提供 HTTP。它只应暴露给客户批准的网络；
+若需要跨不受信任网络访问，应在客户网络边界增加经过审核的 HTTPS 入口，不能把
+NodePort 当作 TLS 或身份边界。
 
 底座验收通过后，再安装匹配版本的 `ob-ops` 内容 Chart，并继续验收
 Prometheus targets、rules、Loki 查询和 Grafana Dashboard。

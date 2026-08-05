@@ -669,9 +669,45 @@
             "sidecar": {
               "type": "object",
               "required": [
+                "dashboards",
                 "datasources"
               ],
               "properties": {
+                "dashboards": {
+                  "type": "object",
+                  "required": [
+                    "enabled",
+                    "label",
+                    "labelValue",
+                    "folderAnnotation",
+                    "provider"
+                  ],
+                  "properties": {
+                    "enabled": {
+                      "const": true
+                    },
+                    "label": {
+                      "const": "grafana_dashboard"
+                    },
+                    "labelValue": {
+                      "const": "1"
+                    },
+                    "folderAnnotation": {
+                      "const": "grafana_folder"
+                    },
+                    "provider": {
+                      "type": "object",
+                      "required": [
+                        "foldersFromFilesStructure"
+                      ],
+                      "properties": {
+                        "foldersFromFilesStructure": {
+                          "const": true
+                        }
+                      }
+                    }
+                  }
+                },
                 "datasources": {
                   "type": "object",
                   "properties": {

@@ -440,6 +440,10 @@ mo-ruler-stack:
         repository: docker.io/kiwigrid/k8s-sidecar
         tag: 2.8.1
       dashboards:
+        # Keep these fields aligned with the ob-ops Dashboard ConfigMaps.
+        enabled: true
+        label: grafana_dashboard
+        labelValue: "1"
         folderAnnotation: grafana_folder
         # k8s-sidecar 2.8.1 keeps the folder map during list reconciliation,
         # so bulk Helm deletes converge even if individual watch events are lost.

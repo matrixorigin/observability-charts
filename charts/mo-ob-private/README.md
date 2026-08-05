@@ -15,12 +15,42 @@ Kubernetes/Loki/MatrixOne/MOI/MinIO ServiceMonitors, rules and dashboards.
 
 Before installation, the customer site must provide:
 
-1. a reachable Kubernetes cluster and Helm 3;
-2. a dynamic `ReadWriteOnce` StorageClass;
-3. an external S3-compatible service and a pre-created Loki bucket;
+1. a reachable Kubernetes cluster, Helm 3 and at least three schedulable nodes;
+2. a dynamic `ReadWriteOnce` StorageClass available in every intended failure
+   domain;
+3. an external highly available S3-compatible service and a pre-created Loki
+   bucket;
 4. least-privilege S3 credentials with the required bucket operations;
-5. network access to every rendered image, or a fully verified customer mirror;
-6. enough schedulable CPU, memory and persistent storage for the reviewed sizing.
+5. an external highly available PostgreSQL or MySQL database for Grafana;
+6. network access to every rendered image, or a fully verified customer mirror;
+7. enough schedulable CPU, memory and persistent storage for the reviewed sizing;
+8. an unused NodePort `30081` and a reviewed firewall or security-group rule for
+   the clients that may access Grafana.
+
+The supplied `values-customer.yaml.example` is a high-availability sizing
+starting point, not a universal production recommendation. It runs Loki with
+three write replicas, two read replicas, three backend replicas and two gateway
+replicas; Prometheus and Grafana with two replicas each; and Alertmanager with
+three replicas. The hard anti-affinity rules require at least three suitable
+nodes. Each customer must review these values against its own ingest rate,
+cardinality, retention, failure domains and recovery objectives.
+
+This is node-level availability based on `kubernetes.io/hostname`, not an
+automatic multi-zone or multi-datacenter disaster-recovery design. The PDBs
+protect voluntary disruption such as planned node maintenance; they do not
+prevent node, disk, network, object-storage or database failures, and they do
+not compensate for insufficient CPU, memory or PVC capacity.
+
+Two Grafana Pods backed by two local SQLite databases are not highly available.
+Both replicas must use the same customer-managed highly available PostgreSQL or
+MySQL service through the Namespace-local Secret
+`mo-ob-grafana-database`. The database lifecycle, backup, restore, TLS and
+availability remain the customer's responsibility. The example disables
+Grafana Unified Alerting because it does not configure that subsystem's HA
+coordination; alerts in this monitoring base use Prometheus and Alertmanager.
+If Grafana Alerting or Grafana Live is required, design and validate their HA
+separately. Install Grafana plugins through the same image or Helm values on
+both replicas; do not install a plugin manually in only one Pod.
 
 The default release Namespace is `mo-ob`. A custom Namespace is supported by
 setting the same value everywhere: the Helm `--namespace` argument, `OBNS`
@@ -92,9 +122,12 @@ only to the release-maintainer workflow above.
 
 ## Prepare Namespace-local Secrets
 
-Create the Grafana password in the customer password manager first. The block
-below uses a mode-`0700` temporary directory and `--from-file`, so credentials
-do not appear in `kubectl` process arguments:
+Create the Grafana administrator and external-database passwords plus one stable
+random Grafana security key in the customer password manager first. The block
+below creates `mo-ob-loki-s3`,
+`mo-ob-grafana-admin` and `mo-ob-grafana-database`. It uses a mode-`0700`
+temporary directory and `--from-file`, so credentials do not appear in
+`kubectl` process arguments:
 
 ```bash
 (
@@ -110,6 +143,19 @@ read -rp 'Grafana administrator [admin]: ' GRAFANA_ADMIN_USER
 GRAFANA_ADMIN_USER="${GRAFANA_ADMIN_USER:-admin}"
 read -rsp 'Grafana administrator password (at least 16 characters): ' \
   GRAFANA_ADMIN_PASSWORD
+printf '\n'
+read -rp 'Grafana database type [postgres]: ' GRAFANA_DATABASE_TYPE
+GRAFANA_DATABASE_TYPE="${GRAFANA_DATABASE_TYPE:-postgres}"
+read -rp 'Grafana database host (host:port): ' GRAFANA_DATABASE_HOST
+read -rp 'Grafana database name [grafana]: ' GRAFANA_DATABASE_NAME
+GRAFANA_DATABASE_NAME="${GRAFANA_DATABASE_NAME:-grafana}"
+read -rp 'Grafana database user: ' GRAFANA_DATABASE_USER
+read -rsp 'Grafana database password: ' GRAFANA_DATABASE_PASSWORD
+printf '\n'
+read -rp 'Grafana database SSL mode (database-specific): ' \
+  GRAFANA_DATABASE_SSL_MODE
+read -rsp 'Grafana shared security secret key (at least 32 characters): ' \
+  GRAFANA_SECURITY_SECRET_KEY
 printf '\n'
 
 LOKI_S3_FORCE_PATH_STYLE="true"
@@ -130,6 +176,21 @@ if (( ${#GRAFANA_ADMIN_PASSWORD} < 16 )) || \
   echo 'Grafana password must be at least 16 characters and differ from the username' >&2
   exit 1
 fi
+case "${GRAFANA_DATABASE_TYPE}" in
+  postgres|mysql) ;;
+  *) echo 'Grafana database type must be postgres or mysql' >&2; exit 1 ;;
+esac
+if [[ -z "${GRAFANA_DATABASE_HOST}" || \
+      -z "${GRAFANA_DATABASE_USER}" || \
+      -z "${GRAFANA_DATABASE_PASSWORD}" || \
+      -z "${GRAFANA_DATABASE_SSL_MODE}" ]]; then
+  echo 'Grafana database host, user, password and SSL mode must not be empty' >&2
+  exit 1
+fi
+if (( ${#GRAFANA_SECURITY_SECRET_KEY} < 32 )); then
+  echo 'Grafana shared security secret key must be at least 32 characters' >&2
+  exit 1
+fi
 
 kubectl create namespace "${OBNS}" \
   --dry-run=client -o yaml | kubectl apply -f -
@@ -145,7 +206,14 @@ cleanup_secret_files() {
     "${SECRET_DIR}/LOKI_S3_FORCE_PATH_STYLE" \
     "${SECRET_DIR}/LOKI_S3_INSECURE" \
     "${SECRET_DIR}/admin-user" \
-    "${SECRET_DIR}/admin-password"
+    "${SECRET_DIR}/admin-password" \
+    "${SECRET_DIR}/GF_DATABASE_TYPE" \
+    "${SECRET_DIR}/GF_DATABASE_HOST" \
+    "${SECRET_DIR}/GF_DATABASE_NAME" \
+    "${SECRET_DIR}/GF_DATABASE_USER" \
+    "${SECRET_DIR}/GF_DATABASE_PASSWORD" \
+    "${SECRET_DIR}/GF_DATABASE_SSL_MODE" \
+    "${SECRET_DIR}/GF_SECURITY_SECRET_KEY"
   rmdir -- "${SECRET_DIR}" 2>/dev/null || true
 }
 trap cleanup_secret_files EXIT
@@ -158,6 +226,13 @@ printf '%s' "${LOKI_S3_FORCE_PATH_STYLE}" >"${SECRET_DIR}/LOKI_S3_FORCE_PATH_STY
 printf '%s' "${LOKI_S3_INSECURE}" >"${SECRET_DIR}/LOKI_S3_INSECURE"
 printf '%s' "${GRAFANA_ADMIN_USER}" >"${SECRET_DIR}/admin-user"
 printf '%s' "${GRAFANA_ADMIN_PASSWORD}" >"${SECRET_DIR}/admin-password"
+printf '%s' "${GRAFANA_DATABASE_TYPE}" >"${SECRET_DIR}/GF_DATABASE_TYPE"
+printf '%s' "${GRAFANA_DATABASE_HOST}" >"${SECRET_DIR}/GF_DATABASE_HOST"
+printf '%s' "${GRAFANA_DATABASE_NAME}" >"${SECRET_DIR}/GF_DATABASE_NAME"
+printf '%s' "${GRAFANA_DATABASE_USER}" >"${SECRET_DIR}/GF_DATABASE_USER"
+printf '%s' "${GRAFANA_DATABASE_PASSWORD}" >"${SECRET_DIR}/GF_DATABASE_PASSWORD"
+printf '%s' "${GRAFANA_DATABASE_SSL_MODE}" >"${SECRET_DIR}/GF_DATABASE_SSL_MODE"
+printf '%s' "${GRAFANA_SECURITY_SECRET_KEY}" >"${SECRET_DIR}/GF_SECURITY_SECRET_KEY"
 
 kubectl -n "${OBNS}" create secret generic mo-ob-loki-s3 \
   --from-file="${SECRET_DIR}/LOKI_S3_ENDPOINT" \
@@ -172,12 +247,37 @@ kubectl -n "${OBNS}" create secret generic mo-ob-grafana-admin \
   --from-file="admin-user=${SECRET_DIR}/admin-user" \
   --from-file="admin-password=${SECRET_DIR}/admin-password" \
   --dry-run=client -o yaml | kubectl apply -f -
+
+kubectl -n "${OBNS}" create secret generic mo-ob-grafana-database \
+  --from-file="${SECRET_DIR}/GF_DATABASE_TYPE" \
+  --from-file="${SECRET_DIR}/GF_DATABASE_HOST" \
+  --from-file="${SECRET_DIR}/GF_DATABASE_NAME" \
+  --from-file="${SECRET_DIR}/GF_DATABASE_USER" \
+  --from-file="${SECRET_DIR}/GF_DATABASE_PASSWORD" \
+  --from-file="${SECRET_DIR}/GF_DATABASE_SSL_MODE" \
+  --from-file="${SECRET_DIR}/GF_SECURITY_SECRET_KEY" \
+  --dry-run=client -o yaml | kubectl apply -f -
 )
 ```
 
 The Secrets are updated idempotently. Rotate credentials only in a controlled
 maintenance window and never commit their values to Git, values files, tickets
 or delivery documents.
+
+The database endpoint must be reachable from both Grafana Pods and must already
+contain the reviewed database and user. Choose `GF_DATABASE_SSL_MODE` according
+to the selected database engine and the customer's TLS policy. Do not weaken
+database TLS to work around an untrusted certificate. Check only the Secret key
+names, without printing their values:
+
+`GF_SECURITY_SECRET_KEY` must be identical on every Grafana replica and remain
+stable across upgrades. Store it in the customer password manager; changing it
+can make previously encrypted Grafana data unreadable.
+
+```bash
+kubectl -n "${OBNS}" get secret mo-ob-grafana-database -o json |
+jq '{type: .type, keys: (.data | keys)}'
+```
 
 If the HTTPS S3 endpoint uses a private CA, the CA must be trusted inside every
 Loki workload through a reviewed site values override. Do not weaken TLS or
@@ -252,20 +352,66 @@ customerSizingApproved: true
 Do not quote `true` and do not use `--skip-schema-validation`. Helm validation
 rejects the customer values while this acknowledgement is absent or false.
 
-The default numbers are an editing worksheet, not a production recommendation.
-Capacity is approximately:
+The example is deliberately a high-availability editing worksheet, not a
+production recommendation. Its replica topology is:
+
+- Loki write/backend: 3 each; Loki read/gateway: 2 each;
+- Prometheus/Grafana: 2 each;
+- Alertmanager: 3.
+
+Only Loki write/backend, Prometheus, Grafana and Alertmanager request persistent
+volumes in this profile. Capacity is approximately:
 
 ```text
 (Loki write replicas × write PVC size)
 + (Loki backend replicas × backend PVC size)
 + (Prometheus replicas × Prometheus PVC size)
 + (Grafana replicas × Grafana PVC size)
-+ at least 20%-30% site headroom
++ (Alertmanager replicas × Alertmanager PVC size)
+
+= (3 × 10Gi) + (3 × 10Gi) + (2 × 40Gi) + (2 × 5Gi) + (3 × 1Gi)
+= approximately 153Gi across 13 ReadWriteOnce PVCs
 ```
 
-Confirm StorageClass topology, expansion support, failure domains and the
-available capacity on every schedulable node. Do not copy node names or sizes
-from another cluster.
+The `153Gi` and 13-PVC figures are example requested capacity before customer
+headroom, snapshots, storage-system overhead and external Loki object storage.
+They must not be treated as proof that a customer storage system has enough
+usable capacity. Confirm StorageClass topology, expansion support, failure
+domains and capacity on every schedulable node using the customer's storage
+provider procedures. Do not copy node names, free-space figures or sizing from
+another cluster.
+
+With node-local `ReadWriteOnce` storage, an existing PVC normally cannot move
+to another node after a node or disk failure. HA keeps service available through
+the remaining replicas; recovery of the failed replica must follow the customer
+storage provider's documented procedure.
+
+The following Grafana dashboard-discovery protocol is not a sizing knob. Keep
+it aligned with the companion `ob-ops` Dashboard ConfigMaps so MatrixOne, MOI,
+K8s and Loki dashboards remain in their intended folders:
+
+```yaml
+mo-ruler-stack:
+  grafana:
+    sidecar:
+      dashboards:
+        enabled: true
+        label: grafana_dashboard
+        labelValue: "1"
+        folderAnnotation: grafana_folder
+        provider:
+          foldersFromFilesStructure: true
+```
+
+Changing either `folderAnnotation` or `foldersFromFilesStructure` without the
+matching content-Chart change breaks folder placement. The customer HA example
+therefore keeps `folderAnnotation: grafana_folder` and
+`foldersFromFilesStructure: true` explicitly.
+
+The same example exposes Grafana as `NodePort` `30081`. Confirm that the port is
+unused and restrict node firewall or security-group access to approved client
+networks. A client that can route to a cluster node can then use
+`http://<reachable-node-ip>:30081`. NodePort does not provide HTTPS by itself.
 
 ## Image sources and private registries
 
@@ -352,6 +498,13 @@ kubectl get nodes
 kubectl get storageclass
 kubectl get pvc -A
 
+for REQUIRED_SECRET in \
+  mo-ob-loki-s3 \
+  mo-ob-grafana-admin \
+  mo-ob-grafana-database; do
+  kubectl -n "${OBNS}" get secret "${REQUIRED_SECRET}" >/dev/null
+done
+
 HELM_VALUE_ARGS=(-f "${VALUES_FILE}")
 if [[ -f ./values-registry.yaml ]]; then
   HELM_VALUE_ARGS+=(-f ./values-registry.yaml)
@@ -360,6 +513,7 @@ fi
 helm lint "${PACKAGE}" "${HELM_VALUE_ARGS[@]}"
 helm template mo-ob-private "${PACKAGE}" \
   --namespace "${OBNS}" \
+  --api-versions policy/v1/PodDisruptionBudget \
   "${HELM_VALUE_ARGS[@]}" >"${RENDERED_MANIFEST}"
 
 if grep -Eq \
@@ -368,6 +522,17 @@ if grep -Eq \
   echo 'Unsafe legacy value found in rendered manifests' >&2
   exit 1
 fi
+
+for REQUIRED_GRAFANA_VALUE in \
+  'name: mo-ob-grafana-database' \
+  'foldersFromFilesStructure: true' \
+  'value: "grafana_folder"' \
+  'nodePort: 30081'; do
+  if ! grep -Fq "${REQUIRED_GRAFANA_VALUE}" "${RENDERED_MANIFEST}"; then
+    echo "Missing required Grafana HA value: ${REQUIRED_GRAFANA_VALUE}" >&2
+    exit 1
+  fi
+done
 
 grep -E '^[[:space:]]*image:' "${RENDERED_MANIFEST}" | sort -u
 
@@ -398,17 +563,30 @@ kubectl -n "${OBNS}" logs statefulset/loki-write \
   --all-containers --tail=100
 kubectl -n "${OBNS}" logs statefulset/loki-backend \
   --all-containers --tail=100
-kubectl -n "${OBNS}" port-forward \
-  service/mo-ob-private-grafana 3000:80
+kubectl -n "${OBNS}" get service mo-ob-private-grafana -o wide
+kubectl get nodes -o wide
+
+# From a client allowed by the node firewall/security group:
+GRAFANA_NODE_IP="<reachable-node-ip>"
+curl --fail "http://${GRAFANA_NODE_IP}:30081/api/health"
+
+kubectl -n "${OBNS}" get configmap \
+  mo-ob-private-grafana-config-dashboards \
+  -o jsonpath='{.data.provider\.yaml}'
 ```
 
 Verify all Pods are Ready, PVCs use the approved StorageClass, Loki can retain
-and retrieve data across a controlled restart, and Grafana has healthy
-`prometheus` and `loki` datasources.
+and retrieve data across a controlled restart, and both Grafana replicas are
+Ready and reference `mo-ob-grafana-database`. The provider output must contain
+`foldersFromFilesStructure: true`; the Grafana dashboard sidecar must contain
+`FOLDER_ANNOTATION=grafana_folder`. Verify that Grafana has healthy `prometheus`
+and `loki` datasources and remains functional after either Grafana Pod is
+restarted.
 
-The bundled Alertmanager is standalone and does not consume
-`AlertmanagerConfig`. With `mo-ob-private 1.0.5`, the companion `ob-ops`
-content values must keep:
+The bundled Alertmanager is a standalone Chart deployment and does not consume
+`AlertmanagerConfig`; "standalone" does not mean one replica—the HA customer
+example runs three clustered replicas. With `mo-ob-private 1.0.5`, the companion
+`ob-ops` content values must keep:
 
 ```yaml
 notifications:

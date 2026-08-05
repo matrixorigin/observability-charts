@@ -290,6 +290,11 @@ mo-ruler-stack:
         repository: docker.io/kiwigrid/k8s-sidecar
         tag: 2.8.1
       dashboards:
+        # Keep these fields aligned with the ob-ops Dashboard ConfigMaps.
+        enabled: true
+        label: grafana_dashboard
+        labelValue: "1"
+        folderAnnotation: grafana_folder
         # Periodic list reconciliation guarantees convergence after bulk deletes.
         watchMethod: SLEEP
         env:

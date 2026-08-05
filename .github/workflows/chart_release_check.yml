@@ -74,6 +74,7 @@ jobs:
           helm template mo-ob-private charts/mo-ob-private \
             --namespace mo-ob \
             --kube-version 1.34.3 \
+            --api-versions policy/v1/PodDisruptionBudget \
             >"${RUNNER_TEMP}/mo-ob-private-rendered.yaml"
 
           test "$(
@@ -93,6 +94,161 @@ jobs:
               "${RUNNER_TEMP}/mo-ob-private-rendered.yaml" ||
               true
           )" -eq 0
+
+          CUSTOMER_RENDERED="${RUNNER_TEMP}/mo-ob-private-customer-ha.yaml"
+
+          helm template mo-ob-private charts/mo-ob-private \
+            --namespace mo-ob \
+            --kube-version 1.34.3 \
+            --api-versions policy/v1/PodDisruptionBudget \
+            --values charts/mo-ob-private/values-customer.yaml.example \
+            --set customerSizingApproved=true \
+            >"${CUSTOMER_RENDERED}"
+
+          for KIND in ServiceMonitor PodMonitor PrometheusRule; do
+            test "$(
+              grep -c "^kind: ${KIND}$" "${CUSTOMER_RENDERED}" ||
+                true
+            )" -eq 0
+          done
+
+          if grep -q '^apiVersion: policy/v1beta1$' "${CUSTOMER_RENDERED}"; then
+            echo 'Customer HA render contains an obsolete PDB API version'
+            exit 1
+          fi
+
+          assert_document_line() {
+            local kind="$1"
+            local name="$2"
+            local expected="$3"
+
+            awk \
+              -v kind="${kind}" \
+              -v name="${name}" \
+              -v expected="${expected}" '
+                BEGIN { RS = "---"; found = 0 }
+                {
+                  has_kind = 0
+                  has_name = 0
+                  has_expected = 0
+                  line_count = split($0, lines, "\n")
+
+                  for (line = 1; line <= line_count; line++) {
+                    if (lines[line] == "kind: " kind) {
+                      has_kind = 1
+                    }
+                    if (lines[line] == "  name: " name) {
+                      has_name = 1
+                    }
+                    if (lines[line] == expected) {
+                      has_expected = 1
+                    }
+                  }
+
+                  if (has_kind && has_name && has_expected) {
+                    found = 1
+                  }
+                }
+                END { exit found ? 0 : 1 }
+              ' "${CUSTOMER_RENDERED}"
+          }
+
+          assert_document_sequence() {
+            local kind="$1"
+            local name="$2"
+            local first="$3"
+            local second="$4"
+
+            awk \
+              -v kind="${kind}" \
+              -v name="${name}" \
+              -v first="${first}" \
+              -v second="${second}" '
+                BEGIN { RS = "---"; found = 0 }
+                {
+                  has_kind = 0
+                  has_name = 0
+                  has_sequence = 0
+                  line_count = split($0, lines, "\n")
+
+                  for (line = 1; line <= line_count; line++) {
+                    if (lines[line] == "kind: " kind) {
+                      has_kind = 1
+                    }
+                    if (lines[line] == "  name: " name) {
+                      has_name = 1
+                    }
+                    if (lines[line] == first && lines[line + 1] == second) {
+                      has_sequence = 1
+                    }
+                  }
+
+                  if (has_kind && has_name && has_sequence) {
+                    found = 1
+                  }
+                }
+                END { exit found ? 0 : 1 }
+              ' "${CUSTOMER_RENDERED}"
+          }
+
+          assert_document_line StatefulSet loki-write '  replicas: 3'
+          assert_document_line StatefulSet loki-backend '  replicas: 3'
+          assert_document_line Deployment loki-read '  replicas: 2'
+          assert_document_line Deployment mo-ob-private-loki-gateway '  replicas: 2'
+          assert_document_line StatefulSet mo-ob-alertmanager '  replicas: 3'
+          assert_document_line StatefulSet mo-ob-private-grafana '  replicas: 2'
+          assert_document_line Prometheus \
+            mo-ob-private-kube-prometh-prometheus \
+            '  replicas: 2'
+
+          assert_document_line PodDisruptionBudget \
+            mo-ob-private-kube-prometh-prometheus \
+            '  minAvailable: 1'
+          assert_document_line PodDisruptionBudget loki-backend \
+            '  maxUnavailable: 1'
+          assert_document_line PodDisruptionBudget mo-ob-private-loki-gateway \
+            '  maxUnavailable: 1'
+          assert_document_line PodDisruptionBudget loki-read \
+            '  maxUnavailable: 1'
+          assert_document_line PodDisruptionBudget loki-write \
+            '  maxUnavailable: 1'
+          assert_document_line PodDisruptionBudget mo-ob-alertmanager \
+            '  minAvailable: 2'
+          assert_document_line PodDisruptionBudget mo-ob-private-grafana \
+            '  minAvailable: 1'
+
+          assert_document_line ConfigMap \
+            mo-ob-private-grafana-config-dashboards \
+            '          foldersFromFilesStructure: true'
+          assert_document_sequence StatefulSet mo-ob-private-grafana \
+            '            - name: LABEL_VALUE' \
+            '              value: "1"'
+          assert_document_sequence StatefulSet mo-ob-private-grafana \
+            '            - name: FOLDER_ANNOTATION' \
+            '              value: "grafana_folder"'
+          assert_document_sequence StatefulSet mo-ob-private-grafana \
+            '            - secretRef:' \
+            '                name: mo-ob-grafana-database'
+          assert_document_line Service mo-ob-private-grafana \
+            '  type: NodePort'
+          assert_document_line Service mo-ob-private-grafana \
+            '      nodePort: 30081'
+          assert_document_sequence ConfigMap mo-ob-private-grafana \
+            '    [unified_alerting]' \
+            '    enabled = false'
+
+          INVALID_FOLDER_LOG="${RUNNER_TEMP}/invalid-grafana-folder.log"
+
+          if helm lint charts/mo-ob-private \
+            --values charts/mo-ob-private/values-customer.yaml.example \
+            --set customerSizingApproved=true \
+            --set mo-ruler-stack.grafana.sidecar.dashboards.provider.foldersFromFilesStructure=false \
+            >"${INVALID_FOLDER_LOG}" 2>&1; then
+
+            echo 'Grafana folder mapping must be rejected when disabled'
+            cat "${INVALID_FOLDER_LOG}"
+            exit 1
+          fi
 
       - name: Dry-run chart-releaser packaging
         shell: bash

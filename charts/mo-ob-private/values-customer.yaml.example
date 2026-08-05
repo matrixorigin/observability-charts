@@ -1,28 +1,53 @@
-# Customer sizing worksheet. These quantities are examples, not production
-# recommendations. Set replicas, resources, retention and PVC sizes from the
-# customer's ingest rate, metric cardinality and recovery objectives.
+# 客户高可用容量规划示例。
 #
-# The storageClass keys are intentionally commented. Leave them absent only
-# when the cluster has one suitable default ReadWriteOnce StorageClass;
-# otherwise uncomment every key and set the customer StorageClass explicitly.
+# 注释标记说明：
+# - 【必须修改】安装前必须按客户现场填写或确认。
+# - 【必须准备】安装前必须先创建对应的外部资源或 Kubernetes Secret。
+# - 【必须确认】可以沿用示例值，但必须先检查客户现场是否冲突或满足条件。
+# - 【可直接修改】不会破坏 Chart 协议，可按客户需求调整。
+# - 【按容量修改】示例值可以直接修改，但必须经过容量评审。
+# - 【通常保持】与 Chart/ob-ops 的兼容协议相关，不建议修改。
+#
+# 高可用前提：
+# 1. 至少 3 个可调度节点；Loki、Prometheus、Alertmanager 和 Grafana 使用
+#    hostname 级硬反亲和。这是节点级高可用，不等同于跨可用区或跨机房容灾。
+# 2. 客户必须提供可动态供给 ReadWriteOnce PVC 的 StorageClass，并确认各故障域容量。
+#    若使用本地 RWO 存储，原 PVC 通常不能随故障 Pod 跨节点漂移；服务可用性依赖
+#    其他副本，故障盘恢复必须遵循客户存储系统流程。
+# 3. Loki 使用客户独立维护的高可用 S3/MinIO 和已创建的 Bucket。
+# 4. Grafana 两副本必须共用客户独立维护的 PostgreSQL/MySQL；不能使用各 Pod 本地 SQLite。
+# 5. Grafana NodePort 30081 必须未被占用，且节点防火墙/安全组允许客户端访问。
+# 6. PDB 只保护自愿驱逐/节点维护，不能代替节点、磁盘、对象存储和数据库容灾。
+#
+# 下列 CPU、内存、保留时间和 PVC 大小只是可运行的评审起点，不是所有生产环境的
+# 统一推荐值。请根据日志写入量、指标基数、保留周期和恢复目标修改。
 
-# This example intentionally fails schema validation until an accountable
-# reviewer confirms the sizing worksheet and changes this YAML boolean to true.
-# Record the change ticket, reviewer and review date in the delivery record.
+# 【必须修改】完成容量评审并记录变更单、评审人和日期后，改成 YAML 布尔值 true。
+# 不要写成字符串 "true"，也不要跳过 Schema 校验。
 customerSizingApproved: false
 
 mo-ob-opensource:
   loki:
     loki:
+      commonConfig:
+        # 【通常保持】3 个 write 副本对应 3 副本数据复制；不要低于 3。
+        replication_factor: 3
       limits_config:
+        # 【按容量修改】日志保留时间；720h = 30 天。
         retention_period: 720h
 
     write:
-      replicas: 1
+      # 【通常保持】3 副本配合 replication_factor=3，并分散到 3 个节点。
+      replicas: 3
       persistence:
+        # 【通常保持】Helm 升级、缩容或删除 StatefulSet 时不自动删除客户 PVC。
+        enableStatefulSetAutoDeletePVC: false
+        # 【必须修改】没有合适的默认 StorageClass 时，取消下一行注释并填写实际名称。
         # storageClass: customer-rwo-storage-class
+        # 【按容量修改】每个 write 副本各申请一个 PVC，总量为 replicas × size。
         size: 10Gi
       resources:
+        # 【按容量修改】调度依据；必须保证每个故障域都有足够资源。
         requests:
           cpu: 250m
           memory: 1Gi
@@ -31,7 +56,9 @@ mo-ob-opensource:
           memory: 1Gi
 
     read:
-      replicas: 1
+      # 【可直接修改】查询压力较大时可增加；高可用至少保持 2。
+      # 当前 SimpleScalable 模式下 read 是 Deployment，不申请独立 RWO PVC。
+      replicas: 2
       resources:
         requests:
           cpu: 250m
@@ -41,9 +68,13 @@ mo-ob-opensource:
           memory: 3Gi
 
     backend:
-      replicas: 1
+      # 【通常保持】3 副本承载 compactor、index-gateway 和 query-scheduler。
+      replicas: 3
       persistence:
+        enableStatefulSetAutoDeletePVC: false
+        # 【必须修改】没有合适的默认 StorageClass 时取消注释并填写实际名称。
         # storageClass: customer-rwo-storage-class
+        # 【按容量修改】每个 backend 副本各申请一个 PVC。
         size: 10Gi
       resources:
         requests:
@@ -53,12 +84,32 @@ mo-ob-opensource:
           cpu: 200m
           memory: 250Mi
 
+    gateway:
+      # 【通常保持】两个网关副本避免单 Pod 故障中断 Loki 读写入口。
+      replicas: 2
+      resources:
+        requests:
+          cpu: 250m
+          memory: 250Mi
+        limits:
+          cpu: 1000m
+          memory: 1Gi
+
   kube-prometheus-stack:
     prometheus:
+      # 两副本时保留至少一个可用副本，避免节点维护同时驱逐全部 Prometheus。
+      podDisruptionBudget:
+        enabled: true
+        minAvailable: 1
       prometheusSpec:
-        # When using a custom Namespace, replace mo-ob with the same value
-        # passed to helm --namespace. Keep this complete list item together:
-        # Helm replaces array entries as a unit rather than merging one field.
+        # 【通常保持】两个副本分别保存完整数据并抓取相同目标，因此抓取流量和
+        # Prometheus PVC 申请量也按两个完整副本计算。
+        replicas: 2
+        podAntiAffinity: hard
+        podAntiAffinityTopologyKey: kubernetes.io/hostname
+
+        # 【必须修改】若安装 Namespace 不是 mo-ob，必须把 namespace 改成同一值。
+        # Helm 会整体替换数组项，因此以下字段必须完整保留，不能只覆盖 namespace。
         alertingEndpoints:
           - name: mo-ob-alertmanager
             namespace: mo-ob
@@ -66,6 +117,8 @@ mo-ob-opensource:
             scheme: http
             pathPrefix: ""
             apiVersion: v2
+
+        # 【按容量修改】指标保留时间。
         retention: 21d
         resources:
           requests:
@@ -77,19 +130,74 @@ mo-ob-opensource:
         storageSpec:
           volumeClaimTemplate:
             spec:
+              # 【必须修改】没有合适的默认 StorageClass 时取消注释并填写实际名称。
               # storageClassName: customer-rwo-storage-class
               accessModes:
                 - ReadWriteOnce
               resources:
                 requests:
+                  # 【按容量修改】每个 Prometheus 副本各申请一个 PVC。
                   storage: 40Gi
 
 mo-ruler-stack:
-  grafana:
-    replicas: 1
+  alertmanager:
+    # 【通常保持】三个副本会自动组成 Alertmanager 集群。
+    replicaCount: 3
+    podAntiAffinity: hard
+    podAntiAffinityTopologyKey: kubernetes.io/hostname
+    podDisruptionBudget:
+      minAvailable: 2
     persistence:
+      enabled: true
+      # 【必须修改】没有合适的默认 StorageClass 时取消注释并填写实际名称。
+      # storageClass: customer-rwo-storage-class
+      # 【按容量修改】每个 Alertmanager 副本各申请一个 PVC。
+      size: 1Gi
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+  grafana:
+    # 【通常保持】两个副本通过 NodePort Service 负载均衡。
+    # 真高可用必须配置下方共享外部数据库；本地 SQLite 不能用于多副本。
+    replicas: 2
+    podDisruptionBudget:
+      minAvailable: 1
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values:
+                    - grafana
+            topologyKey: kubernetes.io/hostname
+
+    # 【必须准备】在 Helm release Namespace（默认 mo-ob）预先创建同名 Secret。
+    # Secret 必须包含以下环境变量键，值不得写入本文件或 Git：
+    # GF_DATABASE_TYPE=postgres（也可以按客户实际使用 mysql）
+    # GF_DATABASE_HOST=<高可用数据库地址:端口>
+    # GF_DATABASE_NAME=grafana
+    # GF_DATABASE_USER=<Grafana 数据库用户>
+    # GF_DATABASE_PASSWORD=<密码>
+    # GF_DATABASE_SSL_MODE=require（按数据库类型和客户 TLS 策略调整）
+    # GF_SECURITY_SECRET_KEY=<所有副本共用的随机长密钥>
+    envFromSecret: mo-ob-grafana-database
+
+    # 每个 Grafana Pod 使用独立 RWO PVC 保存插件和本地文件；业务状态存放在外部数据库。
+    persistence:
+      enabled: true
+      type: statefulset
+      # 【必须修改】没有合适的默认 StorageClass 时取消注释并填写实际名称。
       # storageClassName: customer-rwo-storage-class
+      # 【按容量修改】每个 Grafana 副本各申请一个 PVC。
       size: 5Gi
+
     resources:
       requests:
         cpu: 200m
@@ -97,8 +205,42 @@ mo-ruler-stack:
       limits:
         cpu: 500m
         memory: 1Gi
+
+    grafana.ini:
+      unified_alerting:
+        # 【通常保持】本底座使用 Prometheus + Alertmanager；这里未配置 Grafana
+        # Alerting 的 HA 去重。若客户要启用，必须另行设计其 HA 和通知链路。
+        enabled: false
+
+    sidecar:
+      dashboards:
+        # 【通常保持】必须与 ob-ops Dashboard ConfigMap 协议一致。
+        enabled: true
+        label: grafana_dashboard
+        labelValue: "1"
+        folderAnnotation: grafana_folder
+        watchMethod: SLEEP
+        env:
+          SLEEP_TIME: "10"
+        skipReload: true
+        provider:
+          # 【通常保持】必须为 true，才能把 MatrixOne/MOI/K8s/Loki 文件目录
+          # 映射成 Grafana Dashboard 目录。
+          foldersFromFilesStructure: true
+      datasources:
+        # null 表示只在当前 Helm release Namespace 中搜索，避免集群级 Secret 权限。
+        searchNamespace: null
+
     service:
-      type: ClusterIP
-      # For NodePort, set type: NodePort and either omit nodePort for automatic
-      # allocation or set a verified free port.
-      # nodePort: 30081
+      enabled: true
+      # 【可直接修改】NodePort 允许通过任一可达节点 IP 直接访问 Grafana。
+      type: NodePort
+      port: 80
+      targetPort: 3000
+      # 【必须确认】范围为 30000-32767；部署前检查客户集群中没有占用。
+      nodePort: 30081
+      # 访问地址：http://<任一可达节点IP>:30081
+      # NodePort 本身不提供 HTTPS；生产环境应在客户批准的 TLS 入口后访问。
+
+    # 【通常保持】插件应通过相同镜像或 values 同步到两个副本，禁止只在单 Pod
+    # 内手工安装，否则两个 Grafana 副本的插件会不一致。
