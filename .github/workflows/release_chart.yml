@@ -20,7 +20,7 @@ permissions:
 env:
   CHART_DIR: charts/mo-ob-private
   HARBOR_REGISTRY: shanghai.idc.matrixorigin.cn:30019
-  HARBOR_CHART_PROJECT: mocloud-chart
+  HARBOR_CHART_PROJECT: mocloud-charts
 
 jobs:
   publish:
