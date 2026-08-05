@@ -1,0 +1,114 @@
+# 国内公共镜像配置。此文件可以显式追加在客户 values 文件之后；Chart 默认值
+# 已使用同一组国内地址。每个国内地址下面都保留对应的国外原始地址。
+# 公共加速站不等于离线仓库，正式离线交付仍应把全部镜像同步到客户私有仓库。
+imageSource: domestic
+
+postgresql:
+  cluster:
+    imageName: >-
+      ghcr.m.daocloud.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c
+    # 国外原始地址：
+    # ghcr.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c
+
+mo-ob-opensource:
+  alloy:
+    image:
+      registry: docker.m.daocloud.io
+      repository: grafana/alloy
+      tag: v1.3.1
+      # 国外原始地址：docker.io/grafana/alloy:v1.3.1
+
+  promtail:
+    image:
+      registry: docker.m.daocloud.io
+      repository: grafana/promtail
+      tag: "2.8.4"
+      # 国外原始地址：docker.io/grafana/promtail:2.8.4
+
+  loki:
+    loki:
+      image:
+        registry: docker.m.daocloud.io
+        repository: grafana/loki
+        tag: "3.2.0"
+        # 国外原始地址：docker.io/grafana/loki:3.2.0
+    sidecar:
+      image:
+        repository: docker.m.daocloud.io/kiwigrid/k8s-sidecar
+        tag: 1.27.5
+        # 国外原始地址：docker.io/kiwigrid/k8s-sidecar:1.27.5
+    gateway:
+      image:
+        registry: docker.m.daocloud.io
+        repository: nginxinc/nginx-unprivileged
+        tag: 1.27-alpine
+        # 国外原始地址：docker.io/nginxinc/nginx-unprivileged:1.27-alpine
+
+  kube-prometheus-stack:
+    prometheus-node-exporter:
+      image:
+        registry: quay.m.daocloud.io
+        repository: prometheus/node-exporter
+        tag: v1.5.0
+        # 国外原始地址：quay.io/prometheus/node-exporter:v1.5.0
+    prometheusOperator:
+      image:
+        registry: quay.m.daocloud.io
+        repository: prometheus-operator/prometheus-operator
+        tag: v0.63.0
+        # 国外原始地址：quay.io/prometheus-operator/prometheus-operator:v0.63.0
+      prometheusConfigReloader:
+        image:
+          registry: quay.m.daocloud.io
+          repository: prometheus-operator/prometheus-config-reloader
+          tag: v0.63.0
+          # 国外原始地址：quay.io/prometheus-operator/prometheus-config-reloader:v0.63.0
+      thanosImage:
+        # DaoCloud 的 Quay 路径没有此 tag；该 Docker Hub 镜像与 Quay 原镜像
+        # manifest digest 相同。
+        registry: docker.m.daocloud.io
+        repository: thanosio/thanos
+        tag: v0.30.2
+        # 国外原始地址：quay.io/thanos/thanos:v0.30.2
+    prometheus:
+      prometheusSpec:
+        image:
+          registry: quay.m.daocloud.io
+          repository: prometheus/prometheus
+          tag: v2.42.0
+          # 国外原始地址：quay.io/prometheus/prometheus:v2.42.0
+    kube-state-metrics:
+      image:
+        registry: m.daocloud.io
+        repository: registry.k8s.io/kube-state-metrics/kube-state-metrics
+        tag: v2.8.2
+        # 国外原始地址：registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.8.2
+
+mo-ruler-stack:
+  alertmanagerWebhookAdapter:
+    image:
+      # DaoCloud 没有此可选镜像；1ms 为已验证公网加速地址。正式离线交付
+      # 仍应同步到客户 Harbor。
+      repository: docker.1ms.run/ez4bruce3280/alertmanager-webhook-adapter
+      tag: v1.1.7
+      # 国外原始地址：docker.io/ez4bruce3280/alertmanager-webhook-adapter:v1.1.7
+  alertmanager:
+    image:
+      repository: quay.m.daocloud.io/prometheus/alertmanager
+      tag: v0.27.0
+      # 国外原始地址：quay.io/prometheus/alertmanager:v0.27.0
+  grafana:
+    image:
+      repository: docker.m.daocloud.io/grafana/grafana
+      tag: 10.1.6
+      # 国外原始地址：docker.io/grafana/grafana:10.1.6
+    initChownData:
+      image:
+        repository: docker.m.daocloud.io/library/busybox
+        tag: 1.31.1
+        # 国外原始地址：docker.io/library/busybox:1.31.1
+    sidecar:
+      image:
+        repository: docker.m.daocloud.io/kiwigrid/k8s-sidecar
+        tag: 2.8.1
+        # 国外原始地址：docker.io/kiwigrid/k8s-sidecar:2.8.1

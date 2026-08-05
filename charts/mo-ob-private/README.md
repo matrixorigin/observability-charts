@@ -615,11 +615,50 @@ networks. A client that can route to a cluster node can then use
 
 ## Image sources and private registries
 
-The standalone Chart defaults to upstream `docker.io`, `quay.io` and
-`registry.k8s.io` images. When deploying through the companion `ob-ops`
-installer, `IMAGE_SOURCE=upstream|domestic` selects its reviewed image profile.
-The domestic profile is a public network accelerator, not an offline guarantee;
-verify every repository, tag and CPU architecture from the customer network.
+The standalone Chart defaults to `imageSource: domestic`. Every enabled
+workload uses a verified domestic public mirror, including the PostgreSQL
+operand and the otherwise easy-to-miss Thanos base image passed as a Prometheus
+Operator argument. The independent CloudNativePG Operator has a matching
+domestic values file. Each active domestic image in `values.yaml` and
+`values-images-domestic.yaml` is immediately followed by a comment containing
+its foreign upstream address.
+
+Two complete and directly usable profiles are included in the Chart package:
+
+- `values-images-domestic.yaml`: default and recommended for customer delivery;
+- `values-images-upstream.yaml`: original `docker.io`, `quay.io`,
+  `registry.k8s.io` and `ghcr.io` addresses.
+
+Use exactly one profile after the customer values file, so the last file wins:
+
+```bash
+PACKAGE=./mo-ob-private-1.0.5.tgz
+
+# The profiles are files inside the Chart package. Extract them once before
+# using -f; this works even when the customer receives only the immutable tgz.
+for IMAGE_PROFILE in domestic upstream; do
+  tar -xOf "${PACKAGE}" \
+    "mo-ob-private/values-images-${IMAGE_PROFILE}.yaml" \
+    >"./values-images-${IMAGE_PROFILE}.yaml"
+done
+
+# Recommended domestic mode.
+helm upgrade --install mo-ob-private "${PACKAGE}" \
+  --namespace mo-ob --create-namespace \
+  -f ./values-customer.yaml \
+  -f ./values-images-domestic.yaml
+
+# Foreign upstream mode; use only when the customer network can reach it.
+helm upgrade --install mo-ob-private "${PACKAGE}" \
+  --namespace mo-ob --create-namespace \
+  -f ./values-customer.yaml \
+  -f ./values-images-upstream.yaml
+```
+
+The domestic profile is a public network accelerator, not an offline
+guarantee. Verify every repository, tag and CPU architecture from the customer
+network. The companion `ob-ops` installer uses the same
+`IMAGE_SOURCE=domestic|upstream` model and also defaults to `domestic`.
 
 For a private registry, mirror every exact rendered image and provide a tested
 image override file. An image pull Secret is Namespace-scoped, so create it in
@@ -701,37 +740,25 @@ Namespace as the PostgreSQL Cluster:
 set -euo pipefail
 
 OBNS="${OBNS:-mo-ob}"
-OPERATOR_VALUES="/root/mo-ob-cnpg-operator-values.yaml"
+PACKAGE="${PACKAGE:-./mo-ob-private-1.0.5.tgz}"
+# domestic is the default; change to upstream only when foreign registries are
+# reachable. Use the same IMAGE_SOURCE for the Operator and mo-ob-private.
+IMAGE_SOURCE="${IMAGE_SOURCE:-domestic}"
 
+case "${IMAGE_SOURCE}" in
+  domestic|upstream) ;;
+  *)
+    echo 'IMAGE_SOURCE must be domestic or upstream' >&2
+    exit 1
+    ;;
+esac
+
+OPERATOR_VALUES="/root/mo-ob-cnpg-operator-values-${IMAGE_SOURCE}.yaml"
 umask 077
-cat >"${OPERATOR_VALUES}" <<'EOF'
-fullnameOverride: mo-ob-postgresql-operator
-
-config:
-  clusterWide: false
-
-replicaCount: 2
-
-monitoring:
-  podMonitorEnabled: false
-
-resources:
-  requests:
-    cpu: 100m
-    memory: 128Mi
-  limits:
-    cpu: 500m
-    memory: 512Mi
-
-affinity:
-  podAntiAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-      - labelSelector:
-          matchLabels:
-            app.kubernetes.io/name: cloudnative-pg
-            app.kubernetes.io/instance: mo-ob-postgresql-operator
-        topologyKey: kubernetes.io/hostname
-EOF
+tar -xOf "${PACKAGE}" \
+  "mo-ob-private/cnpg-operator-values-${IMAGE_SOURCE}.yaml" \
+  >"${OPERATOR_VALUES}"
+test -s "${OPERATOR_VALUES}"
 
 helm repo add cnpg https://cloudnative-pg.github.io/charts
 helm repo update cnpg
@@ -795,7 +822,24 @@ RELEASE_REF_FILE="./mo-ob-private-1.0.5.release-ref.txt"
 RENDERED_MANIFEST="$(mktemp)"
 trap 'rm -f -- "${RENDERED_MANIFEST}"' EXIT
 
+# 国内镜像是默认值。只有客户网络能够稳定访问国外 Registry 时才改为 upstream。
+IMAGE_SOURCE="${IMAGE_SOURCE:-domestic}"
+case "${IMAGE_SOURCE}" in
+  domestic|upstream) ;;
+  *)
+    echo 'IMAGE_SOURCE must be domestic or upstream' >&2
+    exit 1
+    ;;
+esac
+
+IMAGE_VALUES_FILE="./values-images-${IMAGE_SOURCE}.yaml"
+
 sha256sum --check "${PACKAGE}.sha256"
+
+tar -xOf "${PACKAGE}" \
+  "mo-ob-private/values-images-${IMAGE_SOURCE}.yaml" \
+  >"${IMAGE_VALUES_FILE}"
+test -s "${IMAGE_VALUES_FILE}"
 
 if [[ ! -f "${RELEASE_REF_FILE}" ]] || \
    ! grep -Eq '^observability-charts-ref=[0-9a-f]{40}$' \
@@ -871,7 +915,10 @@ kubectl get crd \
   scheduledbackups.postgresql.cnpg.io \
   backups.postgresql.cnpg.io >/dev/null
 
-HELM_VALUE_ARGS=(-f "${VALUES_FILE}")
+HELM_VALUE_ARGS=(
+  -f "${VALUES_FILE}"
+  -f "${IMAGE_VALUES_FILE}"
+)
 if [[ -f ./values-registry.yaml ]]; then
   HELM_VALUE_ARGS+=(-f ./values-registry.yaml)
 fi
@@ -903,6 +950,17 @@ for REQUIRED_GRAFANA_VALUE in \
   fi
 done
 
+case "${IMAGE_SOURCE}" in
+  domestic)
+    EXPECTED_POSTGRESQL_IMAGE='ghcr.m.daocloud.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c'
+    EXPECTED_OPERATOR_IMAGE='ghcr.m.daocloud.io/cloudnative-pg/cloudnative-pg:1.30.0'
+    ;;
+  upstream)
+    EXPECTED_POSTGRESQL_IMAGE='ghcr.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c'
+    EXPECTED_OPERATOR_IMAGE='ghcr.io/cloudnative-pg/cloudnative-pg:1.30.0'
+    ;;
+esac
+
 if [[ -f ./values-registry.yaml ]]; then
   if ! grep -Eq \
     '^[[:space:]]*imageName:[[:space:]]+[^[:space:]]+@sha256:[0-9a-f]{64}[[:space:]]*$' \
@@ -914,16 +972,17 @@ if [[ -f ./values-registry.yaml ]]; then
     echo 'Private-registry workloads must reference harbor-image-secret' >&2
     exit 1
   fi
-elif ! grep -Fq \
-  'ghcr.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c' \
+elif ! grep -Fq "${EXPECTED_POSTGRESQL_IMAGE}" \
   "${RENDERED_MANIFEST}"; then
-  echo 'The reviewed upstream PostgreSQL image digest is missing' >&2
+  echo "The reviewed ${IMAGE_SOURCE} PostgreSQL image is missing" >&2
   exit 1
 fi
 
-grep -E '^[[:space:]]*image(Name)?:' "${RENDERED_MANIFEST}" | sort -u
+grep -E \
+  '^[[:space:]]*image(Name)?:|--prometheus-config-reloader=|--thanos-default-base-image=' \
+  "${RENDERED_MANIFEST}" | sort -u
 printf '%s\n' \
-  'CloudNativePG Operator image (separate release): ghcr.io/cloudnative-pg/cloudnative-pg:1.30.0'
+  "CloudNativePG Operator image (separate release): ${EXPECTED_OPERATOR_IMAGE}"
 
 helm upgrade --install mo-ob-private "${PACKAGE}" \
   --namespace "${OBNS}" \
@@ -936,8 +995,8 @@ helm upgrade --install mo-ob-private "${PACKAGE}" \
 
 The rendered `imageName:` entry is the PostgreSQL operand image; it is not
 matched by an `image:`-only inventory. The Operator belongs to its separate
-Helm release, so its `ghcr.io/cloudnative-pg/cloudnative-pg:1.30.0` image must
-also be reachable or mirrored independently.
+Helm release, so the matching domestic or upstream Operator values file must
+be used and its image must also be reachable or mirrored independently.
 
 The first installation intentionally omits `--atomic`, preserving failed Pods,
 PVCs and Events for diagnosis. On first failure, inspect the release, images,

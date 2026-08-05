@@ -1,6 +1,8 @@
 # Optional high-capacity profile. Do not use this file without sizing it for
 # the customer environment. External object-storage credentials are read from
-# the namespace-local mo-ob-loki-s3 Secret.
+# the namespace-local mo-ob-loki-s3 Secret. This file is intentionally
+# image-source neutral; apply values-images-domestic.yaml (recommended) or
+# values-images-upstream.yaml after it.
 mo-ob-opensource:
 
   victoria-metrics-k8s-stack:
@@ -9,10 +11,6 @@ mo-ob-opensource:
   alloy:
     serviceMonitor:
       enabled: false
-    image:
-      registry: "docker.io"
-      repository: grafana/alloy
-      tag: v1.3.1
     alloy:
       resources: 
         limits:
@@ -25,10 +23,6 @@ mo-ob-opensource:
   promtail:
     serviceMonitor:
       enabled: false
-    image:
-      registry: docker.io
-      repository: grafana/promtail
-      tag: "2.8.4"
     resources:
       limits:
         cpu: "200m"
@@ -37,14 +31,6 @@ mo-ob-opensource:
         cpu: "100m"
         memory: "200Mi"
   loki:
-    sidecar: 
-      image:
-        repository: kiwigrid/k8s-sidecar
-        tag: 1.27.5
-    image:
-      registry: docker.io
-      repository: grafana/loki
-      tag: "3.2.0"
     enabled: true
     monitoring:
       dashboards:
@@ -156,10 +142,6 @@ mo-ob-opensource:
 
     # Configuration for the gateway
     gateway:
-      image:
-        registry: docker.io
-        repository: nginxinc/nginx-unprivileged
-        tag: 1.27-alpine
       enabled: true
       replicas: 1
       deploymentStrategy:
@@ -188,10 +170,6 @@ mo-ob-opensource:
     kubelet:
       enabled: false
     prometheus-node-exporter: 
-      image:
-        registry: quay.io
-        repository: prometheus/node-exporter
-        tag: v1.5.0
       prometheus:
         monitor:
           enabled: false
@@ -199,25 +177,11 @@ mo-ob-opensource:
     prometheusOperator:
       serviceMonitor:
         selfMonitor: false
-      image: 
-        registry: quay.io
-        repository: prometheus-operator/prometheus-operator
-        tag: v0.63.0
-      prometheusConfigReloader: 
-        image:
-          registry: quay.io
-          repository: prometheus-operator/prometheus-config-reloader
-          # if not set appVersion field from Chart.yaml is used
-          tag: v0.63.0
     
     prometheus:
       serviceMonitor:
         selfMonitor: false
       prometheusSpec:
-        image:
-          registry: quay.io
-          repository: prometheus/prometheus
-          tag: v2.42.0
         retention: 14d
         serviceMonitorSelectorNilUsesHelmValues: false
         serviceMonitorSelector: {}
@@ -248,10 +212,6 @@ mo-ob-opensource:
 
     kube-state-metrics:
       enabled: true
-      image:
-        registry: registry.k8s.io
-        repository: kube-state-metrics/kube-state-metrics
-        tag: v2.8.2
       prometheus:
         monitor:
           enabled: false
@@ -263,10 +223,6 @@ mo-ob-opensource:
 mo-ruler-stack:
 
   alertmanager:
-    image:
-      repository: quay.io/prometheus/alertmanager
-      pullPolicy: IfNotPresent
-      tag: v0.27.0
     service:
       annotations:
         prometheus.io/scrape: "false"
@@ -275,20 +231,11 @@ mo-ruler-stack:
         prometheus.io/scrape: "false"
 
   grafana:
-    image:
-      repository: docker.io/grafana/grafana
-      tag: 10.1.6
     serviceMonitor:
       enabled: false
     initChownData: 
       enabled: false
-      image:
-        repository: docker.io/library/busybox
-        tag: 1.31.1
     sidecar: 
-      image:
-        repository: docker.io/kiwigrid/k8s-sidecar
-        tag: 2.8.1
       dashboards:
         # Keep these fields aligned with the ob-ops Dashboard ConfigMaps.
         enabled: true

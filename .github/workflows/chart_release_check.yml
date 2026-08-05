@@ -41,6 +41,7 @@ jobs:
           helm repo add victoriametrics https://victoriametrics.github.io/helm-charts
           helm repo add fluent https://fluent.github.io/helm-charts
           helm repo add ckotzbauer https://ckotzbauer.github.io/helm-charts
+          helm repo add cnpg https://cloudnative-pg.github.io/charts
           helm repo update
 
       - name: Install chart-releaser
@@ -110,8 +111,20 @@ jobs:
             --kube-version 1.34.3 \
             --api-versions policy/v1/PodDisruptionBudget \
             --values charts/mo-ob-private/values-customer.yaml.example \
+            --values charts/mo-ob-private/values-images-domestic.yaml \
             --set customerSizingApproved=true \
             >"${CUSTOMER_RENDERED}"
+
+          CUSTOMER_UPSTREAM_RENDERED="${RUNNER_TEMP}/mo-ob-private-customer-upstream.yaml"
+
+          helm template mo-ob-private charts/mo-ob-private \
+            --namespace mo-ob \
+            --kube-version 1.34.3 \
+            --api-versions policy/v1/PodDisruptionBudget \
+            --values charts/mo-ob-private/values-customer.yaml.example \
+            --values charts/mo-ob-private/values-images-upstream.yaml \
+            --set customerSizingApproved=true \
+            >"${CUSTOMER_UPSTREAM_RENDERED}"
 
           for KIND in ServiceMonitor PodMonitor PrometheusRule; do
             test "$(
@@ -201,6 +214,129 @@ jobs:
               ' "${rendered}"
           }
 
+          assert_render_contains() {
+            local rendered="$1"
+            local expected="$2"
+
+            if ! grep -Fq "${expected}" "${rendered}"; then
+              echo "Rendered manifest is missing image: ${expected}"
+              exit 1
+            fi
+          }
+
+          DOMESTIC_IMAGES=(
+            'docker.m.daocloud.io/grafana/alloy:v1.3.1'
+            'docker.m.daocloud.io/grafana/promtail:2.8.4'
+            'docker.m.daocloud.io/grafana/loki:3.2.0'
+            'docker.m.daocloud.io/kiwigrid/k8s-sidecar:1.27.5'
+            'docker.m.daocloud.io/nginxinc/nginx-unprivileged:1.27-alpine'
+            'quay.m.daocloud.io/prometheus/node-exporter:v1.5.0'
+            'quay.m.daocloud.io/prometheus-operator/prometheus-operator:v0.63.0'
+            'quay.m.daocloud.io/prometheus-operator/prometheus-config-reloader:v0.63.0'
+            'docker.m.daocloud.io/thanosio/thanos:v0.30.2'
+            'quay.m.daocloud.io/prometheus/prometheus:v2.42.0'
+            'm.daocloud.io/registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.8.2'
+            'quay.m.daocloud.io/prometheus/alertmanager:v0.27.0'
+            'docker.m.daocloud.io/kiwigrid/k8s-sidecar:2.8.1'
+            'docker.m.daocloud.io/grafana/grafana:10.1.6'
+            'ghcr.m.daocloud.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c'
+          )
+
+          for IMAGE in "${DOMESTIC_IMAGES[@]}"; do
+            assert_render_contains "${CUSTOMER_RENDERED}" "${IMAGE}"
+          done
+
+          if grep -Eq \
+            "(^|[[:space:]=\"'])(docker\\.io|quay\\.io|ghcr\\.io|registry\\.k8s\\.io)/" \
+            "${CUSTOMER_RENDERED}"; then
+            echo 'Domestic render contains a foreign upstream registry'
+            grep -En \
+              "(^|[[:space:]=\"'])(docker\\.io|quay\\.io|ghcr\\.io|registry\\.k8s\\.io)/" \
+              "${CUSTOMER_RENDERED}"
+            exit 1
+          fi
+
+          UPSTREAM_IMAGES=(
+            'docker.io/grafana/alloy:v1.3.1'
+            'docker.io/grafana/promtail:2.8.4'
+            'docker.io/grafana/loki:3.2.0'
+            'docker.io/kiwigrid/k8s-sidecar:1.27.5'
+            'docker.io/nginxinc/nginx-unprivileged:1.27-alpine'
+            'quay.io/prometheus/node-exporter:v1.5.0'
+            'quay.io/prometheus-operator/prometheus-operator:v0.63.0'
+            'quay.io/prometheus-operator/prometheus-config-reloader:v0.63.0'
+            'quay.io/thanos/thanos:v0.30.2'
+            'quay.io/prometheus/prometheus:v2.42.0'
+            'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.8.2'
+            'quay.io/prometheus/alertmanager:v0.27.0'
+            'docker.io/kiwigrid/k8s-sidecar:2.8.1'
+            'docker.io/grafana/grafana:10.1.6'
+            'ghcr.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c'
+          )
+
+          for IMAGE in "${UPSTREAM_IMAGES[@]}"; do
+            assert_render_contains "${CUSTOMER_UPSTREAM_RENDERED}" "${IMAGE}"
+          done
+
+          if grep -Eq '(m\.daocloud\.io|docker\.1ms\.run)' \
+            "${CUSTOMER_UPSTREAM_RENDERED}"; then
+            echo 'Upstream render contains a domestic mirror registry'
+            grep -En '(m\.daocloud\.io|docker\.1ms\.run)' \
+              "${CUSTOMER_UPSTREAM_RENDERED}"
+            exit 1
+          fi
+
+          grep -Fqx 'imageSource: domestic' \
+            charts/mo-ob-private/values-customer.yaml.example
+          grep -Fqx 'imageSource: domestic' \
+            charts/mo-ob-private/values-images-domestic.yaml
+          grep -Fqx 'imageSource: upstream' \
+            charts/mo-ob-private/values-images-upstream.yaml
+
+          for OPTIONAL_DOMESTIC_IMAGE in \
+            'docker.1ms.run/ez4bruce3280/alertmanager-webhook-adapter' \
+            'docker.m.daocloud.io/library/busybox'; do
+            grep -Fq "${OPTIONAL_DOMESTIC_IMAGE}" \
+              charts/mo-ob-private/values-images-domestic.yaml
+          done
+
+          for OPTIONAL_UPSTREAM_IMAGE in \
+            'docker.io/ez4bruce3280/alertmanager-webhook-adapter' \
+            'docker.io/library/busybox'; do
+            grep -Fq "${OPTIONAL_UPSTREAM_IMAGE}" \
+              charts/mo-ob-private/values-images-upstream.yaml
+          done
+
+          CNPG_DOMESTIC_RENDERED="${RUNNER_TEMP}/cnpg-operator-domestic.yaml"
+          CNPG_UPSTREAM_RENDERED="${RUNNER_TEMP}/cnpg-operator-upstream.yaml"
+
+          helm template mo-ob-postgresql-operator cnpg/cloudnative-pg \
+            --version 0.29.0 \
+            --namespace mo-ob \
+            --values charts/mo-ob-private/cnpg-operator-values-domestic.yaml \
+            >"${CNPG_DOMESTIC_RENDERED}"
+
+          helm template mo-ob-postgresql-operator cnpg/cloudnative-pg \
+            --version 0.29.0 \
+            --namespace mo-ob \
+            --values charts/mo-ob-private/cnpg-operator-values-upstream.yaml \
+            >"${CNPG_UPSTREAM_RENDERED}"
+
+          assert_render_contains "${CNPG_DOMESTIC_RENDERED}" \
+            'ghcr.m.daocloud.io/cloudnative-pg/cloudnative-pg:1.30.0'
+          assert_render_contains "${CNPG_UPSTREAM_RENDERED}" \
+            'ghcr.io/cloudnative-pg/cloudnative-pg:1.30.0'
+
+          if grep -Fq 'ghcr.io/cloudnative-pg/' "${CNPG_DOMESTIC_RENDERED}"; then
+            echo 'Domestic CloudNativePG Operator render contains ghcr.io'
+            exit 1
+          fi
+
+          if grep -Fq 'ghcr.m.daocloud.io/' "${CNPG_UPSTREAM_RENDERED}"; then
+            echo 'Upstream CloudNativePG Operator render contains a domestic mirror'
+            exit 1
+          fi
+
           assert_document_line StatefulSet loki-write '  replicas: 3'
           assert_document_line StatefulSet loki-backend '  replicas: 3'
           assert_document_line Deployment loki-read '  replicas: 2'
@@ -215,7 +351,7 @@ jobs:
           assert_document_line Cluster mo-ob-postgresql \
             '    helm.sh/resource-policy: keep'
           assert_document_line Cluster mo-ob-postgresql \
-            '  imageName: ghcr.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c'
+            '  imageName: ghcr.m.daocloud.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c'
           assert_document_line Cluster mo-ob-postgresql \
             '  enablePDB: true'
           assert_document_line Cluster mo-ob-postgresql \
@@ -299,6 +435,7 @@ jobs:
             --kube-version 1.34.3 \
             --values charts/mo-ob-private/values-customer.yaml.example \
             --set customerSizingApproved=true \
+            --set imageSource=private \
             --set-string "postgresql.cluster.imageName=${PRIVATE_IMAGE}" \
             --set 'postgresql.cluster.imagePullSecrets[0].name=harbor-image-secret' \
             --set postgresql.backups.endpointCA.name=mo-ob-postgresql-backup-ca \
@@ -326,6 +463,19 @@ jobs:
 
             echo 'Grafana folder mapping must be rejected when disabled'
             cat "${INVALID_FOLDER_LOG}"
+            exit 1
+          fi
+
+          INVALID_IMAGE_SOURCE_LOG="${RUNNER_TEMP}/invalid-image-source.log"
+
+          if helm lint charts/mo-ob-private \
+            --values charts/mo-ob-private/values-customer.yaml.example \
+            --set customerSizingApproved=true \
+            --set imageSource=invalid \
+            >"${INVALID_IMAGE_SOURCE_LOG}" 2>&1; then
+
+            echo 'An invalid imageSource value was accepted'
+            cat "${INVALID_IMAGE_SOURCE_LOG}"
             exit 1
           fi
 
@@ -439,6 +589,17 @@ jobs:
               grep -Fqx \
                 'mo-ob-private/templates/postgresql-cluster.yaml' \
                 "${PACKAGE_CONTENTS}"
+
+              for REQUIRED_PROFILE in \
+                values-images-domestic.yaml \
+                values-images-upstream.yaml \
+                cnpg-operator-values-domestic.yaml \
+                cnpg-operator-values-upstream.yaml; do
+
+                grep -Fqx \
+                  "mo-ob-private/${REQUIRED_PROFILE}" \
+                  "${PACKAGE_CONTENTS}"
+              done
             fi
           done
 

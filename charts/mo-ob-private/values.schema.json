@@ -5,6 +5,7 @@
   "additionalProperties": true,
   "required": [
     "customerSizingApproved",
+    "imageSource",
     "postgresql",
     "mo-ob-opensource",
     "mo-ruler-stack"
@@ -69,6 +70,15 @@
     "customerSizingApproved": {
       "const": true,
       "description": "Explicit acknowledgement that the customer resource and storage sizing has been reviewed."
+    },
+    "imageSource": {
+      "type": "string",
+      "enum": [
+        "domestic",
+        "upstream",
+        "private"
+      ],
+      "description": "Rendered image profile: verified domestic mirrors, foreign upstream registries, or a fully overridden private registry."
     },
     "postgresql": {
       "type": "object",

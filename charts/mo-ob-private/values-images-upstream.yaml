@@ -1,0 +1,109 @@
+# 国外原始镜像配置。仅在客户现场能够稳定访问 docker.io、quay.io、
+# registry.k8s.io 和 ghcr.io 时，放在客户 values 文件之后使用。
+imageSource: upstream
+
+postgresql:
+  cluster:
+    imageName: >-
+      ghcr.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c
+    # 国内镜像：
+    # ghcr.m.daocloud.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c
+
+mo-ob-opensource:
+  alloy:
+    image:
+      registry: docker.io
+      repository: grafana/alloy
+      tag: v1.3.1
+      # 国内镜像：docker.m.daocloud.io/grafana/alloy:v1.3.1
+
+  promtail:
+    image:
+      registry: docker.io
+      repository: grafana/promtail
+      tag: "2.8.4"
+      # 国内镜像：docker.m.daocloud.io/grafana/promtail:2.8.4
+
+  loki:
+    loki:
+      image:
+        registry: docker.io
+        repository: grafana/loki
+        tag: "3.2.0"
+        # 国内镜像：docker.m.daocloud.io/grafana/loki:3.2.0
+    sidecar:
+      image:
+        repository: docker.io/kiwigrid/k8s-sidecar
+        tag: 1.27.5
+        # 国内镜像：docker.m.daocloud.io/kiwigrid/k8s-sidecar:1.27.5
+    gateway:
+      image:
+        registry: docker.io
+        repository: nginxinc/nginx-unprivileged
+        tag: 1.27-alpine
+        # 国内镜像：docker.m.daocloud.io/nginxinc/nginx-unprivileged:1.27-alpine
+
+  kube-prometheus-stack:
+    prometheus-node-exporter:
+      image:
+        registry: quay.io
+        repository: prometheus/node-exporter
+        tag: v1.5.0
+        # 国内镜像：quay.m.daocloud.io/prometheus/node-exporter:v1.5.0
+    prometheusOperator:
+      image:
+        registry: quay.io
+        repository: prometheus-operator/prometheus-operator
+        tag: v0.63.0
+        # 国内镜像：quay.m.daocloud.io/prometheus-operator/prometheus-operator:v0.63.0
+      prometheusConfigReloader:
+        image:
+          registry: quay.io
+          repository: prometheus-operator/prometheus-config-reloader
+          tag: v0.63.0
+          # 国内镜像：quay.m.daocloud.io/prometheus-operator/prometheus-config-reloader:v0.63.0
+      thanosImage:
+        registry: quay.io
+        repository: thanos/thanos
+        tag: v0.30.2
+        # 国内镜像：docker.m.daocloud.io/thanosio/thanos:v0.30.2
+    prometheus:
+      prometheusSpec:
+        image:
+          registry: quay.io
+          repository: prometheus/prometheus
+          tag: v2.42.0
+          # 国内镜像：quay.m.daocloud.io/prometheus/prometheus:v2.42.0
+    kube-state-metrics:
+      image:
+        registry: registry.k8s.io
+        repository: kube-state-metrics/kube-state-metrics
+        tag: v2.8.2
+        # 国内镜像：m.daocloud.io/registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.8.2
+
+mo-ruler-stack:
+  alertmanagerWebhookAdapter:
+    image:
+      repository: docker.io/ez4bruce3280/alertmanager-webhook-adapter
+      tag: v1.1.7
+      # 国内镜像：docker.1ms.run/ez4bruce3280/alertmanager-webhook-adapter:v1.1.7
+  alertmanager:
+    image:
+      repository: quay.io/prometheus/alertmanager
+      tag: v0.27.0
+      # 国内镜像：quay.m.daocloud.io/prometheus/alertmanager:v0.27.0
+  grafana:
+    image:
+      repository: docker.io/grafana/grafana
+      tag: 10.1.6
+      # 国内镜像：docker.m.daocloud.io/grafana/grafana:10.1.6
+    initChownData:
+      image:
+        repository: docker.io/library/busybox
+        tag: 1.31.1
+        # 国内镜像：docker.m.daocloud.io/library/busybox:1.31.1
+    sidecar:
+      image:
+        repository: docker.io/kiwigrid/k8s-sidecar
+        tag: 2.8.1
+        # 国内镜像：docker.m.daocloud.io/kiwigrid/k8s-sidecar:2.8.1

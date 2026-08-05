@@ -115,7 +115,7 @@ test -z "$(git status --porcelain)"
 | Alertmanager PVC 大小/副本数 | 示例 1Gi × 3 |
 | PostgreSQL PVC 大小/实例数 | 示例 20Gi × 3 |
 | PostgreSQL requests/limits | 每实例 1 CPU / 2Gi，Guaranteed QoS |
-| PostgreSQL 固定镜像 | `ghcr.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c` |
+| PostgreSQL 固定镜像 | 国内默认 `ghcr.m.daocloud.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c`；国外原始地址见同文件紧邻注释 |
 | 各组件 CPU/内存 requests、limits | |
 | S3/MinIO Endpoint | |
 | Loki Bucket | |
@@ -123,7 +123,7 @@ test -z "$(git status --porcelain)"
 | S3 是否使用 HTTPS | |
 | PostgreSQL 备份私有 CA Secret | 可选，示例 `mo-ob-postgresql-backup-ca` / `ca.crt` |
 | 是否使用 Path Style | |
-| 镜像来源 | 上游公网 / 客户 Harbor |
+| 镜像来源 | 国内公共镜像（默认）/ 国外上游 / 客户 Harbor |
 | CloudNativePG Operator | chart 0.29.0 / app 1.30.0；本地 2 副本、hostname 硬反亲和、PDB minAvailable=1，或复用满足同等 HA 要求的 cluster-wide Operator |
 | Grafana 数据库地址 | 固定为 `mo-ob-postgresql-rw:5432` |
 | Grafana Service 类型 | 示例 NodePort |
@@ -203,12 +203,14 @@ grep -w 30081 || true
 查询方式不同，应使用客户存储厂商提供的工具检查，不能仅根据
 `kubectl get storageclass` 判断剩余容量。
 
-最终镜像清单在完成客户 values 后通过第 10 节的渲染结果取得。单独
-Chart 默认使用上游镜像；通过 `ob-ops` 一键流程部署时，使用
-`IMAGE_SOURCE=upstream|domestic` 选择已审核的镜像 profile。国内 profile
-是公网加速路径，不是离线可用保证；仍必须从客户网络逐个验证精确的
-repository、tag 和 CPU 架构。如果使用客户 Harbor，必须先完整同步这些
-镜像。
+最终镜像清单在完成客户 values 后通过第 10 节的渲染结果取得。Chart 和
+`ob-ops` 一键流程都默认使用国内镜像，并通过
+`IMAGE_SOURCE=domestic|upstream` 选择完整 profile。Chart 包内同时提供
+`values-images-domestic.yaml`、`values-images-upstream.yaml`，以及对应的
+CloudNativePG Operator values。国内文件中每个启用地址下面都紧跟国外原始
+地址注释。国内 profile 是公网加速路径，不是离线可用保证；仍必须从客户网络
+逐个验证精确的 repository、tag 和 CPU 架构。如果使用客户 Harbor，必须先
+完整同步这些镜像。
 
 ## 5. 准备外部 S3/MinIO
 
@@ -730,37 +732,25 @@ Operator 所在 Namespace，因此必须安装在同一个 `OBNS`：
 set -euo pipefail
 
 OBNS="${OBNS:-mo-ob}"
-OPERATOR_VALUES="/root/mo-ob-cnpg-operator-values.yaml"
+PACKAGE="${PACKAGE:-./mo-ob-private-1.0.5.tgz}"
+# 默认国内；只有客户网络能够稳定访问国外 Registry 时才改成 upstream。
+# Operator 和 mo-ob-private 必须使用同一个 IMAGE_SOURCE。
+IMAGE_SOURCE="${IMAGE_SOURCE:-domestic}"
 
+case "${IMAGE_SOURCE}" in
+  domestic|upstream) ;;
+  *)
+    echo '错误：IMAGE_SOURCE 只能是 domestic 或 upstream'
+    exit 1
+    ;;
+esac
+
+OPERATOR_VALUES="/root/mo-ob-cnpg-operator-values-${IMAGE_SOURCE}.yaml"
 umask 077
-cat >"${OPERATOR_VALUES}" <<'EOF'
-fullnameOverride: mo-ob-postgresql-operator
-
-config:
-  clusterWide: false
-
-replicaCount: 2
-
-monitoring:
-  podMonitorEnabled: false
-
-resources:
-  requests:
-    cpu: 100m
-    memory: 128Mi
-  limits:
-    cpu: 500m
-    memory: 512Mi
-
-affinity:
-  podAntiAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-      - labelSelector:
-          matchLabels:
-            app.kubernetes.io/name: cloudnative-pg
-            app.kubernetes.io/instance: mo-ob-postgresql-operator
-        topologyKey: kubernetes.io/hostname
-EOF
+tar -xOf "${PACKAGE}" \
+  "mo-ob-private/cnpg-operator-values-${IMAGE_SOURCE}.yaml" \
+  >"${OPERATOR_VALUES}"
+test -s "${OPERATOR_VALUES}"
 
 helm repo add cnpg https://cloudnative-pg.github.io/charts
 helm repo update cnpg
@@ -809,8 +799,8 @@ object-store 备份。该 in-tree 集成已经弃用，预计在 CloudNativePG `
 
 ## 8. 私有镜像 Secret（可选）
 
-默认交付路径使用上游公网镜像。客户节点能够访问第 10 节渲染出的所有镜像时，
-跳过本节。
+默认交付路径使用国内公共镜像。客户节点能够访问第 10 节按所选
+`IMAGE_SOURCE` 渲染出的全部镜像时，跳过本节。
 
 如果客户要求使用私有 Harbor，交付方必须同时提供经过 `helm template` 验证的
 `values-registry.yaml`，其中包含全部启用组件的镜像 repository、tag、CPU 架构和
@@ -973,7 +963,24 @@ RELEASE_REF_FILE="./mo-ob-private-1.0.5.release-ref.txt"
 RENDERED_MANIFEST="$(mktemp)"
 trap 'rm -f -- "${RENDERED_MANIFEST}"' EXIT
 
+# 国内镜像为默认值；客户网络能够稳定访问国外 Registry 时才改为 upstream。
+IMAGE_SOURCE="${IMAGE_SOURCE:-domestic}"
+case "${IMAGE_SOURCE}" in
+  domestic|upstream) ;;
+  *)
+    echo '错误：IMAGE_SOURCE 只能是 domestic 或 upstream'
+    exit 1
+    ;;
+esac
+
+IMAGE_VALUES_FILE="./values-images-${IMAGE_SOURCE}.yaml"
+
 sha256sum --check "${PACKAGE}.sha256"
+
+tar -xOf "${PACKAGE}" \
+  "mo-ob-private/values-images-${IMAGE_SOURCE}.yaml" \
+  >"${IMAGE_VALUES_FILE}"
+test -s "${IMAGE_VALUES_FILE}"
 
 if [[ ! -f "${RELEASE_REF_FILE}" ]] || \
    ! grep -Eq '^observability-charts-ref=[0-9a-f]{40}$' \
@@ -1048,7 +1055,21 @@ kubectl get crd \
   scheduledbackups.postgresql.cnpg.io \
   backups.postgresql.cnpg.io >/dev/null
 
-HELM_VALUE_ARGS=(-f "${VALUES_FILE}")
+HELM_VALUE_ARGS=(
+  -f "${VALUES_FILE}"
+  -f "${IMAGE_VALUES_FILE}"
+)
+
+case "${IMAGE_SOURCE}" in
+  domestic)
+    EXPECTED_POSTGRESQL_IMAGE='ghcr.m.daocloud.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c'
+    EXPECTED_OPERATOR_IMAGE='ghcr.m.daocloud.io/cloudnative-pg/cloudnative-pg:1.30.0'
+    ;;
+  upstream)
+    EXPECTED_POSTGRESQL_IMAGE='ghcr.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c'
+    EXPECTED_OPERATOR_IMAGE='ghcr.io/cloudnative-pg/cloudnative-pg:1.30.0'
+    ;;
+esac
 
 if [[ -f ./values-registry.yaml ]]; then
   HELM_VALUE_ARGS+=(-f ./values-registry.yaml)
@@ -1110,10 +1131,9 @@ if [[ -f ./values-registry.yaml ]]; then
     echo '错误：私有镜像工作负载必须引用 harbor-image-secret'
     exit 1
   fi
-elif ! grep -Fq \
-  'ghcr.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c' \
+elif ! grep -Fq "${EXPECTED_POSTGRESQL_IMAGE}" \
   "${RENDERED_MANIFEST}"; then
-  echo '错误：缺少已评审的上游 PostgreSQL 固定镜像摘要'
+  echo "错误：缺少已评审的 ${IMAGE_SOURCE} PostgreSQL 固定镜像"
   exit 1
 fi
 
@@ -1131,19 +1151,20 @@ done
 
 echo "Helm 渲染和安全检查通过"
 
-grep -E '^[[:space:]]*image(Name)?:' \
+grep -E \
+  '^[[:space:]]*image(Name)?:|--prometheus-config-reloader=|--thanos-default-base-image=' \
   "${RENDERED_MANIFEST}" |
 sort -u
 
 printf '%s\n' \
-  'CloudNativePG Operator 镜像（独立 release）：ghcr.io/cloudnative-pg/cloudnative-pg:1.30.0'
+  "CloudNativePG Operator 镜像（独立 release）：${EXPECTED_OPERATOR_IMAGE}"
 )
 ```
 
 最后输出的是客户必须能够拉取的精确镜像清单。`imageName:` 是 PostgreSQL operand
 镜像，不能因为只搜索 `image:` 而漏掉；CloudNativePG Operator 属于单独的 Helm
-release，因此额外列出其 `ghcr.io/cloudnative-pg/cloudnative-pg:1.30.0` 镜像。使用
-私有 Harbor 时，两类镜像都必须同步并配置对应的拉取方式。
+release，因此额外列出与 `IMAGE_SOURCE` 匹配的 Operator 镜像。使用私有 Harbor
+时，两类镜像都必须同步并配置对应的拉取方式。
 
 不要使用 `--skip-schema-validation`，也不要通过 Helm `--set-string` 传递 AK/SK
 或 Grafana 密码。
@@ -1156,7 +1177,27 @@ set -euo pipefail
 
 OBNS="${OBNS:-mo-ob}"
 PACKAGE="./mo-ob-private-1.0.5.tgz"
-HELM_VALUE_ARGS=(-f ./values-customer.yaml)
+IMAGE_SOURCE="${IMAGE_SOURCE:-domestic}"
+IMAGE_VALUES_FILE="./values-images-${IMAGE_SOURCE}.yaml"
+
+case "${IMAGE_SOURCE}" in
+  domestic|upstream) ;;
+  *)
+    echo '错误：IMAGE_SOURCE 只能是 domestic 或 upstream'
+    exit 1
+    ;;
+esac
+
+test -s "${IMAGE_VALUES_FILE}" || {
+  tar -xOf "${PACKAGE}" \
+    "mo-ob-private/values-images-${IMAGE_SOURCE}.yaml" \
+    >"${IMAGE_VALUES_FILE}"
+}
+
+HELM_VALUE_ARGS=(
+  -f ./values-customer.yaml
+  -f "${IMAGE_VALUES_FILE}"
+)
 
 if [[ -f ./values-registry.yaml ]]; then
   HELM_VALUE_ARGS+=(-f ./values-registry.yaml)

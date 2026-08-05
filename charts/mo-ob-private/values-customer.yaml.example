@@ -37,6 +37,10 @@
 # 不要写成字符串 "true"，也不要跳过 Schema 校验。
 customerSizingApproved: false
 
+# 【通常保持】国内交付默认使用已验证的国内公共镜像；如客户现场可以稳定访问
+# 国外 Registry，可在 Helm 命令最后追加 values-images-upstream.yaml。
+imageSource: domestic
+
 # 内置 Grafana PostgreSQL 高可用数据库。安装本 Chart 前必须先按 README
 # 独立安装并等待 CloudNativePG Operator 1.30.0 Ready。数据库 Cluster 由本
 # Chart 管理，Operator 不与它放在同一 Helm release，避免首次安装 Webhook 竞态。
@@ -51,9 +55,11 @@ postgresql:
       helm.sh/resource-policy: keep
     # 【通常保持】3 个实例分别调度到 3 个节点。
     instances: 3
-    # 【通常保持】固定到官方镜像的不可变摘要，避免 mutable tag 漂移。
+    # 【通常保持】国内镜像与国外原始镜像使用同一不可变摘要。
     imageName: >-
-      ghcr.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c
+      ghcr.m.daocloud.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c
+    # 国外原始地址：
+    # ghcr.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c
     imagePullPolicy: IfNotPresent
     # 【可直接修改】镜像同步到客户私库时填写 Namespace 内 Secret 名称。
     imagePullSecrets: []
