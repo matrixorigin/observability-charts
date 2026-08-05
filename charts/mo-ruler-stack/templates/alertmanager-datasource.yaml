@@ -1,4 +1,4 @@
-{{- if .Values.defaultDatasource.alertmanager -}}
+{{- if and .Values.defaultDatasource.alertmanager .Values.alertmanager.enabled -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -21,9 +21,10 @@ data:
         implementation: prometheus
         # Whether or not Grafana should send alert instances to this Alertmanager
         handleGrafanaManagedAlerts: false
-      # optionally
+      {{- if .Values.managedSecrets.alertmanagerWebAuth }}
       basicAuth: true
       basicAuthUser: {{ .Values.secretValue.alertmanager.alertmanager_web_auth_user }}
       secureJsonData:
-        basicAuthPassword: {{ .Values.secretValue.alertmanager.alertmanager_web_auth_password }} 
+        basicAuthPassword: {{ .Values.secretValue.alertmanager.alertmanager_web_auth_password }}
+      {{- end }}
 {{- end -}}

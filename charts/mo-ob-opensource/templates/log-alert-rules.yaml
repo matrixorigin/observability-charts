@@ -10,7 +10,7 @@ items:
 - apiVersion: v1
   kind: ConfigMap
   metadata:
-    namespace: {{ $.Values.alerting.namespace }}
+    namespace: {{ $.Values.alerting.namespace | default $.Release.Namespace }}
     name: {{ printf "%s" $alertFileName | trunc 63 | trimSuffix "-" }}
     labels:
       app: "mo-ruler-stack"
@@ -19,4 +19,4 @@ items:
    {{ printf "%s.yaml" $alertFileName }}: {{ $.Files.Get $path | toYaml | indent 2}}
 {{- end }}
 {{- end }}
-{{- end }} # end if enabled
+{{- end }}

@@ -20,10 +20,11 @@ moRuler:
     secret: mo-ob-secret
     ruler:
       mo:
-        type: cfg
+        # Read MO_HOST, MO_PORT, MO_USER and MO_PASSWORD from mo-ob-secret.
+        type: env
         labels:
           matrixone.cloud/role: observability
-        host: matrixone.xiezexiong
+        host: ""
         port: 6001
-        user: dump
-        password: 111
+        user: ""
+        password: ""

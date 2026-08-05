@@ -30,6 +30,25 @@ jobs:
         run: |
           cp -r ./charts/mo-ruler-stack/rules ./charts/mo-ob-opensource/rules
 
+      - name: Build and lint Helm dependencies
+        run: |
+          set -euo pipefail
+          helm dependency update charts/mo-ob-opensource
+          helm dependency update charts/mo-ruler-stack
+          helm dependency update charts/mo-ob-private
+          helm lint charts/mo-ob-opensource
+          helm lint charts/mo-ruler-stack
+          helm lint charts/mo-ob-private
+
+          helm template mo-ob-private charts/mo-ob-private \
+            --namespace mo-ob \
+            --kube-version 1.34.3 \
+            > /tmp/mo-ob-private-rendered.yaml
+
+          test "$(grep -c '^kind: ServiceMonitor$' /tmp/mo-ob-private-rendered.yaml || true)" -eq 0
+          test "$(grep -c '^kind: PodMonitor$' /tmp/mo-ob-private-rendered.yaml || true)" -eq 0
+          test "$(grep -c '^kind: PrometheusRule$' /tmp/mo-ob-private-rendered.yaml || true)" -eq 0
+
       - name: Run Artifact Hub lint
         run: |
           #curl -s https://api.github.com/repos/artifacthub/hub/releases/latest | grep -E 'browser_download_url' | grep linux_amd64.tar.gz\" | grep -Eo 'https://[^\"]*' | xargs wget -O - | tar -xz

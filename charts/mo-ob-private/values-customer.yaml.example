@@ -1,0 +1,104 @@
+# Customer sizing worksheet. These quantities are examples, not production
+# recommendations. Set replicas, resources, retention and PVC sizes from the
+# customer's ingest rate, metric cardinality and recovery objectives.
+#
+# The storageClass keys are intentionally commented. Leave them absent only
+# when the cluster has one suitable default ReadWriteOnce StorageClass;
+# otherwise uncomment every key and set the customer StorageClass explicitly.
+
+# This example intentionally fails schema validation until an accountable
+# reviewer confirms the sizing worksheet and changes this YAML boolean to true.
+# Record the change ticket, reviewer and review date in the delivery record.
+customerSizingApproved: false
+
+mo-ob-opensource:
+  loki:
+    loki:
+      limits_config:
+        retention_period: 720h
+
+    write:
+      replicas: 1
+      persistence:
+        # storageClass: customer-rwo-storage-class
+        size: 10Gi
+      resources:
+        requests:
+          cpu: 250m
+          memory: 1Gi
+        limits:
+          cpu: 1000m
+          memory: 1Gi
+
+    read:
+      replicas: 1
+      resources:
+        requests:
+          cpu: 250m
+          memory: 3Gi
+        limits:
+          cpu: 1000m
+          memory: 3Gi
+
+    backend:
+      replicas: 1
+      persistence:
+        # storageClass: customer-rwo-storage-class
+        size: 10Gi
+      resources:
+        requests:
+          cpu: 200m
+          memory: 250Mi
+        limits:
+          cpu: 200m
+          memory: 250Mi
+
+  kube-prometheus-stack:
+    prometheus:
+      prometheusSpec:
+        # When using a custom Namespace, replace mo-ob with the same value
+        # passed to helm --namespace. Keep this complete list item together:
+        # Helm replaces array entries as a unit rather than merging one field.
+        alertingEndpoints:
+          - name: mo-ob-alertmanager
+            namespace: mo-ob
+            port: 9093
+            scheme: http
+            pathPrefix: ""
+            apiVersion: v2
+        retention: 21d
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 2Gi
+          limits:
+            cpu: 1000m
+            memory: 2Gi
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              # storageClassName: customer-rwo-storage-class
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 40Gi
+
+mo-ruler-stack:
+  grafana:
+    replicas: 1
+    persistence:
+      # storageClassName: customer-rwo-storage-class
+      size: 5Gi
+    resources:
+      requests:
+        cpu: 200m
+        memory: 1Gi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+    service:
+      type: ClusterIP
+      # For NodePort, set type: NodePort and either omit nodePort for automatic
+      # allocation or set a verified free port.
+      # nodePort: 30081

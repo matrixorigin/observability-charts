@@ -1,3 +1,4 @@
+{{- if .Values.moRuler.enabled }}
 # mo-agent-stack/templates/rabc.yaml
 # example: aliyun/cos-component/local-system-service/templates/rbac.yaml
 kind: ClusterRole
@@ -43,3 +44,4 @@ subjects:
 - kind: ServiceAccount
   name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace }}
+{{- end }}

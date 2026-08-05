@@ -1,3 +1,7 @@
+{{- if and
+  (index .Values "victoria-metrics-k8s-stack" "enabled")
+  (index .Values "victoria-metrics-k8s-stack" "vmagent" "enabled")
+}}
 apiVersion: v1
 kind: Secret
 metadata:
@@ -47,7 +51,6 @@ stringData:
         - source_labels: [__meta_kubernetes_pod_name]
           action: replace
           target_label: pod
-
     # Scrape config for slow service endpoints; same as above, but with a larger
     # timeout and a larger interval
     #
@@ -107,7 +110,6 @@ stringData:
         - source_labels: [__meta_kubernetes_pod_name]
           action: replace
           target_label: pod
-
     - job_name: "moob-application"
       honor_labels: true
       kubernetes_sd_configs:
@@ -171,3 +173,4 @@ stringData:
         - source_labels: [__meta_kubernetes_pod_name]
           action: replace
           target_label: pod
+{{- end }}

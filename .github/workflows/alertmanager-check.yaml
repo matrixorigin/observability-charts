@@ -32,7 +32,7 @@ jobs:
           CI_SMTP_PASSWORD: ${{ secrets.CI_SMTP_PASSWORD }}
         run: |
           sudo apt-get install prometheus-alertmanager
-          helm dependency build charts/mo-ruler-stack
+          helm dependency update charts/mo-ruler-stack
           python3 ./.github/observability/check-alertmanager/setup_env_and_start.py
           kubectl get all -n mo-ob
           kubectl port-forward service/mo-ob-alertmanager 9099:9093 -n mo-ob &
@@ -62,5 +62,4 @@ jobs:
           path: |
             ${{ github.workspace }}/upload
           retention-days: 7
-
 

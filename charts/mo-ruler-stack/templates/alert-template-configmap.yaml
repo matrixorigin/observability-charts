@@ -1,6 +1,8 @@
+{{- if .Values.alertmanagerWebhookAdapter.enabled }}
 apiVersion: v1
 data:
 {{ (.Files.Glob "alertmanager-webhook-adapter/alert-template/*").AsConfig | indent 2 }}
 kind: ConfigMap
 metadata:
   name: alert-template-config-map
+{{- end }}

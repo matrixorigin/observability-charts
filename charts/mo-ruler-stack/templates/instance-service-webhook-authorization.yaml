@@ -1,3 +1,4 @@
+{{- if .Values.managedSecrets.instanceServiceWebhook }}
 apiVersion: v1
 kind: Secret
 metadata:
@@ -6,3 +7,4 @@ data:
   instance-service: >-
     {{.Values.secretValue.instance_service_webhook_authorization}}
 type: Opaque
+{{- end }}
