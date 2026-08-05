@@ -51,11 +51,12 @@ Every profile requires:
 6. an unused NodePort `30081` and a reviewed firewall or security-group rule for
    the clients that may access Grafana.
 
-The customer examples explicitly use `directpv-min-io` for every PVC instead
-of relying on a cluster default StorageClass. Confirm that this StorageClass is
-installed and has enough capacity in every intended scheduling topology. If a
-customer uses another dynamic RWO provisioner, replace every `storageClass` and
-`storageClassName` value in the selected customer values file consistently.
+The Chart base values and customer examples explicitly use `directpv-min-io`
+for every PVC instead of relying on a cluster default StorageClass. Confirm
+that this StorageClass is installed and has enough capacity in every intended
+scheduling topology. If a customer uses another dynamic RWO provisioner,
+replace every `storageClass` and `storageClassName` value in the selected
+customer values file consistently.
 
 The HA profile additionally requires at least three suitable nodes, storage in
 every intended failure domain, a separate PostgreSQL-backup bucket and

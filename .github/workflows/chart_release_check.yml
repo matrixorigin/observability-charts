@@ -104,6 +104,15 @@ jobs:
             )" -eq 0
           done
 
+          # The base render currently creates Loki write/backend, Prometheus
+          # and Grafana persistent storage. Do not fall back to an implicit
+          # cluster default StorageClass.
+          test "$(
+            grep -Ec \
+              '^[[:space:]]+storageClass(Name)?: directpv-min-io$' \
+              "${RUNNER_TEMP}/mo-ob-private-rendered.yaml" || true
+          )" -eq 4
+
           CUSTOMER_RENDERED="${RUNNER_TEMP}/mo-ob-private-customer-ha.yaml"
 
           helm template mo-ob-private charts/mo-ob-private \

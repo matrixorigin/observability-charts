@@ -12,6 +12,9 @@ imageSource: domestic
 postgresql:
   enabled: false
   cluster:
+    # Delivery default. Override consistently when the customer uses another
+    # dynamic ReadWriteOnce provisioner.
+    storageClass: directpv-min-io
     imageName: >-
       ghcr.m.daocloud.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c
     # Foreign upstream:
@@ -66,6 +69,12 @@ mo-ob-opensource:
         cpu: "10m"
         memory: "20Mi"
   loki:
+    global:
+      # This is the kube-system Service name, not the DNS implementation name.
+      # Some Kubespray clusters use coredns instead of kube-dns.
+      dnsService: kube-dns
+      dnsNamespace: kube-system
+      clusterDomain: cluster.local
     lokiCanary:
       enabled: false
     sidecar: 
@@ -158,6 +167,7 @@ mo-ob-opensource:
             name: mo-ob-loki-s3
       persistence:
         enableStatefulSetAutoDeletePVC: false
+        storageClass: directpv-min-io
         size: 10Gi
       resources:
         requests:
@@ -179,6 +189,7 @@ mo-ob-opensource:
             name: mo-ob-loki-s3
       persistence:
         enableStatefulSetAutoDeletePVC: true
+        storageClass: directpv-min-io
         size: 10Gi
       resources:
         requests:
@@ -201,6 +212,7 @@ mo-ob-opensource:
       extraVolumes: []
       persistence:
         enableStatefulSetAutoDeletePVC: true
+        storageClass: directpv-min-io
         size: 10Gi
       resources:
         requests:
@@ -353,6 +365,7 @@ mo-ob-opensource:
         storageSpec:
           volumeClaimTemplate:
             spec:
+              storageClassName: directpv-min-io
               accessModes: ["ReadWriteOnce"]
               resources:
                 requests:
@@ -425,6 +438,7 @@ mo-ruler-stack:
         prometheus.io/scrape: "false"
     persistence:
       enabled: false
+      storageClass: directpv-min-io
     livenessProbe:
       httpGet:
         httpHeaders: []
@@ -512,6 +526,7 @@ mo-ruler-stack:
     persistence: 
       enabled:          true
       type:             "statefulset"
+      storageClassName: directpv-min-io
       size:             "5Gi"
     
     admin:
