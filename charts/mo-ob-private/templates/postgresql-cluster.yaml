@@ -1,0 +1,99 @@
+{{- $pg := .Values.postgresql -}}
+{{- if $pg.enabled -}}
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ required "postgresql.cluster.name is required" $pg.cluster.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: grafana-database
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  {{- with $pg.cluster.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  instances: {{ $pg.cluster.instances }}
+  imageName: {{ $pg.cluster.imageName }}
+  imagePullPolicy: {{ $pg.cluster.imagePullPolicy }}
+  {{- with $pg.cluster.imagePullSecrets }}
+  imagePullSecrets:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  storage:
+    size: {{ $pg.cluster.storage.size }}
+    {{- with $pg.cluster.storage.storageClass }}
+    storageClass: {{ . }}
+    {{- end }}
+  resources:
+    {{- toYaml $pg.cluster.resources | nindent 4 }}
+  affinity:
+    {{- toYaml $pg.cluster.affinity | nindent 4 }}
+  primaryUpdateMethod: {{ $pg.cluster.primaryUpdateMethod }}
+  primaryUpdateStrategy: {{ $pg.cluster.primaryUpdateStrategy }}
+  enableSuperuserAccess: {{ $pg.cluster.enableSuperuserAccess }}
+  enablePDB: {{ $pg.cluster.enablePDB }}
+  postgresql:
+    {{- with $pg.cluster.postgresql.synchronous }}
+    synchronous:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with $pg.cluster.postgresql.parameters }}
+    parameters:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+  bootstrap:
+    initdb:
+      database: {{ $pg.cluster.initdb.database }}
+      owner: {{ $pg.cluster.initdb.owner }}
+      secret:
+        name: {{ $pg.cluster.initdb.secret.name }}
+  backup:
+    target: prefer-standby
+    retentionPolicy: {{ $pg.backups.retentionPolicy }}
+    barmanObjectStore:
+      endpointURL: {{ required "postgresql.backups.endpointURL is required" $pg.backups.endpointURL | quote }}
+      destinationPath: {{ required "postgresql.backups.destinationPath is required" $pg.backups.destinationPath | quote }}
+      {{- with $pg.backups.endpointCA.name }}
+      endpointCA:
+        name: {{ . }}
+        key: {{ required "postgresql.backups.endpointCA.key is required when endpointCA.name is set" $pg.backups.endpointCA.key }}
+      {{- end }}
+      s3Credentials:
+        accessKeyId:
+          name: {{ $pg.backups.secret.name }}
+          key: ACCESS_KEY_ID
+        secretAccessKey:
+          name: {{ $pg.backups.secret.name }}
+          key: ACCESS_SECRET_KEY
+      wal:
+        compression: {{ $pg.backups.wal.compression }}
+        maxParallel: {{ $pg.backups.wal.maxParallel }}
+      data:
+        compression: {{ $pg.backups.data.compression }}
+        jobs: {{ $pg.backups.data.jobs }}
+{{- if $pg.backups.enabled }}
+{{- range $backup := $pg.backups.scheduledBackups }}
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: {{ $pg.cluster.name }}-{{ $backup.name }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/component: backup
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+spec:
+  immediate: true
+  schedule: {{ $backup.schedule | quote }}
+  method: {{ $backup.method }}
+  backupOwnerReference: {{ $backup.backupOwnerReference }}
+  cluster:
+    name: {{ $pg.cluster.name }}
+{{- end }}
+{{- end }}
+{{- end }}

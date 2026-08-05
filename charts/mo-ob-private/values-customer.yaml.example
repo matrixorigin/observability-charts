@@ -1,13 +1,14 @@
 # 客户高可用容量规划示例。
 #
-# 本文件只保存非敏感配置。MinIO/S3 AK/SK、Grafana 登录密码和 Grafana
-# 数据库密码统一填写到同目录的 customer-secrets.yaml.example 副本中：
+# 本文件只保存非敏感配置。MinIO/S3 AK/SK、Grafana 登录密码和内置
+# PostgreSQL 数据库密码统一填写到同目录的 customer-secrets.yaml.example 副本中：
 #   install -m 0600 customer-secrets.yaml.example /root/mo-ob-customer-secrets.yaml
 # 填好所有 FILL_THIS_VALUE 后执行：
 #   kubectl apply -f /root/mo-ob-customer-secrets.yaml
 #
-# 当前只有 Loki 使用 S3/MinIO。Prometheus、Alertmanager 使用 PVC；Grafana 使用
-# PVC 和共享外部 PostgreSQL/MySQL，不使用 MinIO AK/SK。
+# Loki 使用 S3/MinIO 保存日志；内置 PostgreSQL 使用另一个 S3/MinIO Bucket
+# 保存每日备份和 WAL。Prometheus、Alertmanager 使用 PVC；Grafana 使用 PVC 和
+# 下方 CloudNativePG 三副本数据库。
 #
 # 注释标记说明：
 # - 【必须修改】安装前必须按客户现场填写或确认。
@@ -18,15 +19,16 @@
 # - 【通常保持】与 Chart/ob-ops 的兼容协议相关，不建议修改。
 #
 # 高可用前提：
-# 1. 至少 3 个可调度节点；Loki、Prometheus、Alertmanager 和 Grafana 使用
+# 1. 至少 3 个可调度节点；Loki、Prometheus、Alertmanager、Grafana 和 PostgreSQL 使用
 #    hostname 级硬反亲和。这是节点级高可用，不等同于跨可用区或跨机房容灾。
 # 2. 客户必须提供可动态供给 ReadWriteOnce PVC 的 StorageClass，并确认各故障域容量。
 #    若使用本地 RWO 存储，原 PVC 通常不能随故障 Pod 跨节点漂移；服务可用性依赖
 #    其他副本，故障盘恢复必须遵循客户存储系统流程。
 # 3. Loki 使用客户独立维护的高可用 S3/MinIO 和已创建的 Bucket。
-# 4. Grafana 两副本必须共用客户独立维护的 PostgreSQL/MySQL；不能使用各 Pod 本地 SQLite。
-# 5. Grafana NodePort 30081 必须未被占用，且节点防火墙/安全组允许客户端访问。
-# 6. PDB 只保护自愿驱逐/节点维护，不能代替节点、磁盘、对象存储和数据库容灾。
+# 4. 内置 CloudNativePG 使用 3 个 PostgreSQL 实例并自动切换主库；它不是跨地域容灾。
+# 5. PostgreSQL 每日备份必须使用独立 Bucket。三副本不是备份，必须做恢复演练。
+# 6. Grafana NodePort 30081 必须未被占用，且节点防火墙/安全组允许客户端访问。
+# 7. PDB 只保护自愿驱逐/节点维护，不能代替节点、磁盘、对象存储和数据库容灾。
 #
 # 下列 CPU、内存、保留时间和 PVC 大小只是可运行的评审起点，不是所有生产环境的
 # 统一推荐值。请根据日志写入量、指标基数、保留周期和恢复目标修改。
@@ -34,6 +36,91 @@
 # 【必须修改】完成容量评审并记录变更单、评审人和日期后，改成 YAML 布尔值 true。
 # 不要写成字符串 "true"，也不要跳过 Schema 校验。
 customerSizingApproved: false
+
+# 内置 Grafana PostgreSQL 高可用数据库。安装本 Chart 前必须先按 README
+# 独立安装并等待 CloudNativePG Operator 1.30.0 Ready。数据库 Cluster 由本
+# Chart 管理，Operator 不与它放在同一 Helm release，避免首次安装 Webhook 竞态。
+# CloudNativePG 管理 1 主 2 备，Service mo-ob-postgresql-rw 始终指向当前主库。
+postgresql:
+  enabled: true
+
+  cluster:
+    name: mo-ob-postgresql
+    annotations:
+      # 【通常保持】防止 helm uninstall 直接删除数据库 Cluster CR。
+      helm.sh/resource-policy: keep
+    # 【通常保持】3 个实例分别调度到 3 个节点。
+    instances: 3
+    # 【通常保持】固定到官方镜像的不可变摘要，避免 mutable tag 漂移。
+    imageName: >-
+      ghcr.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c
+    imagePullPolicy: IfNotPresent
+    # 【可直接修改】镜像同步到客户私库时填写 Namespace 内 Secret 名称。
+    imagePullSecrets: []
+    # 示例：
+    # imagePullSecrets:
+    #   - name: harbor-image-secret
+    enablePDB: true
+    enableSuperuserAccess: false
+    primaryUpdateMethod: switchover
+    primaryUpdateStrategy: unsupervised
+    affinity:
+      enablePodAntiAffinity: true
+      podAntiAffinityType: required
+      topologyKey: kubernetes.io/hostname
+    initdb:
+      database: grafana
+      owner: grafana
+      secret:
+        name: mo-ob-postgresql-app
+    storage:
+      # 【必须修改】没有合适的默认 StorageClass 时填写客户 RWO StorageClass。
+      storageClass: ""
+      # 【按容量修改】每个实例申请一个 PVC，总量为 3 × 20Gi。
+      size: 20Gi
+    resources:
+      # 【按容量修改】数据库建议 Guaranteed QoS，因此 requests 与 limits 相同。
+      requests:
+        cpu: 1000m
+        memory: 2Gi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+    postgresql:
+      # 任一同步备库确认后提交。比异步复制更接近 RPO 0，但会增加写延迟；
+      # 三节点同时只剩一个可用实例时，写入可能暂停，这是高可用取舍。
+      synchronous:
+        dataDurability: required
+        method: any
+        number: 1
+      parameters:
+        max_connections: "200"
+  # PostgreSQL/WAL 每日备份到客户 MinIO/S3。Bucket 必须与 Loki Bucket 分开。
+  # 【必须修改】安装前替换 endpointURL 和 destinationPath 中的 FILL_THIS_VALUE。
+  backups:
+    enabled: true
+    method: barmanObjectStore
+    endpointURL: FILL_THIS_VALUE
+    destinationPath: s3://FILL_THIS_VALUE/mo-ob-postgresql
+    # HTTPS MinIO/S3 使用私有 CA 时填写 Secret 名称和 CA 键；公共 CA 或 HTTP 留空。
+    endpointCA:
+      name: ""
+      key: ca.crt
+    secret:
+      name: mo-ob-postgresql-backup-s3
+    retentionPolicy: 30d
+    scheduledBackups:
+      - name: daily-backup
+        # CloudNativePG 使用包含秒字段的 6 段 Cron：每天 02:00 执行。
+        schedule: "0 0 2 * * *"
+        backupOwnerReference: self
+        method: barmanObjectStore
+    wal:
+      compression: gzip
+      maxParallel: 2
+    data:
+      compression: gzip
+      jobs: 2
 
 mo-ob-opensource:
   loki:
@@ -202,8 +289,7 @@ mo-ruler-stack:
         memory: 512Mi
 
   grafana:
-    # 【通常保持】两个副本通过 NodePort Service 负载均衡。
-    # 真高可用必须配置下方共享外部数据库；本地 SQLite 不能用于多副本。
+    # 【通常保持】两个副本通过 NodePort Service 负载均衡，并共享内置 PostgreSQL。
     replicas: 2
     # 【通常保持】Grafana Web 用户名和密码位于 customer-secrets.yaml 中的
     # mo-ob-grafana-admin Secret，不要直接写进 values。
@@ -224,18 +310,27 @@ mo-ruler-stack:
                     - grafana
             topologyKey: kubernetes.io/hostname
 
-    # 【必须准备】在 Helm release Namespace（默认 mo-ob）预先创建同名 Secret。
-    # Secret 必须包含以下环境变量键，值不得写入本文件或 Git：
-    # GF_DATABASE_TYPE=postgres（也可以按客户实际使用 mysql）
-    # GF_DATABASE_HOST=<高可用数据库地址:端口>
-    # GF_DATABASE_NAME=grafana
-    # GF_DATABASE_USER=<Grafana 数据库用户>
-    # GF_DATABASE_PASSWORD=<密码>
-    # GF_DATABASE_SSL_MODE=require（按数据库类型和客户 TLS 策略调整）
-    # GF_SECURITY_SECRET_KEY=<所有副本共用的随机长密钥>
-    envFromSecret: mo-ob-grafana-database
+    # 非敏感连接参数直接写入环境变量。CloudNativePG 自动为数据库 Service
+    # 配置 TLS，require 会加密传输但不校验服务端 CA；如客户要求 verify-full，
+    # 还需把 CloudNativePG CA 以文件形式挂载到 Grafana 并完成专项验证。
+    env:
+      GF_DATABASE_TYPE: postgres
+      GF_DATABASE_HOST: mo-ob-postgresql-rw:5432
+      GF_DATABASE_NAME: grafana
+      GF_DATABASE_USER: grafana
+      GF_DATABASE_SSL_MODE: require
+    # Grafana 只读取应用用户密码和共享加密密钥，不会获得 PostgreSQL 超级用户权限。
+    envValueFrom:
+      GF_DATABASE_PASSWORD:
+        secretKeyRef:
+          name: mo-ob-postgresql-app
+          key: password
+      GF_SECURITY_SECRET_KEY:
+        secretKeyRef:
+          name: mo-ob-postgresql-app
+          key: GF_SECURITY_SECRET_KEY
 
-    # 每个 Grafana Pod 使用独立 RWO PVC 保存插件和本地文件；业务状态存放在外部数据库。
+    # 每个 Grafana Pod 使用独立 RWO PVC 保存插件和本地文件；业务状态存放在内置数据库。
     persistence:
       enabled: true
       type: statefulset

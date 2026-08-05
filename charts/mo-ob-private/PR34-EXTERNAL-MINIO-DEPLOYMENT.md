@@ -9,13 +9,15 @@
 - Prometheus、Prometheus Operator；
 - Loki、Alloy、Promtail；
 - Grafana、Alertmanager；
+- 供 Grafana 使用的三实例 CloudNativePG PostgreSQL Cluster；
 - node-exporter、kube-state-metrics。
 
 本 Chart 不负责：
 
 - 部署或修改客户的 MinIO/S3；
 - 创建、扩容或删除客户的 StorageClass；
-- 创建 Loki Bucket；
+- 创建 Loki 或 PostgreSQL 备份 Bucket；
+- 安装 CloudNativePG Operator、CRD 和 Webhook；
 - 安装 MatrixOne/MOI 业务采集规则、告警规则和 Dashboard。
 
 业务 ServiceMonitor、PrometheusRule 和 Dashboard 由配套的 `ob-ops` 内容
@@ -23,22 +25,32 @@ Chart 单独管理。底座健康后再安装内容 Chart。
 
 随包提供的 `values-customer.yaml.example` 是高可用容量评审起点：Loki write、
 backend 各 3 副本，read、gateway 各 2 副本；Prometheus、Grafana 各 2 副本；
-Alertmanager 3 副本。硬反亲和要求至少 3 个合适的可调度节点。这些数值不是所有
-客户生产环境的统一推荐值，必须按客户写入量、指标基数、保留周期、故障域和恢复
-目标完成评审。
+Alertmanager 3 副本，内置 PostgreSQL 3 实例。硬反亲和要求至少 3 个合适的可调度
+节点。这些数值不是所有客户生产环境的统一推荐值，必须按客户写入量、指标基数、
+保留周期、故障域和恢复目标完成评审。
 
 这里的硬反亲和以 `kubernetes.io/hostname` 为拓扑键，只提供节点级可用性，不等于
 自动完成跨可用区或跨机房容灾。PDB 只约束计划维护等自愿驱逐，不能防止节点、磁盘、
 网络、对象存储或数据库硬故障，也不能解决 CPU、内存或 PVC 容量不足。
 
 Grafana 两副本不能分别使用本地 SQLite；那只是两个相互独立的实例，不是真正的
-高可用。两个副本必须通过 Namespace 级 Secret `mo-ob-grafana-database` 共用客户
-独立维护的高可用 PostgreSQL 或 MySQL。示例同时使用 NodePort `30081`，允许获准
+高可用。本 Chart 创建一主两从的 CloudNativePG PostgreSQL Cluster；Grafana 两个
+副本通过稳定 Service `mo-ob-postgresql-rw:5432` 连接同一数据库，并从 Namespace
+级 Secret `mo-ob-postgresql-app` 读取应用密码。PostgreSQL 复制不等于备份，客户
+必须提供独立于 Loki 的 MinIO/S3 Bucket 和专用 AK/SK，并完成恢复演练。示例同时
+使用 NodePort `30081`，允许获准
 客户端通过 `http://<可达节点IP>:30081` 直接访问；客户必须确认端口未占用并限制
 节点防火墙或安全组的来源范围。示例关闭 Grafana Unified Alerting，告警由
 Prometheus 和 Alertmanager 负责；如需 Grafana Alerting 或 Grafana Live，必须另行
 完成其 HA 设计和验收。Grafana 插件必须通过同一镜像或 values 同步到两个副本，禁止
 只在单个 Pod 中手工安装。
+
+本示例面向全新 Namespace 和全新的 Grafana 数据库。已有 Grafana release 如果仍
+使用 SQLite，禁止仅修改数据库配置后直接升级；Grafana 不会自动把 SQLite 数据
+迁移到本 PostgreSQL Cluster。切换前必须盘点并备份 SQLite 数据库/PVC，制定并验证
+应用支持的迁移与回滚方案，并核对用户、组织、数据源、Dashboard、告警状态、API
+Key/Service Account 等持久化内容。未执行迁移时，PostgreSQL 中会得到一个新的
+Grafana 应用数据库，原状态不会自动出现。
 
 ## 2. 交付版本与完整性
 
@@ -86,7 +98,7 @@ test -z "$(git status --porcelain)"
 
 | 参数 | 客户填写 |
 |---|---|
-| Kubernetes 版本 | |
+| Kubernetes 版本 | 必须 `>=1.29.0`，并按客户兼容矩阵确认 |
 | CPU 架构 | amd64 / arm64 |
 | StorageClass | |
 | 是否为默认 StorageClass | |
@@ -101,17 +113,22 @@ test -z "$(git status --porcelain)"
 | Prometheus PVC 大小/副本数/保留时间 | 示例 40Gi × 2 / 21d |
 | Grafana PVC 大小/副本数 | 示例 5Gi × 2 |
 | Alertmanager PVC 大小/副本数 | 示例 1Gi × 3 |
+| PostgreSQL PVC 大小/实例数 | 示例 20Gi × 3 |
+| PostgreSQL requests/limits | 每实例 1 CPU / 2Gi，Guaranteed QoS |
+| PostgreSQL 固定镜像 | `ghcr.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c` |
 | 各组件 CPU/内存 requests、limits | |
 | S3/MinIO Endpoint | |
 | Loki Bucket | |
+| PostgreSQL 备份 Bucket | 必须与 Loki Bucket 分开 |
 | S3 是否使用 HTTPS | |
+| PostgreSQL 备份私有 CA Secret | 可选，示例 `mo-ob-postgresql-backup-ca` / `ca.crt` |
 | 是否使用 Path Style | |
 | 镜像来源 | 上游公网 / 客户 Harbor |
-| Grafana 外部数据库类型 | PostgreSQL / MySQL |
-| Grafana 外部数据库 HA、备份和 TLS | |
-| Grafana 数据库地址（不含密码） | |
+| CloudNativePG Operator | chart 0.29.0 / app 1.30.0；本地 2 副本、hostname 硬反亲和、PDB minAvailable=1，或复用满足同等 HA 要求的 cluster-wide Operator |
+| Grafana 数据库地址 | 固定为 `mo-ob-postgresql-rw:5432` |
 | Grafana Service 类型 | 示例 NodePort |
 | Grafana NodePort | 示例 30081，部署前确认未占用 |
+| 是否已有 Grafana/SQLite release | 有则必须提供已验证的迁移、备份和回滚方案 |
 
 当前 SimpleScalable 模式的持久化容量计算方式为：
 
@@ -121,16 +138,18 @@ Loki write 副本数 × write PVC
 + Prometheus 副本数 × Prometheus PVC
 + Grafana 副本数 × Grafana PVC
 + Alertmanager 副本数 × Alertmanager PVC
++ PostgreSQL 实例数 × PostgreSQL PVC
 ```
 
 当前示例的计算结果为：
 
 ```text
 (3 × 10Gi) + (3 × 10Gi) + (2 × 40Gi) + (2 × 5Gi) + (3 × 1Gi)
-= 约 153Gi，共 13 个 ReadWriteOnce PVC
++ (3 × 20Gi)
+= 约 213Gi，共 16 个 ReadWriteOnce PVC
 ```
 
-`153Gi` 和 13 个 PVC 只是示例申请量，不包含客户预留、快照、存储系统开销和
+`213Gi` 和 16 个 PVC 只是示例申请量，不包含客户预留、快照、存储系统开销和
 外部 Loki 对象存储。它不能证明客户存储系统的实际可用容量足够。还必须按客户
 存储厂商的流程确认 StorageClass 拓扑、扩容能力、失败域和每个可调度节点的容量；
 不得带入其他测试集群的节点名称、剩余空间或经验值。客户生产环境应根据日志
@@ -193,10 +212,11 @@ repository、tag 和 CPU 架构。如果使用客户 Harbor，必须先完整同
 
 ## 5. 准备外部 S3/MinIO
 
-由客户提前创建独立 Loki Bucket。不得与 MatrixOne、MOI 或其他业务共用
-Bucket。
+由客户提前创建两个相互独立的 Bucket：一个给 Loki，一个给 PostgreSQL base
+backup 和 WAL。两个 Bucket 都不得与 MatrixOne、MOI 或其他业务共用，也不得共用
+同一组宽权限 AK/SK。
 
-准备一个只能访问 Loki Bucket 的专用 AK/SK，并验证它至少具备：
+分别准备只能访问对应 Bucket 的最小权限 AK/SK，并验证它们至少具备：
 
 - 列举 Bucket；
 - 写入、读取、删除对象；
@@ -210,6 +230,8 @@ Bucket。
 (
 set -euo pipefail
 
+OBNS="${OBNS:-mo-ob}"
+
 read -rp 'S3/MinIO endpoint（http[s]://host:port）：' \
   LOKI_S3_ENDPOINT
 read -rp '已创建的 Loki Bucket：' \
@@ -221,17 +243,83 @@ read -rsp 'S3 Secret Key：' \
   LOKI_S3_SECRET_KEY
 printf '\n'
 
+read -rp 'PostgreSQL 备份 Endpoint（留空复用 Loki Endpoint）：' \
+  PG_S3_ENDPOINT
+PG_S3_ENDPOINT="${PG_S3_ENDPOINT:-${LOKI_S3_ENDPOINT}}"
+read -rp '已创建的 PostgreSQL 备份 Bucket：' \
+  PG_S3_BUCKET
+read -rsp 'PostgreSQL 备份 Access Key：' \
+  PG_S3_ACCESS_KEY
+printf '\n'
+read -rsp 'PostgreSQL 备份 Secret Key：' \
+  PG_S3_SECRET_KEY
+printf '\n'
+read -rp 'Loki Endpoint 私有 CA 文件（不需要则留空）：' \
+  LOKI_S3_CA_FILE
+read -rp 'PostgreSQL 备份私有 CA 文件（Endpoint 相同时留空复用 Loki CA）：' \
+  PG_S3_CA_FILE
+if [[ -z "${PG_S3_CA_FILE}" && \
+      "${LOKI_S3_ENDPOINT%/}" == "${PG_S3_ENDPOINT%/}" ]]; then
+  PG_S3_CA_FILE="${LOKI_S3_CA_FILE}"
+fi
+
+for ENDPOINT in "${LOKI_S3_ENDPOINT}" "${PG_S3_ENDPOINT}"; do
+  case "${ENDPOINT}" in
+    http://*|https://*) ;;
+    *) echo "错误：Endpoint 必须以 http:// 或 https:// 开头：${ENDPOINT}"; exit 1 ;;
+  esac
+done
+
+if [[ -z "${LOKI_S3_BUCKET}" || \
+      -z "${LOKI_S3_ACCESS_KEY}" || \
+      -z "${LOKI_S3_SECRET_KEY}" || \
+      -z "${PG_S3_BUCKET}" || \
+      -z "${PG_S3_ACCESS_KEY}" || \
+      -z "${PG_S3_SECRET_KEY}" ]]; then
+  echo '错误：两个 Bucket 名和两组专用 AK/SK 都不能为空'
+  exit 1
+fi
+
+if [[ "${LOKI_S3_ENDPOINT%/}" == "${PG_S3_ENDPOINT%/}" && \
+      "${LOKI_S3_BUCKET}" == "${PG_S3_BUCKET}" ]]; then
+  echo '错误：Loki 与 PostgreSQL 备份禁止使用同一个 Endpoint/Bucket'
+  exit 1
+fi
+
+for CA_FILE in "${LOKI_S3_CA_FILE}" "${PG_S3_CA_FILE}"; do
+  if [[ -n "${CA_FILE}" && ! -s "${CA_FILE}" ]]; then
+    echo "错误：私有 CA 文件不存在或为空：${CA_FILE}"
+    exit 1
+  fi
+done
+
 MC_CONFIG_DIR="$(mktemp -d)"
 chmod 0700 "${MC_CONFIG_DIR}"
-MC_ALIAS="mo-ob-check-$$"
-CHECK_OBJECT="mo-ob-preflight-$(date +%s)-$$.txt"
+mkdir -p "${MC_CONFIG_DIR}/certs/CAs"
+if [[ -n "${LOKI_S3_CA_FILE}" ]]; then
+  install -m 0644 "${LOKI_S3_CA_FILE}" \
+    "${MC_CONFIG_DIR}/certs/CAs/loki-private-ca.crt"
+fi
+if [[ -n "${PG_S3_CA_FILE}" ]]; then
+  install -m 0644 "${PG_S3_CA_FILE}" \
+    "${MC_CONFIG_DIR}/certs/CAs/postgresql-private-ca.crt"
+fi
+LOKI_ALIAS="mo-ob-loki-check-$$"
+PG_ALIAS="mo-ob-pg-check-$$"
+LOKI_CHECK_OBJECT="mo-ob-loki-preflight-$(date +%s)-$$.txt"
+PG_CHECK_OBJECT="mo-ob-pg-preflight-$(date +%s)-$$.txt"
 CHECK_FILE="$(mktemp)"
 
 cleanup_ob_preflight() {
   mc --config-dir "${MC_CONFIG_DIR}" rm \
-    "${MC_ALIAS}/${LOKI_S3_BUCKET}/${CHECK_OBJECT}" \
+    "${LOKI_ALIAS}/${LOKI_S3_BUCKET}/${LOKI_CHECK_OBJECT}" \
     >/dev/null 2>&1 || true
-  mc --config-dir "${MC_CONFIG_DIR}" alias rm "${MC_ALIAS}" \
+  mc --config-dir "${MC_CONFIG_DIR}" rm \
+    "${PG_ALIAS}/${PG_S3_BUCKET}/${PG_CHECK_OBJECT}" \
+    >/dev/null 2>&1 || true
+  mc --config-dir "${MC_CONFIG_DIR}" alias rm "${LOKI_ALIAS}" \
+    >/dev/null 2>&1 || true
+  mc --config-dir "${MC_CONFIG_DIR}" alias rm "${PG_ALIAS}" \
     >/dev/null 2>&1 || true
   rm -f -- "${CHECK_FILE}"
   find "${MC_CONFIG_DIR}" -depth -mindepth 1 -delete 2>/dev/null || true
@@ -239,32 +327,74 @@ cleanup_ob_preflight() {
 }
 trap cleanup_ob_preflight EXIT
 
-mc --config-dir "${MC_CONFIG_DIR}" alias set "${MC_ALIAS}" \
-  "${LOKI_S3_ENDPOINT}" \
-  "${LOKI_S3_ACCESS_KEY}" \
-  "${LOKI_S3_SECRET_KEY}"
-
 printf 'mo-ob-preflight\n' >"${CHECK_FILE}"
-mc --config-dir "${MC_CONFIG_DIR}" cp "${CHECK_FILE}" \
-  "${MC_ALIAS}/${LOKI_S3_BUCKET}/${CHECK_OBJECT}"
-mc --config-dir "${MC_CONFIG_DIR}" stat \
-  "${MC_ALIAS}/${LOKI_S3_BUCKET}/${CHECK_OBJECT}"
-mc --config-dir "${MC_CONFIG_DIR}" cat \
-  "${MC_ALIAS}/${LOKI_S3_BUCKET}/${CHECK_OBJECT}" \
-  >/dev/null
-mc --config-dir "${MC_CONFIG_DIR}" rm \
-  "${MC_ALIAS}/${LOKI_S3_BUCKET}/${CHECK_OBJECT}"
+
+validate_bucket() {
+  local ALIAS_NAME="$1"
+  local ENDPOINT="$2"
+  local BUCKET="$3"
+  local ACCESS_KEY="$4"
+  local SECRET_KEY="$5"
+  local OBJECT_NAME="$6"
+
+  mc --config-dir "${MC_CONFIG_DIR}" alias set "${ALIAS_NAME}" \
+    "${ENDPOINT}" "${ACCESS_KEY}" "${SECRET_KEY}"
+  mc --config-dir "${MC_CONFIG_DIR}" cp "${CHECK_FILE}" \
+    "${ALIAS_NAME}/${BUCKET}/${OBJECT_NAME}"
+  mc --config-dir "${MC_CONFIG_DIR}" stat \
+    "${ALIAS_NAME}/${BUCKET}/${OBJECT_NAME}"
+  mc --config-dir "${MC_CONFIG_DIR}" cat \
+    "${ALIAS_NAME}/${BUCKET}/${OBJECT_NAME}" >/dev/null
+  mc --config-dir "${MC_CONFIG_DIR}" rm \
+    "${ALIAS_NAME}/${BUCKET}/${OBJECT_NAME}"
+}
+
+validate_bucket \
+  "${LOKI_ALIAS}" "${LOKI_S3_ENDPOINT}" "${LOKI_S3_BUCKET}" \
+  "${LOKI_S3_ACCESS_KEY}" "${LOKI_S3_SECRET_KEY}" "${LOKI_CHECK_OBJECT}"
+
+validate_bucket \
+  "${PG_ALIAS}" "${PG_S3_ENDPOINT}" "${PG_S3_BUCKET}" \
+  "${PG_S3_ACCESS_KEY}" "${PG_S3_SECRET_KEY}" "${PG_CHECK_OBJECT}"
+
+if [[ -n "${PG_S3_CA_FILE}" ]]; then
+  kubectl create namespace "${OBNS}" \
+    --dry-run=client -o yaml | kubectl apply -f -
+  kubectl -n "${OBNS}" create secret generic mo-ob-postgresql-backup-ca \
+    --from-file="ca.crt=${PG_S3_CA_FILE}" \
+    --dry-run=client -o yaml | kubectl apply -f -
+fi
 )
 ```
 
-只有写入、读取和删除全部成功后才能继续。
-如果 HTTPS S3/MinIO 使用私有 CA，必须通过已评审的现场 values 让所有
-Loki 工作负载信任该 CA；不得为了规避证书错误而改用 HTTP 或关闭 TLS 校验。
+命令会明确拒绝相同的 Endpoint/Bucket，并分别使用两组专用凭据完成写入、查询、
+读取和删除；两组检查都成功后才能继续。
+
+提供私有 CA 文件时，上述命令会先复制到全新的
+`${MC_CONFIG_DIR}/certs/CAs/`，再执行 `mc alias set`，全程禁止使用
+`--insecure`。同一个 PostgreSQL CA 文件还会以 `ca.crt` 写入 Namespace 级
+`mo-ob-postgresql-backup-ca` Secret。
+
+并在 `values-customer.yaml` 中填写：
+
+```yaml
+postgresql:
+  backups:
+    endpointCA:
+      name: mo-ob-postgresql-backup-ca
+      key: ca.crt
+```
+
+只有 HTTP 或证书链已经被容器系统信任时，`endpointCA.name` 才能留空。这个可选
+CA Secret 不计入第 6 节的四个必填凭据 Secret。Loki 使用私有 CA 时也必须通过
+已评审的现场 values 把 CA 挂载到所有 Loki 工作负载；不得为了规避证书错误而改用
+HTTP 或关闭 TLS 校验。
 
 ## 6. 创建 Namespace 和外部存储 Secret
 
 推荐直接使用 Chart 包内的统一客户凭据模板。这个文件已经把 Loki MinIO/S3、
-Grafana 登录账号和 Grafana 外部数据库的所有必填位置全部展开：
+Grafana 登录账号、内置 PostgreSQL 应用账号和 PostgreSQL MinIO/S3 备份凭据的
+所有必填位置全部展开：
 
 ```bash
 (
@@ -287,10 +417,12 @@ echo "请编辑 ${SECRET_FILE}，替换所有 FILL_THIS_VALUE"
 
 1. Loki 使用的 MinIO/S3 Endpoint、Bucket、AK、SK；
 2. Grafana Web 管理员用户名和密码；
-3. Grafana 高可用 PostgreSQL/MySQL 地址、数据库、用户和密码；
-4. 所有 Grafana 副本共用的 `GF_SECURITY_SECRET_KEY`。
+3. 内置 PostgreSQL 的 `grafana` 应用用户密码；
+4. 所有 Grafana 副本共用且长期保持不变的 `GF_SECURITY_SECRET_KEY`；
+5. PostgreSQL 备份 Bucket 的专用 AK、SK。备份 Endpoint 和 Bucket 路径在
+   `values-customer.yaml` 中填写。
 
-填写后一次性创建 Namespace 和三个 Secret：
+填写后一次性创建 Namespace 和四个 Secret：
 
 ```bash
 (
@@ -309,7 +441,8 @@ kubectl apply -f "${SECRET_FILE}"
 for SECRET_NAME in \
   mo-ob-loki-s3 \
   mo-ob-grafana-admin \
-  mo-ob-grafana-database; do
+  mo-ob-postgresql-app \
+  mo-ob-postgresql-backup-s3; do
 
   kubectl -n mo-ob get secret "${SECRET_NAME}" -o name
 done
@@ -319,11 +452,11 @@ done
 填写后的文件包含明文密码，只能保存在受控位置并保持权限 `0600`；不能作为
 Helm values 使用，也不能提交 Git、重新打进 Chart 或粘贴到工单、聊天和交付文档。
 
-当前底座只有 Loki 使用 MinIO/S3。Prometheus 和 Alertmanager 使用 PVC；Grafana
-使用 PVC 保存各 Pod 的插件/本地文件，并使用外部 PostgreSQL/MySQL 保存共享业务
-状态，不使用 MinIO AK/SK。
+Loki 使用专用 MinIO/S3 Bucket。内置 PostgreSQL 使用另一个 Bucket 保存 base
+backup 和 WAL。Prometheus 和 Alertmanager 使用 PVC；Grafana 使用 PVC 保存各 Pod
+的插件/本地文件，并使用 `mo-ob-postgresql-rw:5432` 保存共享业务状态。
 
-下面的手工交互命令保留为可选替代方式。统一凭据模板已经成功创建三个 Secret 时，
+下面的手工交互命令保留为可选替代方式。统一凭据模板已经成功创建四个 Secret 时，
 不需要再重复执行手工创建步骤。
 
 输入客户实际参数。命令不会显示 Secret Key：
@@ -428,10 +561,10 @@ LOKI_S3_FORCE_PATH_STYLE
 LOKI_S3_INSECURE
 ```
 
-## 7. 创建 Grafana 管理员和外部数据库 Secret
+## 7. 准备 Grafana 和内置 PostgreSQL
 
-如果第 6 节已经使用统一客户凭据模板成功创建 `mo-ob-grafana-admin` 和
-`mo-ob-grafana-database`，本节无需重复执行；下面仅作为手工替代方式保留。
+如果第 6 节已经使用统一客户凭据模板成功创建四个 Secret，则 7.1 和 7.2
+无需重复执行；下面只保留为手工替代方式。7.3 的 Operator 检查始终必须执行。
 
 ### 7.1 Grafana 管理员 Secret
 
@@ -477,45 +610,32 @@ kubectl -n "${OBNS}" create secret generic mo-ob-grafana-admin \
 输入值更新 Secret；轮换必须先更新密码管理系统，再更新 Secret，并在维护窗口内
 滚动重启和验证 Grafana。
 
-### 7.2 Grafana 高可用数据库 Secret
+### 7.2 PostgreSQL 应用和备份 Secret
 
-两个 Grafana 副本必须连接同一个客户独立维护的高可用 PostgreSQL 或 MySQL。
-数据库必须已创建，专用用户必须具备 Grafana 初始化和迁移所需权限，并且地址可从
-两个 Grafana Pod 访问。数据库高可用、备份、恢复、监控和 TLS 均不由本 Chart
-管理。不要把两个 Pod 各自的本地 SQLite 当作高可用数据库。
-
-先在客户密码管理系统中保存数据库密码和一个长期固定的随机共享安全密钥，再创建
-Namespace 级 Secret：
+本 Chart 使用 `mo-ob-postgresql-app` 初始化 `grafana` 数据库和同名用户；Grafana
+通过稳定 Service `mo-ob-postgresql-rw:5432` 访问。先在客户密码管理系统中保存
+应用密码、长期固定的 Grafana 共享安全密钥，以及 PostgreSQL 备份 Bucket 的专用
+AK/SK，再创建 Namespace 级 Secret：
 
 ```bash
 (
 set -euo pipefail
 
 OBNS="${OBNS:-mo-ob}"
-read -rp 'Grafana 数据库类型 [postgres]：' GRAFANA_DATABASE_TYPE
-GRAFANA_DATABASE_TYPE="${GRAFANA_DATABASE_TYPE:-postgres}"
-read -rp 'Grafana 数据库地址（host:port）：' GRAFANA_DATABASE_HOST
-read -rp 'Grafana 数据库名 [grafana]：' GRAFANA_DATABASE_NAME
-GRAFANA_DATABASE_NAME="${GRAFANA_DATABASE_NAME:-grafana}"
-read -rp 'Grafana 数据库用户：' GRAFANA_DATABASE_USER
-read -rsp 'Grafana 数据库密码：' GRAFANA_DATABASE_PASSWORD
+read -rsp '内置 PostgreSQL grafana 用户密码：' POSTGRESQL_APP_PASSWORD
 printf '\n'
-read -rp 'Grafana 数据库 SSL mode（按数据库类型和客户 TLS 策略填写）：' \
-  GRAFANA_DATABASE_SSL_MODE
 read -rsp 'Grafana 全副本共享安全密钥（至少 32 个字符）：' \
   GRAFANA_SECURITY_SECRET_KEY
 printf '\n'
+read -rsp 'PostgreSQL 备份 Bucket Access Key：' PG_BACKUP_ACCESS_KEY
+printf '\n'
+read -rsp 'PostgreSQL 备份 Bucket Secret Key：' PG_BACKUP_SECRET_KEY
+printf '\n'
 
-case "${GRAFANA_DATABASE_TYPE}" in
-  postgres|mysql) ;;
-  *) echo '错误：数据库类型只能是 postgres 或 mysql'; exit 1 ;;
-esac
-
-if [[ -z "${GRAFANA_DATABASE_HOST}" || \
-      -z "${GRAFANA_DATABASE_USER}" || \
-      -z "${GRAFANA_DATABASE_PASSWORD}" || \
-      -z "${GRAFANA_DATABASE_SSL_MODE}" ]]; then
-  echo '错误：数据库地址、用户、密码和 SSL mode 不能为空'
+if [[ -z "${POSTGRESQL_APP_PASSWORD}" || \
+      -z "${PG_BACKUP_ACCESS_KEY}" || \
+      -z "${PG_BACKUP_SECRET_KEY}" ]]; then
+  echo '错误：PostgreSQL 应用密码和备份 AK/SK 不能为空'
   exit 1
 fi
 if (( ${#GRAFANA_SECURITY_SECRET_KEY} < 32 )); then
@@ -523,61 +643,169 @@ if (( ${#GRAFANA_SECURITY_SECRET_KEY} < 32 )); then
   exit 1
 fi
 
-DATABASE_SECRET_DIR="$(mktemp -d)"
-chmod 0700 "${DATABASE_SECRET_DIR}"
-cleanup_grafana_database_secret_files() {
+POSTGRESQL_SECRET_DIR="$(mktemp -d)"
+chmod 0700 "${POSTGRESQL_SECRET_DIR}"
+cleanup_postgresql_secret_files() {
   rm -f -- \
-    "${DATABASE_SECRET_DIR}/GF_DATABASE_TYPE" \
-    "${DATABASE_SECRET_DIR}/GF_DATABASE_HOST" \
-    "${DATABASE_SECRET_DIR}/GF_DATABASE_NAME" \
-    "${DATABASE_SECRET_DIR}/GF_DATABASE_USER" \
-    "${DATABASE_SECRET_DIR}/GF_DATABASE_PASSWORD" \
-    "${DATABASE_SECRET_DIR}/GF_DATABASE_SSL_MODE" \
-    "${DATABASE_SECRET_DIR}/GF_SECURITY_SECRET_KEY"
-  rmdir -- "${DATABASE_SECRET_DIR}" 2>/dev/null || true
+    "${POSTGRESQL_SECRET_DIR}/username" \
+    "${POSTGRESQL_SECRET_DIR}/password" \
+    "${POSTGRESQL_SECRET_DIR}/GF_SECURITY_SECRET_KEY" \
+    "${POSTGRESQL_SECRET_DIR}/ACCESS_KEY_ID" \
+    "${POSTGRESQL_SECRET_DIR}/ACCESS_SECRET_KEY"
+  rmdir -- "${POSTGRESQL_SECRET_DIR}" 2>/dev/null || true
 }
-trap cleanup_grafana_database_secret_files EXIT
+trap cleanup_postgresql_secret_files EXIT
 
-printf '%s' "${GRAFANA_DATABASE_TYPE}" \
-  >"${DATABASE_SECRET_DIR}/GF_DATABASE_TYPE"
-printf '%s' "${GRAFANA_DATABASE_HOST}" \
-  >"${DATABASE_SECRET_DIR}/GF_DATABASE_HOST"
-printf '%s' "${GRAFANA_DATABASE_NAME}" \
-  >"${DATABASE_SECRET_DIR}/GF_DATABASE_NAME"
-printf '%s' "${GRAFANA_DATABASE_USER}" \
-  >"${DATABASE_SECRET_DIR}/GF_DATABASE_USER"
-printf '%s' "${GRAFANA_DATABASE_PASSWORD}" \
-  >"${DATABASE_SECRET_DIR}/GF_DATABASE_PASSWORD"
-printf '%s' "${GRAFANA_DATABASE_SSL_MODE}" \
-  >"${DATABASE_SECRET_DIR}/GF_DATABASE_SSL_MODE"
+printf '%s' 'grafana' >"${POSTGRESQL_SECRET_DIR}/username"
+printf '%s' "${POSTGRESQL_APP_PASSWORD}" \
+  >"${POSTGRESQL_SECRET_DIR}/password"
 printf '%s' "${GRAFANA_SECURITY_SECRET_KEY}" \
-  >"${DATABASE_SECRET_DIR}/GF_SECURITY_SECRET_KEY"
+  >"${POSTGRESQL_SECRET_DIR}/GF_SECURITY_SECRET_KEY"
+printf '%s' "${PG_BACKUP_ACCESS_KEY}" \
+  >"${POSTGRESQL_SECRET_DIR}/ACCESS_KEY_ID"
+printf '%s' "${PG_BACKUP_SECRET_KEY}" \
+  >"${POSTGRESQL_SECRET_DIR}/ACCESS_SECRET_KEY"
 
-kubectl -n "${OBNS}" create secret generic mo-ob-grafana-database \
-  --from-file="${DATABASE_SECRET_DIR}/GF_DATABASE_TYPE" \
-  --from-file="${DATABASE_SECRET_DIR}/GF_DATABASE_HOST" \
-  --from-file="${DATABASE_SECRET_DIR}/GF_DATABASE_NAME" \
-  --from-file="${DATABASE_SECRET_DIR}/GF_DATABASE_USER" \
-  --from-file="${DATABASE_SECRET_DIR}/GF_DATABASE_PASSWORD" \
-  --from-file="${DATABASE_SECRET_DIR}/GF_DATABASE_SSL_MODE" \
-  --from-file="${DATABASE_SECRET_DIR}/GF_SECURITY_SECRET_KEY" \
+kubectl -n "${OBNS}" create secret generic mo-ob-postgresql-app \
+  --type=kubernetes.io/basic-auth \
+  --from-file="${POSTGRESQL_SECRET_DIR}/username" \
+  --from-file="${POSTGRESQL_SECRET_DIR}/password" \
+  --from-file="${POSTGRESQL_SECRET_DIR}/GF_SECURITY_SECRET_KEY" \
   --dry-run=client -o yaml | kubectl apply -f -
+
+kubectl -n "${OBNS}" label secret mo-ob-postgresql-app \
+  cnpg.io/reload=true --overwrite
+
+kubectl -n "${OBNS}" create secret generic mo-ob-postgresql-backup-s3 \
+  --from-file="${POSTGRESQL_SECRET_DIR}/ACCESS_KEY_ID" \
+  --from-file="${POSTGRESQL_SECRET_DIR}/ACCESS_SECRET_KEY" \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+kubectl -n "${OBNS}" label secret mo-ob-postgresql-backup-s3 \
+  cnpg.io/reload=true --overwrite
 )
 ```
 
-`GF_DATABASE_SSL_MODE` 的合法值取决于 PostgreSQL 或 MySQL 以及客户的 TLS
-策略，必须经过数据库负责人确认。不得为了绕过未知证书而关闭 TLS。
 `GF_SECURITY_SECRET_KEY` 必须由所有 Grafana 副本共用、存入客户密码管理系统并在
 升级期间保持不变；随意更换可能导致既有加密数据无法解密。只检查键名、不要显示值：
 
 ```bash
-kubectl -n "${OBNS}" get secret mo-ob-grafana-database -o json |
-jq '{type: .type, keys: (.data | keys)}'
+for SECRET_NAME in mo-ob-postgresql-app mo-ob-postgresql-backup-s3; do
+  kubectl -n "${OBNS}" get secret "${SECRET_NAME}" -o json |
+    jq '{type: .type, keys: (.data | keys)}'
+done
 ```
 
-预期包含：`GF_DATABASE_TYPE`、`GF_DATABASE_HOST`、`GF_DATABASE_NAME`、
-`GF_DATABASE_USER`、`GF_DATABASE_PASSWORD`、`GF_DATABASE_SSL_MODE`、
-`GF_SECURITY_SECRET_KEY`。
+应用 Secret 预期包含 `username`、`password`、`GF_SECURITY_SECRET_KEY`；备份
+Secret 预期包含 `ACCESS_KEY_ID`、`ACCESS_SECRET_KEY`。
+
+### 7.3 安装或复用 CloudNativePG Operator
+
+`mo-ob-private` 直接创建 PostgreSQL `Cluster` 和 `ScheduledBackup`，但不把
+集群级 CRD、Webhook 和 Operator 塞进同一个 Helm release。先检查现有 Operator：
+
+```bash
+OBNS="${OBNS:-mo-ob}"
+
+kubectl get deployment -A \
+  -l app.kubernetes.io/name=cloudnative-pg \
+  -o 'custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name,IMAGE:.spec.template.spec.containers[0].image'
+kubectl get crd clusters.postgresql.cnpg.io scheduledbackups.postgresql.cnpg.io \
+  2>/dev/null || true
+kubectl get validatingwebhookconfiguration \
+  cnpg-validating-webhook-configuration 2>/dev/null || true
+```
+
+如果已经存在经过客户平台负责人批准、兼容 CloudNativePG `1.30.x` 的
+cluster-wide Operator，直接复用，禁止重复安装。如果现有 Operator 只监听其他
+Namespace、发现多个 Operator，或版本不兼容，必须停止并先明确平台所有权。
+复用 cluster-wide Operator 时，由平台负责人确认它至少具备双副本、跨节点调度、
+合理 requests/limits 和 `minAvailable: 1` 的 PDB；本流程不得擅自修改共享 Operator。
+
+如果没有现有 Operator，安装独立 release。`config.clusterWide=false` 表示只监听
+Operator 所在 Namespace，因此必须安装在同一个 `OBNS`：
+
+```bash
+(
+set -euo pipefail
+
+OBNS="${OBNS:-mo-ob}"
+OPERATOR_VALUES="/root/mo-ob-cnpg-operator-values.yaml"
+
+umask 077
+cat >"${OPERATOR_VALUES}" <<'EOF'
+fullnameOverride: mo-ob-postgresql-operator
+
+config:
+  clusterWide: false
+
+replicaCount: 2
+
+monitoring:
+  podMonitorEnabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: cloudnative-pg
+            app.kubernetes.io/instance: mo-ob-postgresql-operator
+        topologyKey: kubernetes.io/hostname
+EOF
+
+helm repo add cnpg https://cloudnative-pg.github.io/charts
+helm repo update cnpg
+
+helm upgrade --install mo-ob-postgresql-operator cnpg/cloudnative-pg \
+  --version 0.29.0 \
+  --namespace "${OBNS}" \
+  --create-namespace \
+  -f "${OPERATOR_VALUES}" \
+  --wait \
+  --timeout 10m
+
+kubectl apply -f - <<EOF
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: mo-ob-postgresql-operator
+  namespace: ${OBNS}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cloudnative-pg
+      app.kubernetes.io/instance: mo-ob-postgresql-operator
+EOF
+
+kubectl -n "${OBNS}" rollout status \
+  deployment/mo-ob-postgresql-operator --timeout=300s
+kubectl -n "${OBNS}" get pod \
+  -l app.kubernetes.io/instance=mo-ob-postgresql-operator -o wide
+kubectl -n "${OBNS}" get poddisruptionbudget \
+  mo-ob-postgresql-operator
+kubectl wait --for=condition=Established \
+  crd/clusters.postgresql.cnpg.io --timeout=120s
+kubectl wait --for=condition=Established \
+  crd/scheduledbackups.postgresql.cnpg.io --timeout=120s
+kubectl wait --for=condition=Established \
+  crd/backups.postgresql.cnpg.io --timeout=120s
+)
+```
+
+本版本固定 CloudNativePG `1.30` 系列 PostgreSQL 镜像，并使用 1.30 内置的 Barman
+object-store 备份。该 in-tree 集成已经弃用，预计在 CloudNativePG `1.31` 删除；
+在 Chart 切换到官方备份插件并完成备份恢复验证前，禁止把 Operator 升级到 1.31。
+只要 Namespace 中仍有 `Cluster`，就禁止卸载 Operator。
 
 ## 8. 私有镜像 Secret（可选）
 
@@ -665,17 +893,20 @@ vi values-customer.yaml
 
 必须根据客户现场修改：
 
-- Loki、Prometheus、Grafana、Alertmanager 的资源、保留时间和容量；
+- Loki、Prometheus、Grafana、Alertmanager、PostgreSQL 的资源、保留时间和容量；
 - 至少 3 个可调度节点是否满足示例中的硬反亲和；
 - Loki write/backend StorageClass 和 PVC 大小；
 - Prometheus StorageClass、PVC 大小和 retention；
 - Grafana StorageClass 和 PVC 大小；
 - Alertmanager StorageClass 和 PVC 大小；
-- Grafana 外部高可用 PostgreSQL/MySQL 地址、TLS 和 Secret 是否就绪；
+- PostgreSQL StorageClass 和每实例 PVC 大小；
+- PostgreSQL 固定镜像、3 实例和同步复制策略是否符合现场评审；
+- PostgreSQL `backups.endpointURL`、`destinationPath`、保留周期和每日备份时间；
 - NodePort `30081` 是否未占用，以及防火墙或安全组的允许来源。
 
 Secret 值不在该文件中。values 中只引用 `mo-ob-loki-s3`、
-`mo-ob-grafana-admin` 和 `mo-ob-grafana-database`。示例中的高可用副本、容量和
+`mo-ob-grafana-admin`、`mo-ob-postgresql-app` 和
+`mo-ob-postgresql-backup-s3`。示例中的高可用副本、容量和
 资源只是编辑工作表，不是所有生产环境的统一推荐值。评审人必须将：
 
 ```yaml
@@ -757,15 +988,65 @@ if ! grep -Eq '^customerSizingApproved:[[:space:]]+true[[:space:]]*$' \
   exit 1
 fi
 
+if grep -n 'FILL_THIS_VALUE' "${VALUES_FILE}"; then
+  echo "错误：客户 values 中仍有未填写的 PostgreSQL 备份 Endpoint 或 Bucket"
+  exit 1
+fi
+
 for REQUIRED_SECRET in \
   mo-ob-loki-s3 \
   mo-ob-grafana-admin \
-  mo-ob-grafana-database; do
+  mo-ob-postgresql-app \
+  mo-ob-postgresql-backup-s3; do
   if ! kubectl -n "${OBNS}" get secret "${REQUIRED_SECRET}" >/dev/null; then
     echo "错误：缺少 Namespace 级 Secret ${REQUIRED_SECRET}"
     exit 1
   fi
 done
+
+OPERATOR_JSON="$(
+  kubectl get deployment -A \
+    -l app.kubernetes.io/name=cloudnative-pg \
+    -o json
+)"
+
+OPERATOR_COUNT="$(jq '.items | length' <<<"${OPERATOR_JSON}")"
+if [[ "${OPERATOR_COUNT}" -ne 1 ]]; then
+  echo "错误：必须且只能有一个 CloudNativePG Operator，当前 ${OPERATOR_COUNT} 个"
+  exit 1
+fi
+
+OPERATOR_VERSION="$(
+  jq -r '.items[0].metadata.labels["app.kubernetes.io/version"] // ""' \
+    <<<"${OPERATOR_JSON}"
+)"
+WATCH_NAMESPACE="$(
+  jq -r '
+    [
+      .items[0].spec.template.spec.containers[]
+      | select(.name == "manager")
+      | (.env // [])[]
+      | select(.name == "WATCH_NAMESPACE")
+      | .value
+    ][0] // ""
+  ' <<<"${OPERATOR_JSON}"
+)"
+
+if [[ ! "${OPERATOR_VERSION}" =~ ^1\.30\. ]]; then
+  echo "错误：要求 CloudNativePG 1.30.x，当前 ${OPERATOR_VERSION}"
+  exit 1
+fi
+
+if [[ -n "${WATCH_NAMESPACE}" ]] && \
+   ! tr ',' '\n' <<<"${WATCH_NAMESPACE}" | grep -Fxq "${OBNS}"; then
+  echo "错误：CloudNativePG 未监听 Namespace ${OBNS}：${WATCH_NAMESPACE}"
+  exit 1
+fi
+
+kubectl get crd \
+  clusters.postgresql.cnpg.io \
+  scheduledbackups.postgresql.cnpg.io \
+  backups.postgresql.cnpg.io >/dev/null
 
 HELM_VALUE_ARGS=(-f "${VALUES_FILE}")
 
@@ -803,15 +1084,11 @@ if grep -Eq \
   exit 1
 fi
 
-if [[ -f ./values-registry.yaml ]] && \
-   ! grep -Fq 'name: harbor-image-secret' \
-     "${RENDERED_MANIFEST}"; then
-  echo "错误：私有镜像 values 没有让工作负载引用 harbor-image-secret"
-  exit 1
-fi
-
 for REQUIRED_GRAFANA_VALUE in \
-  'name: mo-ob-grafana-database' \
+  'kind: Cluster' \
+  'name: mo-ob-postgresql' \
+  'name: mo-ob-postgresql-app' \
+  'kind: ScheduledBackup' \
   'foldersFromFilesStructure: true' \
   'value: "grafana_folder"' \
   'nodePort: 30081'; do
@@ -821,6 +1098,24 @@ for REQUIRED_GRAFANA_VALUE in \
     exit 1
   fi
 done
+
+if [[ -f ./values-registry.yaml ]]; then
+  if ! grep -Eq \
+    '^[[:space:]]*imageName:[[:space:]]+[^[:space:]]+@sha256:[0-9a-f]{64}[[:space:]]*$' \
+    "${RENDERED_MANIFEST}"; then
+    echo '错误：私有 PostgreSQL imageName 必须固定到 @sha256 摘要'
+    exit 1
+  fi
+  if ! grep -Fq 'name: harbor-image-secret' "${RENDERED_MANIFEST}"; then
+    echo '错误：私有镜像工作负载必须引用 harbor-image-secret'
+    exit 1
+  fi
+elif ! grep -Fq \
+  'ghcr.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c' \
+  "${RENDERED_MANIFEST}"; then
+  echo '错误：缺少已评审的上游 PostgreSQL 固定镜像摘要'
+  exit 1
+fi
 
 for REQUIRED_VALUE in \
   '${LOKI_S3_ENDPOINT}' \
@@ -836,13 +1131,19 @@ done
 
 echo "Helm 渲染和安全检查通过"
 
-grep -E '^[[:space:]]*image:' \
+grep -E '^[[:space:]]*image(Name)?:' \
   "${RENDERED_MANIFEST}" |
 sort -u
+
+printf '%s\n' \
+  'CloudNativePG Operator 镜像（独立 release）：ghcr.io/cloudnative-pg/cloudnative-pg:1.30.0'
 )
 ```
 
-最后输出的是客户必须能够拉取的精确镜像清单。
+最后输出的是客户必须能够拉取的精确镜像清单。`imageName:` 是 PostgreSQL operand
+镜像，不能因为只搜索 `image:` 而漏掉；CloudNativePG Operator 属于单独的 Helm
+release，因此额外列出其 `ghcr.io/cloudnative-pg/cloudnative-pg:1.30.0` 镜像。使用
+私有 Harbor 时，两类镜像都必须同步并配置对应的拉取方式。
 
 不要使用 `--skip-schema-validation`，也不要通过 Helm `--set-string` 传递 AK/SK
 或 Grafana 密码。
@@ -872,10 +1173,13 @@ helm upgrade --install mo-ob-private \
 ```
 
 首次安装故意不使用 `--atomic`，这样失败后的 Pod、PVC 和 Events 会保留供排查。
-首次失败时先查看 Pod、PVC、Events、镜像拉取和外部 S3 日志。不要删除客户
+首次失败时先查看 Pod、PVC、Events、PostgreSQL Cluster 状态、镜像拉取和外部
+S3 日志。不要删除客户
 已有 MinIO、StorageClass、MatrixOne、MOI 或其他业务资源。
-也不要把 `destroy`、`helm uninstall`、删除 Namespace 或删除 PVC 当作首次失败的
-排查步骤。修正配置后应使用同一 values 重复执行 `helm upgrade --install`。
+也不要把 `destroy`、`helm uninstall`、卸载 CloudNativePG Operator、删除
+PostgreSQL Cluster、删除 Namespace 或删除 PVC 当作首次失败的排查步骤。
+`helm.sh/resource-policy: keep` 只是最后一道防误删保护，不是卸载流程。修正配置后
+应使用同一 values 重复执行 `helm upgrade --install`。
 
 基线验收成功后，计划内升级可以增加 `--atomic`。
 
@@ -888,6 +1192,9 @@ helm -n "${OBNS}" status mo-ob-private
 kubectl -n "${OBNS}" get pods -o wide
 kubectl -n "${OBNS}" get pvc -o wide
 kubectl -n "${OBNS}" get service
+kubectl -n "${OBNS}" get clusters.postgresql.cnpg.io
+kubectl -n "${OBNS}" get \
+  scheduledbackups.postgresql.cnpg.io,backups.postgresql.cnpg.io
 
 kubectl -n "${OBNS}" get events \
   --sort-by=.metadata.creationTimestamp |
@@ -902,6 +1209,7 @@ kubectl -n "${OBNS}" logs statefulset/loki-backend \
   --tail=200
 
 kubectl -n "${OBNS}" get service mo-ob-private-grafana -o wide
+kubectl -n "${OBNS}" get service mo-ob-postgresql-rw -o wide
 kubectl get nodes -o wide
 
 # 在防火墙或安全组已放行的客户端执行。
@@ -926,17 +1234,21 @@ kubectl -n "${OBNS}" get pod "${GRAFANA_POD}" \
 1. Loki write/backend 各 3 个 Pod、read/gateway 各 2 个 Pod Ready，并按硬反亲和
    分散；
 2. Prometheus、Grafana 各 2 个 Pod，Alertmanager 3 个 Pod Ready；
-3. 当前示例在全新 Namespace 中创建约 153Gi、13 个 RWO PVC，全部 Bound 且没有
+3. PostgreSQL Cluster 显示 Ready，3 个实例分散在不同节点，稳定 Service
+   `mo-ob-postgresql-rw` 存在；
+4. 当前示例在全新 Namespace 中创建约 213Gi、16 个 RWO PVC，全部 Bound 且没有
    意外使用错误 StorageClass；该数字仍须与客户评审记录核对；
-4. Loki 日志没有鉴权、Bucket 不存在或对象写入失败；
-5. Grafana 两个副本都引用 `mo-ob-grafana-database`，数据库连接正常；停掉任一
+5. Loki 日志没有鉴权、Bucket 不存在或对象写入失败；
+6. Grafana 两个副本都引用 `mo-ob-postgresql-app`，数据库连接正常；停掉任一
    Grafana Pod 后，NodePort `30081` 仍能访问并保留 Dashboard、用户和会话状态；
-6. provider 输出包含 `foldersFromFilesStructure: true`，sidecar 环境包含
+7. PostgreSQL 至少一次 `ScheduledBackup` 或手工 `Backup` 成功写入专用 Bucket，
+   并完成一次经批准的恢复验证；
+8. provider 输出包含 `foldersFromFilesStructure: true`，sidecar 环境包含
    `FOLDER_ANNOTATION=grafana_folder`；
-7. Prometheus、Grafana、Alertmanager Service 正常；
-8. 重启 Loki write/backend 后仍能查询重启前日志；
-9. Helm 使用相同 values 重复执行 upgrade 成功；
-10. MatrixOne、MOI、MinIO 等业务 Pod UID 未因安装监控发生变化。
+9. Prometheus、Grafana、Alertmanager Service 正常；
+10. 重启 Loki write/backend 后仍能查询重启前日志；
+11. Helm 使用相同 values 重复执行 upgrade 成功；
+12. MatrixOne、MOI、MinIO 等业务 Pod UID 未因安装监控发生变化。
 
 基础包的 Alertmanager receiver 默认为 `null`，不会发送邮件或 Webhook；这表示
 告警组件健康，不表示通知链路已经交付。`mo-ob-private 1.0.5` 内置的是

@@ -1,5 +1,11 @@
 customerSizingApproved: true
 
+# The CloudNativePG Cluster is opt-in so upgrading an existing release never
+# creates a database unexpectedly. Install the operator as a separate release
+# and wait for it to become ready before enabling this block.
+postgresql:
+  enabled: false
+
 mo-ob-opensource:
   enabled: true
 

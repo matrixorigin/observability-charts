@@ -5,23 +5,31 @@
 - Prometheus and Prometheus Operator;
 - Loki, Alloy and Promtail;
 - Grafana and standalone Alertmanager;
+- a three-instance CloudNativePG PostgreSQL Cluster used by Grafana;
 - node-exporter and kube-state-metrics.
 
-The Chart does not create or manage a StorageClass, MinIO/S3 service, bucket,
-or business monitoring content. The companion `ob-ops` content Chart owns
-Kubernetes/Loki/MatrixOne/MOI/MinIO ServiceMonitors, rules and dashboards.
+The Chart does not install the CloudNativePG Operator and does not create or
+manage a StorageClass, MinIO/S3 service, bucket, or business monitoring
+content. Install or reuse one compatible CloudNativePG Operator before this
+release. The companion `ob-ops` content Chart owns Kubernetes/Loki/MatrixOne/
+MOI/MinIO ServiceMonitors, rules and dashboards.
 
 ## Customer contract
 
 Before installation, the customer site must provide:
 
-1. a reachable Kubernetes cluster, Helm 3 and at least three schedulable nodes;
+1. a reachable Kubernetes `>=1.29.0` cluster, Helm 3 and at least three
+   schedulable nodes;
 2. a dynamic `ReadWriteOnce` StorageClass available in every intended failure
    domain;
-3. an external highly available S3-compatible service and a pre-created Loki
-   bucket;
-4. least-privilege S3 credentials with the required bucket operations;
-5. an external highly available PostgreSQL or MySQL database for Grafana;
+3. an external highly available S3-compatible service with separate,
+   pre-created Loki and PostgreSQL-backup buckets;
+4. separate least-privilege S3 credentials for the Loki bucket and the
+   PostgreSQL backup bucket;
+5. CloudNativePG Operator chart `0.29.0` / CloudNativePG `1.30.0`, installed as
+   an independent two-replica, cross-node Helm release with a PDB in `mo-ob`,
+   or one compatible existing cluster-wide Operator whose equivalent HA
+   controls are approved for reuse;
 6. network access to every rendered image, or a fully verified customer mirror;
 7. enough schedulable CPU, memory and persistent storage for the reviewed sizing;
 8. an unused NodePort `30081` and a reviewed firewall or security-group rule for
@@ -32,8 +40,10 @@ starting point, not a universal production recommendation. It runs Loki with
 three write replicas, two read replicas, three backend replicas and two gateway
 replicas; Prometheus and Grafana with two replicas each; and Alertmanager with
 three replicas. The hard anti-affinity rules require at least three suitable
-nodes. Each customer must review these values against its own ingest rate,
-cardinality, retention, failure domains and recovery objectives.
+nodes. The bundled PostgreSQL Cluster runs one primary and two replicas with
+one `20Gi` PVC per instance. Each customer must review these values against its
+own ingest rate, cardinality, retention, failure domains and recovery
+objectives.
 
 This is node-level availability based on `kubernetes.io/hostname`, not an
 automatic multi-zone or multi-datacenter disaster-recovery design. The PDBs
@@ -42,15 +52,29 @@ prevent node, disk, network, object-storage or database failures, and they do
 not compensate for insufficient CPU, memory or PVC capacity.
 
 Two Grafana Pods backed by two local SQLite databases are not highly available.
-Both replicas must use the same customer-managed highly available PostgreSQL or
-MySQL service through the Namespace-local Secret
-`mo-ob-grafana-database`. The database lifecycle, backup, restore, TLS and
-availability remain the customer's responsibility. The example disables
-Grafana Unified Alerting because it does not configure that subsystem's HA
-coordination; alerts in this monitoring base use Prometheus and Alertmanager.
+Both replicas therefore use the same three-instance CloudNativePG PostgreSQL
+Cluster created by this Chart. CloudNativePG maintains the stable write Service
+`mo-ob-postgresql-rw`; Grafana reads its application password from the
+Namespace-local `kubernetes.io/basic-auth` Secret
+`mo-ob-postgresql-app`. PostgreSQL replication is not a backup: the customer
+must provide a separate MinIO/S3 backup bucket and credential, verify the first
+backup, and periodically test recovery. The example disables Grafana Unified
+Alerting because it does not configure that subsystem's HA coordination;
+alerts in this monitoring base use Prometheus and Alertmanager.
 If Grafana Alerting or Grafana Live is required, design and validate their HA
 separately. Install Grafana plugins through the same image or Helm values on
 both replicas; do not install a plugin manually in only one Pod.
+
+This HA example targets a new Namespace and a fresh Grafana database. Do not
+point an existing Grafana release that uses SQLite at PostgreSQL and assume the
+state will move automatically. Grafana does not automatically migrate the
+existing SQLite database into this PostgreSQL Cluster. Before changing an
+existing release, inventory and back up the SQLite database/PVC, define and
+test an application-supported database migration plus rollback procedure, and
+verify users, organizations, data sources, dashboards, alerting state, API
+keys/service accounts and other persisted settings. Without that migration,
+the new PostgreSQL-backed Grafana starts with a new application database and
+the previous state is not transferred.
 
 The default release Namespace is `mo-ob`. A custom Namespace is supported by
 setting the same value everywhere: the Helm `--namespace` argument, `OBNS`
@@ -124,7 +148,8 @@ only to the release-maintainer workflow above.
 
 The simplest customer workflow is to fill the packaged Secret manifest once.
 It contains every required credential location for this HA profile: Loki
-S3/MinIO, the Grafana Web administrator and the shared Grafana database.
+S3/MinIO, the Grafana Web administrator, the bundled PostgreSQL application
+user, and PostgreSQL S3/MinIO backup access.
 
 ```bash
 (
@@ -148,10 +173,12 @@ to enter:
 
 - the Loki S3/MinIO Endpoint, Bucket, Access Key and Secret Key;
 - the Grafana administrator username and password;
-- the Grafana PostgreSQL/MySQL host, database, username and password;
-- the stable `GF_SECURITY_SECRET_KEY` shared by every Grafana replica.
+- the `grafana` PostgreSQL application-user password;
+- the stable `GF_SECURITY_SECRET_KEY` shared by every Grafana replica;
+- the PostgreSQL backup Bucket credential. The backup Endpoint and Bucket path
+  are configured in `values-customer.yaml`, not in the Secret.
 
-Then reject incomplete input and create the Namespace plus all three Secrets:
+Then reject incomplete input and create the Namespace plus all four Secrets:
 
 ```bash
 (
@@ -170,7 +197,8 @@ kubectl apply -f "${SECRET_FILE}"
 for SECRET_NAME in \
   mo-ob-loki-s3 \
   mo-ob-grafana-admin \
-  mo-ob-grafana-database; do
+  mo-ob-postgresql-app \
+  mo-ob-postgresql-backup-s3; do
 
   kubectl -n mo-ob get secret "${SECRET_NAME}" -o name
 done
@@ -182,22 +210,19 @@ never commit, package, upload or paste it into delivery records. The
 `.gitignore` protects the standard local filenames, but file permissions and
 operator handling remain required.
 
-Only Loki uses S3/MinIO in this monitoring base. Prometheus and Alertmanager
-use PVCs. Grafana uses PVCs for per-Pod local files and the shared external
-PostgreSQL/MySQL for HA application state; Grafana does not need the MinIO
-Access Key or Secret Key.
+Loki uses its dedicated S3/MinIO Bucket. PostgreSQL uses a different Bucket for
+base backups and WAL. Prometheus and Alertmanager use PVCs. Grafana uses PVCs
+for per-Pod local files and `mo-ob-postgresql-rw:5432` for shared application
+state. Never reuse the Loki Bucket or its credential for PostgreSQL backups.
 
 ### Optional interactive alternative
 
-The block below creates the same three Secrets without keeping a filled
+The block below creates the same four Secrets without keeping a filled
 manifest. Use either workflow, not both during the same credential change.
-
-Create the Grafana administrator and external-database passwords plus one stable
-random Grafana security key in the customer password manager first. The block
-below creates `mo-ob-loki-s3`,
-`mo-ob-grafana-admin` and `mo-ob-grafana-database`. It uses a mode-`0700`
-temporary directory and `--from-file`, so credentials do not appear in
-`kubectl` process arguments:
+Create and save the Grafana administrator password, PostgreSQL application
+password, stable Grafana security key and PostgreSQL-backup S3 credential in
+the customer password manager first. The mode-`0700` temporary directory and
+`--from-file` keep credentials out of `kubectl` process arguments:
 
 ```bash
 (
@@ -209,21 +234,16 @@ read -rp 'S3/MinIO endpoint (http[s]://host:port): ' LOKI_S3_ENDPOINT
 read -rp 'Existing Loki bucket: ' LOKI_S3_BUCKET
 read -rsp 'S3 access key: ' LOKI_S3_ACCESS_KEY; printf '\n'
 read -rsp 'S3 secret key: ' LOKI_S3_SECRET_KEY; printf '\n'
+read -rp 'PostgreSQL backup S3 access key: ' PG_BACKUP_ACCESS_KEY
+read -rsp 'PostgreSQL backup S3 secret key: ' PG_BACKUP_SECRET_KEY; printf '\n'
 read -rp 'Grafana administrator [admin]: ' GRAFANA_ADMIN_USER
 GRAFANA_ADMIN_USER="${GRAFANA_ADMIN_USER:-admin}"
 read -rsp 'Grafana administrator password (at least 16 characters): ' \
   GRAFANA_ADMIN_PASSWORD
 printf '\n'
-read -rp 'Grafana database type [postgres]: ' GRAFANA_DATABASE_TYPE
-GRAFANA_DATABASE_TYPE="${GRAFANA_DATABASE_TYPE:-postgres}"
-read -rp 'Grafana database host (host:port): ' GRAFANA_DATABASE_HOST
-read -rp 'Grafana database name [grafana]: ' GRAFANA_DATABASE_NAME
-GRAFANA_DATABASE_NAME="${GRAFANA_DATABASE_NAME:-grafana}"
-read -rp 'Grafana database user: ' GRAFANA_DATABASE_USER
-read -rsp 'Grafana database password: ' GRAFANA_DATABASE_PASSWORD
+read -rsp 'Bundled PostgreSQL grafana-user password: ' \
+  POSTGRESQL_APP_PASSWORD
 printf '\n'
-read -rp 'Grafana database SSL mode (database-specific): ' \
-  GRAFANA_DATABASE_SSL_MODE
 read -rsp 'Grafana shared security secret key (at least 32 characters): ' \
   GRAFANA_SECURITY_SECRET_KEY
 printf '\n'
@@ -237,8 +257,10 @@ esac
 
 if [[ -z "${LOKI_S3_BUCKET}" || \
       -z "${LOKI_S3_ACCESS_KEY}" || \
-      -z "${LOKI_S3_SECRET_KEY}" ]]; then
-  echo 'S3 bucket, access key and secret key must not be empty' >&2
+      -z "${LOKI_S3_SECRET_KEY}" || \
+      -z "${PG_BACKUP_ACCESS_KEY}" || \
+      -z "${PG_BACKUP_SECRET_KEY}" ]]; then
+  echo 'Loki and PostgreSQL-backup S3 credentials must not be empty' >&2
   exit 1
 fi
 if (( ${#GRAFANA_ADMIN_PASSWORD} < 16 )) || \
@@ -246,15 +268,8 @@ if (( ${#GRAFANA_ADMIN_PASSWORD} < 16 )) || \
   echo 'Grafana password must be at least 16 characters and differ from the username' >&2
   exit 1
 fi
-case "${GRAFANA_DATABASE_TYPE}" in
-  postgres|mysql) ;;
-  *) echo 'Grafana database type must be postgres or mysql' >&2; exit 1 ;;
-esac
-if [[ -z "${GRAFANA_DATABASE_HOST}" || \
-      -z "${GRAFANA_DATABASE_USER}" || \
-      -z "${GRAFANA_DATABASE_PASSWORD}" || \
-      -z "${GRAFANA_DATABASE_SSL_MODE}" ]]; then
-  echo 'Grafana database host, user, password and SSL mode must not be empty' >&2
+if [[ -z "${POSTGRESQL_APP_PASSWORD}" ]]; then
+  echo 'Bundled PostgreSQL application password must not be empty' >&2
   exit 1
 fi
 if (( ${#GRAFANA_SECURITY_SECRET_KEY} < 32 )); then
@@ -277,13 +292,11 @@ cleanup_secret_files() {
     "${SECRET_DIR}/LOKI_S3_INSECURE" \
     "${SECRET_DIR}/admin-user" \
     "${SECRET_DIR}/admin-password" \
-    "${SECRET_DIR}/GF_DATABASE_TYPE" \
-    "${SECRET_DIR}/GF_DATABASE_HOST" \
-    "${SECRET_DIR}/GF_DATABASE_NAME" \
-    "${SECRET_DIR}/GF_DATABASE_USER" \
-    "${SECRET_DIR}/GF_DATABASE_PASSWORD" \
-    "${SECRET_DIR}/GF_DATABASE_SSL_MODE" \
-    "${SECRET_DIR}/GF_SECURITY_SECRET_KEY"
+    "${SECRET_DIR}/username" \
+    "${SECRET_DIR}/password" \
+    "${SECRET_DIR}/GF_SECURITY_SECRET_KEY" \
+    "${SECRET_DIR}/ACCESS_KEY_ID" \
+    "${SECRET_DIR}/ACCESS_SECRET_KEY"
   rmdir -- "${SECRET_DIR}" 2>/dev/null || true
 }
 trap cleanup_secret_files EXIT
@@ -296,13 +309,11 @@ printf '%s' "${LOKI_S3_FORCE_PATH_STYLE}" >"${SECRET_DIR}/LOKI_S3_FORCE_PATH_STY
 printf '%s' "${LOKI_S3_INSECURE}" >"${SECRET_DIR}/LOKI_S3_INSECURE"
 printf '%s' "${GRAFANA_ADMIN_USER}" >"${SECRET_DIR}/admin-user"
 printf '%s' "${GRAFANA_ADMIN_PASSWORD}" >"${SECRET_DIR}/admin-password"
-printf '%s' "${GRAFANA_DATABASE_TYPE}" >"${SECRET_DIR}/GF_DATABASE_TYPE"
-printf '%s' "${GRAFANA_DATABASE_HOST}" >"${SECRET_DIR}/GF_DATABASE_HOST"
-printf '%s' "${GRAFANA_DATABASE_NAME}" >"${SECRET_DIR}/GF_DATABASE_NAME"
-printf '%s' "${GRAFANA_DATABASE_USER}" >"${SECRET_DIR}/GF_DATABASE_USER"
-printf '%s' "${GRAFANA_DATABASE_PASSWORD}" >"${SECRET_DIR}/GF_DATABASE_PASSWORD"
-printf '%s' "${GRAFANA_DATABASE_SSL_MODE}" >"${SECRET_DIR}/GF_DATABASE_SSL_MODE"
+printf '%s' 'grafana' >"${SECRET_DIR}/username"
+printf '%s' "${POSTGRESQL_APP_PASSWORD}" >"${SECRET_DIR}/password"
 printf '%s' "${GRAFANA_SECURITY_SECRET_KEY}" >"${SECRET_DIR}/GF_SECURITY_SECRET_KEY"
+printf '%s' "${PG_BACKUP_ACCESS_KEY}" >"${SECRET_DIR}/ACCESS_KEY_ID"
+printf '%s' "${PG_BACKUP_SECRET_KEY}" >"${SECRET_DIR}/ACCESS_SECRET_KEY"
 
 kubectl -n "${OBNS}" create secret generic mo-ob-loki-s3 \
   --from-file="${SECRET_DIR}/LOKI_S3_ENDPOINT" \
@@ -318,15 +329,23 @@ kubectl -n "${OBNS}" create secret generic mo-ob-grafana-admin \
   --from-file="admin-password=${SECRET_DIR}/admin-password" \
   --dry-run=client -o yaml | kubectl apply -f -
 
-kubectl -n "${OBNS}" create secret generic mo-ob-grafana-database \
-  --from-file="${SECRET_DIR}/GF_DATABASE_TYPE" \
-  --from-file="${SECRET_DIR}/GF_DATABASE_HOST" \
-  --from-file="${SECRET_DIR}/GF_DATABASE_NAME" \
-  --from-file="${SECRET_DIR}/GF_DATABASE_USER" \
-  --from-file="${SECRET_DIR}/GF_DATABASE_PASSWORD" \
-  --from-file="${SECRET_DIR}/GF_DATABASE_SSL_MODE" \
+kubectl -n "${OBNS}" create secret generic mo-ob-postgresql-app \
+  --type=kubernetes.io/basic-auth \
+  --from-file="${SECRET_DIR}/username" \
+  --from-file="${SECRET_DIR}/password" \
   --from-file="${SECRET_DIR}/GF_SECURITY_SECRET_KEY" \
   --dry-run=client -o yaml | kubectl apply -f -
+
+kubectl -n "${OBNS}" label secret mo-ob-postgresql-app \
+  cnpg.io/reload=true --overwrite
+
+kubectl -n "${OBNS}" create secret generic mo-ob-postgresql-backup-s3 \
+  --from-file="${SECRET_DIR}/ACCESS_KEY_ID" \
+  --from-file="${SECRET_DIR}/ACCESS_SECRET_KEY" \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+kubectl -n "${OBNS}" label secret mo-ob-postgresql-backup-s3 \
+  cnpg.io/reload=true --overwrite
 )
 ```
 
@@ -334,29 +353,27 @@ The Secrets are updated idempotently. Rotate credentials only in a controlled
 maintenance window and never commit their values to Git, values files, tickets
 or delivery documents.
 
-The database endpoint must be reachable from both Grafana Pods and must already
-contain the reviewed database and user. Choose `GF_DATABASE_SSL_MODE` according
-to the selected database engine and the customer's TLS policy. Do not weaken
-database TLS to work around an untrusted certificate. Check only the Secret key
-names, without printing their values:
-
 `GF_SECURITY_SECRET_KEY` must be identical on every Grafana replica and remain
 stable across upgrades. Store it in the customer password manager; changing it
 can make previously encrypted Grafana data unreadable.
 
 ```bash
-kubectl -n "${OBNS}" get secret mo-ob-grafana-database -o json |
-jq '{type: .type, keys: (.data | keys)}'
+for SECRET_NAME in mo-ob-postgresql-app mo-ob-postgresql-backup-s3; do
+  kubectl -n "${OBNS}" get secret "${SECRET_NAME}" -o json |
+    jq '{type: .type, keys: (.data | keys)}'
+done
 ```
 
-If the HTTPS S3 endpoint uses a private CA, the CA must be trusted inside every
-Loki workload through a reviewed site values override. Do not weaken TLS or
-switch to HTTP merely to bypass an unknown certificate.
+If the HTTPS S3 endpoint uses a private CA, follow the procedure below for
+PostgreSQL and mount the CA into every Loki workload through an approved site
+values override. Do not weaken TLS or switch to HTTP merely to bypass an
+unknown certificate.
 
 ## Validate external S3/MinIO
 
-The installer never creates MinIO or the Loki bucket. Validate the existing
-bucket with a dedicated, least-privilege credential. This block isolates all
+The installer never creates MinIO, the Loki bucket or the PostgreSQL backup
+bucket. Validate each existing bucket with its own dedicated, least-privilege
+credential. This block isolates all
 `mc` state in a temporary `MC_CONFIG_DIR`, uses a unique alias and cleans the
 test object, alias and configuration on every exit:
 
@@ -364,22 +381,84 @@ test object, alias and configuration on every exit:
 (
 set -euo pipefail
 
+OBNS="${OBNS:-mo-ob}"
+
 read -rp 'S3/MinIO endpoint (http[s]://host:port): ' LOKI_S3_ENDPOINT
 read -rp 'Existing Loki bucket: ' LOKI_S3_BUCKET
 read -rsp 'S3 access key: ' LOKI_S3_ACCESS_KEY; printf '\n'
 read -rsp 'S3 secret key: ' LOKI_S3_SECRET_KEY; printf '\n'
 
+read -rp 'PostgreSQL backup endpoint [same as Loki]: ' PG_S3_ENDPOINT
+PG_S3_ENDPOINT="${PG_S3_ENDPOINT:-${LOKI_S3_ENDPOINT}}"
+read -rp 'Existing PostgreSQL backup bucket: ' PG_S3_BUCKET
+read -rsp 'PostgreSQL backup access key: ' PG_S3_ACCESS_KEY; printf '\n'
+read -rsp 'PostgreSQL backup secret key: ' PG_S3_SECRET_KEY; printf '\n'
+read -rp 'Loki endpoint private CA file [empty when not required]: ' \
+  LOKI_S3_CA_FILE
+read -rp 'PostgreSQL backup private CA file [empty; same as Loki when endpoints match]: ' \
+  PG_S3_CA_FILE
+if [[ -z "${PG_S3_CA_FILE}" && \
+      "${LOKI_S3_ENDPOINT%/}" == "${PG_S3_ENDPOINT%/}" ]]; then
+  PG_S3_CA_FILE="${LOKI_S3_CA_FILE}"
+fi
+
+for ENDPOINT in "${LOKI_S3_ENDPOINT}" "${PG_S3_ENDPOINT}"; do
+  case "${ENDPOINT}" in
+    http://*|https://*) ;;
+    *) echo "Endpoint must begin with http:// or https://: ${ENDPOINT}" >&2; exit 1 ;;
+  esac
+done
+
+if [[ -z "${LOKI_S3_BUCKET}" || \
+      -z "${LOKI_S3_ACCESS_KEY}" || \
+      -z "${LOKI_S3_SECRET_KEY}" || \
+      -z "${PG_S3_BUCKET}" || \
+      -z "${PG_S3_ACCESS_KEY}" || \
+      -z "${PG_S3_SECRET_KEY}" ]]; then
+  echo 'Both bucket names and both dedicated credential pairs are required' >&2
+  exit 1
+fi
+
+if [[ "${LOKI_S3_ENDPOINT%/}" == "${PG_S3_ENDPOINT%/}" && \
+      "${LOKI_S3_BUCKET}" == "${PG_S3_BUCKET}" ]]; then
+  echo 'Loki and PostgreSQL backups must not use the same Endpoint/Bucket' >&2
+  exit 1
+fi
+
+for CA_FILE in "${LOKI_S3_CA_FILE}" "${PG_S3_CA_FILE}"; do
+  if [[ -n "${CA_FILE}" && ! -s "${CA_FILE}" ]]; then
+    echo "Private CA file does not exist or is empty: ${CA_FILE}" >&2
+    exit 1
+  fi
+done
+
 MC_CONFIG_DIR="$(mktemp -d)"
 chmod 0700 "${MC_CONFIG_DIR}"
-MC_ALIAS="mo-ob-check-$$"
-CHECK_OBJECT="mo-ob-preflight-$(date +%s)-$$.txt"
+mkdir -p "${MC_CONFIG_DIR}/certs/CAs"
+if [[ -n "${LOKI_S3_CA_FILE}" ]]; then
+  install -m 0644 "${LOKI_S3_CA_FILE}" \
+    "${MC_CONFIG_DIR}/certs/CAs/loki-private-ca.crt"
+fi
+if [[ -n "${PG_S3_CA_FILE}" ]]; then
+  install -m 0644 "${PG_S3_CA_FILE}" \
+    "${MC_CONFIG_DIR}/certs/CAs/postgresql-private-ca.crt"
+fi
+LOKI_ALIAS="mo-ob-loki-check-$$"
+PG_ALIAS="mo-ob-pg-check-$$"
+LOKI_CHECK_OBJECT="mo-ob-loki-preflight-$(date +%s)-$$.txt"
+PG_CHECK_OBJECT="mo-ob-pg-preflight-$(date +%s)-$$.txt"
 CHECK_FILE="$(mktemp)"
 
 cleanup_ob_preflight() {
   mc --config-dir "${MC_CONFIG_DIR}" rm \
-    "${MC_ALIAS}/${LOKI_S3_BUCKET}/${CHECK_OBJECT}" \
+    "${LOKI_ALIAS}/${LOKI_S3_BUCKET}/${LOKI_CHECK_OBJECT}" \
     >/dev/null 2>&1 || true
-  mc --config-dir "${MC_CONFIG_DIR}" alias rm "${MC_ALIAS}" \
+  mc --config-dir "${MC_CONFIG_DIR}" rm \
+    "${PG_ALIAS}/${PG_S3_BUCKET}/${PG_CHECK_OBJECT}" \
+    >/dev/null 2>&1 || true
+  mc --config-dir "${MC_CONFIG_DIR}" alias rm "${LOKI_ALIAS}" \
+    >/dev/null 2>&1 || true
+  mc --config-dir "${MC_CONFIG_DIR}" alias rm "${PG_ALIAS}" \
     >/dev/null 2>&1 || true
   rm -f -- "${CHECK_FILE}"
   find "${MC_CONFIG_DIR}" -depth -mindepth 1 -delete 2>/dev/null || true
@@ -387,19 +466,66 @@ cleanup_ob_preflight() {
 }
 trap cleanup_ob_preflight EXIT
 
-mc --config-dir "${MC_CONFIG_DIR}" alias set "${MC_ALIAS}" \
-  "${LOKI_S3_ENDPOINT}" "${LOKI_S3_ACCESS_KEY}" "${LOKI_S3_SECRET_KEY}"
 printf 'mo-ob-preflight\n' >"${CHECK_FILE}"
-mc --config-dir "${MC_CONFIG_DIR}" cp "${CHECK_FILE}" \
-  "${MC_ALIAS}/${LOKI_S3_BUCKET}/${CHECK_OBJECT}"
-mc --config-dir "${MC_CONFIG_DIR}" stat \
-  "${MC_ALIAS}/${LOKI_S3_BUCKET}/${CHECK_OBJECT}"
-mc --config-dir "${MC_CONFIG_DIR}" cat \
-  "${MC_ALIAS}/${LOKI_S3_BUCKET}/${CHECK_OBJECT}" >/dev/null
-mc --config-dir "${MC_CONFIG_DIR}" rm \
-  "${MC_ALIAS}/${LOKI_S3_BUCKET}/${CHECK_OBJECT}"
+
+validate_bucket() {
+  local ALIAS_NAME="$1"
+  local ENDPOINT="$2"
+  local BUCKET="$3"
+  local ACCESS_KEY="$4"
+  local SECRET_KEY="$5"
+  local OBJECT_NAME="$6"
+
+  mc --config-dir "${MC_CONFIG_DIR}" alias set "${ALIAS_NAME}" \
+    "${ENDPOINT}" "${ACCESS_KEY}" "${SECRET_KEY}"
+  mc --config-dir "${MC_CONFIG_DIR}" cp "${CHECK_FILE}" \
+    "${ALIAS_NAME}/${BUCKET}/${OBJECT_NAME}"
+  mc --config-dir "${MC_CONFIG_DIR}" stat \
+    "${ALIAS_NAME}/${BUCKET}/${OBJECT_NAME}"
+  mc --config-dir "${MC_CONFIG_DIR}" cat \
+    "${ALIAS_NAME}/${BUCKET}/${OBJECT_NAME}" >/dev/null
+  mc --config-dir "${MC_CONFIG_DIR}" rm \
+    "${ALIAS_NAME}/${BUCKET}/${OBJECT_NAME}"
+}
+
+validate_bucket \
+  "${LOKI_ALIAS}" "${LOKI_S3_ENDPOINT}" "${LOKI_S3_BUCKET}" \
+  "${LOKI_S3_ACCESS_KEY}" "${LOKI_S3_SECRET_KEY}" "${LOKI_CHECK_OBJECT}"
+
+validate_bucket \
+  "${PG_ALIAS}" "${PG_S3_ENDPOINT}" "${PG_S3_BUCKET}" \
+  "${PG_S3_ACCESS_KEY}" "${PG_S3_SECRET_KEY}" "${PG_CHECK_OBJECT}"
+
+if [[ -n "${PG_S3_CA_FILE}" ]]; then
+  kubectl create namespace "${OBNS}" \
+    --dry-run=client -o yaml | kubectl apply -f -
+  kubectl -n "${OBNS}" create secret generic mo-ob-postgresql-backup-ca \
+    --from-file="ca.crt=${PG_S3_CA_FILE}" \
+    --dry-run=client -o yaml | kubectl apply -f -
+fi
 )
 ```
+
+The block fails if both uses resolve to the same Endpoint/Bucket and validates
+write, stat, read and delete with each dedicated credential before continuing.
+
+When a private CA file is supplied, the block copies it into the fresh
+`${MC_CONFIG_DIR}/certs/CAs/` trust directory before `mc alias set`; it never
+uses `--insecure`. The same PostgreSQL CA file is then stored as `ca.crt` in
+the Namespace-local `mo-ob-postgresql-backup-ca` Secret. Reference it from the
+customer values:
+
+```yaml
+postgresql:
+  backups:
+    endpointCA:
+      name: mo-ob-postgresql-backup-ca
+      key: ca.crt
+```
+
+Leave `endpointCA.name` empty only for HTTP or an HTTPS endpoint whose issuing
+CA is already trusted. This optional CA Secret is additional to the four
+required credential Secrets.
 
 ## Size the customer values
 
@@ -427,10 +553,12 @@ production recommendation. Its replica topology is:
 
 - Loki write/backend: 3 each; Loki read/gateway: 2 each;
 - Prometheus/Grafana: 2 each;
-- Alertmanager: 3.
+- Alertmanager: 3;
+- bundled PostgreSQL: 3 instances.
 
 Only Loki write/backend, Prometheus, Grafana and Alertmanager request persistent
-volumes in this profile. Capacity is approximately:
+volumes in the original profile. The bundled PostgreSQL Cluster adds one PVC
+per instance. Capacity is approximately:
 
 ```text
 (Loki write replicas × write PVC size)
@@ -438,12 +566,14 @@ volumes in this profile. Capacity is approximately:
 + (Prometheus replicas × Prometheus PVC size)
 + (Grafana replicas × Grafana PVC size)
 + (Alertmanager replicas × Alertmanager PVC size)
++ (PostgreSQL instances × PostgreSQL PVC size)
 
 = (3 × 10Gi) + (3 × 10Gi) + (2 × 40Gi) + (2 × 5Gi) + (3 × 1Gi)
-= approximately 153Gi across 13 ReadWriteOnce PVCs
+  + (3 × 20Gi)
+= approximately 213Gi across 16 ReadWriteOnce PVCs
 ```
 
-The `153Gi` and 13-PVC figures are example requested capacity before customer
+The `213Gi` and 16-PVC figures are example requested capacity before customer
 headroom, snapshots, storage-system overhead and external Loki object storage.
 They must not be treated as proof that a customer storage system has enough
 usable capacity. Confirm StorageClass topology, expansion support, failure
@@ -534,6 +664,122 @@ kubectl -n "${OBNS}" create secret generic harbor-image-secret \
 )
 ```
 
+## Install or reuse the CloudNativePG Operator
+
+`mo-ob-private` creates the PostgreSQL `Cluster` and `ScheduledBackup` custom
+resources, but deliberately does not install the cluster-scoped CRDs,
+validating webhook or CloudNativePG Operator. Inspect the cluster before
+installing anything:
+
+```bash
+OBNS="${OBNS:-mo-ob}"
+
+kubectl get deployment -A \
+  -l app.kubernetes.io/name=cloudnative-pg \
+  -o 'custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name,IMAGE:.spec.template.spec.containers[0].image'
+kubectl get crd clusters.postgresql.cnpg.io scheduledbackups.postgresql.cnpg.io \
+  2>/dev/null || true
+kubectl get validatingwebhookconfiguration \
+  cnpg-validating-webhook-configuration 2>/dev/null || true
+```
+
+If a compatible cluster-wide CloudNativePG `1.30.x` Operator already exists,
+reuse it and do not install a second Operator. If an Operator is Namespace-local
+outside `OBNS`, multiple Operators are present, or the detected version is not
+approved, stop and have the platform owner resolve ownership first.
+For a reused cluster-wide Operator, the platform owner must also confirm its
+replica count, cross-node scheduling, requests/limits and a PDB equivalent to
+`minAvailable: 1`; this document must not mutate a shared platform Operator.
+
+If no Operator exists, install the reviewed Operator chart as an independent
+release in `OBNS` (`mo-ob` by default). With `config.clusterWide=false`, the
+Operator watches its own Namespace, so it must be installed in the same
+Namespace as the PostgreSQL Cluster:
+
+```bash
+(
+set -euo pipefail
+
+OBNS="${OBNS:-mo-ob}"
+OPERATOR_VALUES="/root/mo-ob-cnpg-operator-values.yaml"
+
+umask 077
+cat >"${OPERATOR_VALUES}" <<'EOF'
+fullnameOverride: mo-ob-postgresql-operator
+
+config:
+  clusterWide: false
+
+replicaCount: 2
+
+monitoring:
+  podMonitorEnabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: cloudnative-pg
+            app.kubernetes.io/instance: mo-ob-postgresql-operator
+        topologyKey: kubernetes.io/hostname
+EOF
+
+helm repo add cnpg https://cloudnative-pg.github.io/charts
+helm repo update cnpg
+
+helm upgrade --install mo-ob-postgresql-operator cnpg/cloudnative-pg \
+  --version 0.29.0 \
+  --namespace "${OBNS}" \
+  --create-namespace \
+  -f "${OPERATOR_VALUES}" \
+  --wait \
+  --timeout 10m
+
+kubectl apply -f - <<EOF
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: mo-ob-postgresql-operator
+  namespace: ${OBNS}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cloudnative-pg
+      app.kubernetes.io/instance: mo-ob-postgresql-operator
+EOF
+
+kubectl -n "${OBNS}" rollout status \
+  deployment/mo-ob-postgresql-operator --timeout=300s
+kubectl -n "${OBNS}" get pod \
+  -l app.kubernetes.io/instance=mo-ob-postgresql-operator -o wide
+kubectl -n "${OBNS}" get poddisruptionbudget \
+  mo-ob-postgresql-operator
+kubectl wait --for=condition=Established \
+  crd/clusters.postgresql.cnpg.io --timeout=120s
+kubectl wait --for=condition=Established \
+  crd/scheduledbackups.postgresql.cnpg.io --timeout=120s
+kubectl wait --for=condition=Established \
+  crd/backups.postgresql.cnpg.io --timeout=120s
+)
+```
+
+The reviewed PostgreSQL image is pinned to CloudNativePG `1.30` and this
+release uses the in-tree Barman object-store integration for backups. That
+integration is deprecated and is expected to be removed in CloudNativePG
+`1.31`. Do not upgrade the Operator to `1.31` until this Chart has migrated to
+the official backup plugin and a full backup-and-recovery test has passed.
+Never uninstall the Operator while `Cluster` resources still exist.
+
 ## Preflight and install
 
 Install the immutable package, not a working tree:
@@ -564,6 +810,11 @@ if ! grep -Eq '^customerSizingApproved:[[:space:]]+true[[:space:]]*$' \
   exit 1
 fi
 
+if grep -n 'FILL_THIS_VALUE' "${VALUES_FILE}"; then
+  echo 'Customer values still contain an unfilled PostgreSQL backup Endpoint or Bucket' >&2
+  exit 1
+fi
+
 kubectl get nodes
 kubectl get storageclass
 kubectl get pvc -A
@@ -571,9 +822,54 @@ kubectl get pvc -A
 for REQUIRED_SECRET in \
   mo-ob-loki-s3 \
   mo-ob-grafana-admin \
-  mo-ob-grafana-database; do
+  mo-ob-postgresql-app \
+  mo-ob-postgresql-backup-s3; do
   kubectl -n "${OBNS}" get secret "${REQUIRED_SECRET}" >/dev/null
 done
+
+OPERATOR_JSON="$(
+  kubectl get deployment -A \
+    -l app.kubernetes.io/name=cloudnative-pg \
+    -o json
+)"
+
+OPERATOR_COUNT="$(jq '.items | length' <<<"${OPERATOR_JSON}")"
+if [[ "${OPERATOR_COUNT}" -ne 1 ]]; then
+  echo "Expected exactly one CloudNativePG Operator, found ${OPERATOR_COUNT}" >&2
+  exit 1
+fi
+
+OPERATOR_VERSION="$(
+  jq -r '.items[0].metadata.labels["app.kubernetes.io/version"] // ""' \
+    <<<"${OPERATOR_JSON}"
+)"
+WATCH_NAMESPACE="$(
+  jq -r '
+    [
+      .items[0].spec.template.spec.containers[]
+      | select(.name == "manager")
+      | (.env // [])[]
+      | select(.name == "WATCH_NAMESPACE")
+      | .value
+    ][0] // ""
+  ' <<<"${OPERATOR_JSON}"
+)"
+
+if [[ ! "${OPERATOR_VERSION}" =~ ^1\.30\. ]]; then
+  echo "CloudNativePG 1.30.x is required; found ${OPERATOR_VERSION}" >&2
+  exit 1
+fi
+
+if [[ -n "${WATCH_NAMESPACE}" ]] && \
+   ! tr ',' '\n' <<<"${WATCH_NAMESPACE}" | grep -Fxq "${OBNS}"; then
+  echo "CloudNativePG does not watch Namespace ${OBNS}: ${WATCH_NAMESPACE}" >&2
+  exit 1
+fi
+
+kubectl get crd \
+  clusters.postgresql.cnpg.io \
+  scheduledbackups.postgresql.cnpg.io \
+  backups.postgresql.cnpg.io >/dev/null
 
 HELM_VALUE_ARGS=(-f "${VALUES_FILE}")
 if [[ -f ./values-registry.yaml ]]; then
@@ -594,7 +890,10 @@ if grep -Eq \
 fi
 
 for REQUIRED_GRAFANA_VALUE in \
-  'name: mo-ob-grafana-database' \
+  'kind: Cluster' \
+  'name: mo-ob-postgresql' \
+  'name: mo-ob-postgresql-app' \
+  'kind: ScheduledBackup' \
   'foldersFromFilesStructure: true' \
   'value: "grafana_folder"' \
   'nodePort: 30081'; do
@@ -604,7 +903,27 @@ for REQUIRED_GRAFANA_VALUE in \
   fi
 done
 
-grep -E '^[[:space:]]*image:' "${RENDERED_MANIFEST}" | sort -u
+if [[ -f ./values-registry.yaml ]]; then
+  if ! grep -Eq \
+    '^[[:space:]]*imageName:[[:space:]]+[^[:space:]]+@sha256:[0-9a-f]{64}[[:space:]]*$' \
+    "${RENDERED_MANIFEST}"; then
+    echo 'Private PostgreSQL imageName must use an immutable @sha256 digest' >&2
+    exit 1
+  fi
+  if ! grep -Fq 'name: harbor-image-secret' "${RENDERED_MANIFEST}"; then
+    echo 'Private-registry workloads must reference harbor-image-secret' >&2
+    exit 1
+  fi
+elif ! grep -Fq \
+  'ghcr.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c' \
+  "${RENDERED_MANIFEST}"; then
+  echo 'The reviewed upstream PostgreSQL image digest is missing' >&2
+  exit 1
+fi
+
+grep -E '^[[:space:]]*image(Name)?:' "${RENDERED_MANIFEST}" | sort -u
+printf '%s\n' \
+  'CloudNativePG Operator image (separate release): ghcr.io/cloudnative-pg/cloudnative-pg:1.30.0'
 
 helm upgrade --install mo-ob-private "${PACKAGE}" \
   --namespace "${OBNS}" \
@@ -615,11 +934,19 @@ helm upgrade --install mo-ob-private "${PACKAGE}" \
 )
 ```
 
+The rendered `imageName:` entry is the PostgreSQL operand image; it is not
+matched by an `image:`-only inventory. The Operator belongs to its separate
+Helm release, so its `ghcr.io/cloudnative-pg/cloudnative-pg:1.30.0` image must
+also be reachable or mirrored independently.
+
 The first installation intentionally omits `--atomic`, preserving failed Pods,
 PVCs and Events for diagnosis. On first failure, inspect the release, images,
-PVCs and Loki S3 errors and rerun the same upgrade after correction. Do not run
-`destroy`, uninstall the base, delete the Namespace, or delete customer MinIO,
-StorageClass, MatrixOne or MOI resources as a troubleshooting shortcut.
+PVCs, PostgreSQL status and S3 errors and rerun the same upgrade after
+correction. Do not run `destroy`, uninstall the base, uninstall the
+CloudNativePG Operator, delete the Namespace, delete the PostgreSQL `Cluster`
+or PVCs, or delete customer MinIO, StorageClass, MatrixOne or MOI resources as
+a troubleshooting shortcut. The `helm.sh/resource-policy: keep` annotations
+are a final safety net, not an uninstall workflow.
 
 ## Verify and integrate monitoring content
 
@@ -627,6 +954,9 @@ StorageClass, MatrixOne or MOI resources as a troubleshooting shortcut.
 OBNS="${OBNS:-mo-ob}"
 helm -n "${OBNS}" status mo-ob-private
 kubectl -n "${OBNS}" get pods,pvc,service -o wide
+kubectl -n "${OBNS}" get clusters.postgresql.cnpg.io
+kubectl -n "${OBNS}" get \
+  scheduledbackups.postgresql.cnpg.io,backups.postgresql.cnpg.io
 kubectl -n "${OBNS}" get events \
   --sort-by=.metadata.creationTimestamp | tail -n 50
 kubectl -n "${OBNS}" logs statefulset/loki-write \
@@ -634,6 +964,7 @@ kubectl -n "${OBNS}" logs statefulset/loki-write \
 kubectl -n "${OBNS}" logs statefulset/loki-backend \
   --all-containers --tail=100
 kubectl -n "${OBNS}" get service mo-ob-private-grafana -o wide
+kubectl -n "${OBNS}" get service mo-ob-postgresql-rw -o wide
 kubectl get nodes -o wide
 
 # From a client allowed by the node firewall/security group:
@@ -647,7 +978,10 @@ kubectl -n "${OBNS}" get configmap \
 
 Verify all Pods are Ready, PVCs use the approved StorageClass, Loki can retain
 and retrieve data across a controlled restart, and both Grafana replicas are
-Ready and reference `mo-ob-grafana-database`. The provider output must contain
+Ready and reference `mo-ob-postgresql-app`. The PostgreSQL Cluster must report
+Ready with three instances, `mo-ob-postgresql-rw` must exist, and at least one
+scheduled or on-demand MinIO/S3 backup must complete before acceptance. The
+provider output must contain
 `foldersFromFilesStructure: true`; the Grafana dashboard sidecar must contain
 `FOLDER_ANNOTATION=grafana_folder`. Verify that Grafana has healthy `prometheus`
 and `loki` datasources and remains functional after either Grafana Pod is
