@@ -1,5 +1,14 @@
 # 客户高可用容量规划示例。
 #
+# 本文件只保存非敏感配置。MinIO/S3 AK/SK、Grafana 登录密码和 Grafana
+# 数据库密码统一填写到同目录的 customer-secrets.yaml.example 副本中：
+#   install -m 0600 customer-secrets.yaml.example /root/mo-ob-customer-secrets.yaml
+# 填好所有 FILL_THIS_VALUE 后执行：
+#   kubectl apply -f /root/mo-ob-customer-secrets.yaml
+#
+# 当前只有 Loki 使用 S3/MinIO。Prometheus、Alertmanager 使用 PVC；Grafana 使用
+# PVC 和共享外部 PostgreSQL/MySQL，不使用 MinIO AK/SK。
+#
 # 注释标记说明：
 # - 【必须修改】安装前必须按客户现场填写或确认。
 # - 【必须准备】安装前必须先创建对应的外部资源或 Kubernetes Secret。
@@ -32,6 +41,19 @@ mo-ob-opensource:
       commonConfig:
         # 【通常保持】3 个 write 副本对应 3 副本数据复制；不要低于 3。
         replication_factor: 3
+      storage:
+        bucketNames:
+          # 【通常保持】运行时从 mo-ob-loki-s3 Secret 展开，不在 values 中写明文。
+          chunks: ${LOKI_S3_BUCKET}
+          ruler: ${LOKI_S3_BUCKET}
+          admin: ${LOKI_S3_BUCKET}
+        type: s3
+        s3:
+          endpoint: ${LOKI_S3_ENDPOINT}
+          accessKeyId: ${LOKI_S3_ACCESS_KEY}
+          secretAccessKey: ${LOKI_S3_SECRET_KEY}
+          s3ForcePathStyle: ${LOKI_S3_FORCE_PATH_STYLE}
+          insecure: ${LOKI_S3_INSECURE}
       limits_config:
         # 【按容量修改】日志保留时间；720h = 30 天。
         retention_period: 720h
@@ -39,6 +61,13 @@ mo-ob-opensource:
     write:
       # 【通常保持】3 副本配合 replication_factor=3，并分散到 3 个节点。
       replicas: 3
+      # 【通常保持】允许 Loki 展开上面的 ${LOKI_S3_*} 占位符。
+      extraArgs:
+        - -config.expand-env=true
+      # 【通常保持】MinIO/S3 AK/SK 来自客户凭据文件创建的 Namespace Secret。
+      extraEnvFrom:
+        - secretRef:
+            name: mo-ob-loki-s3
       persistence:
         # 【通常保持】Helm 升级、缩容或删除 StatefulSet 时不自动删除客户 PVC。
         enableStatefulSetAutoDeletePVC: false
@@ -59,6 +88,12 @@ mo-ob-opensource:
       # 【可直接修改】查询压力较大时可增加；高可用至少保持 2。
       # 当前 SimpleScalable 模式下 read 是 Deployment，不申请独立 RWO PVC。
       replicas: 2
+      extraArgs:
+        - -common.compactor-grpc-address=
+        - -config.expand-env=true
+      extraEnvFrom:
+        - secretRef:
+            name: mo-ob-loki-s3
       resources:
         requests:
           cpu: 250m
@@ -70,6 +105,11 @@ mo-ob-opensource:
     backend:
       # 【通常保持】3 副本承载 compactor、index-gateway 和 query-scheduler。
       replicas: 3
+      extraArgs:
+        - -config.expand-env=true
+      extraEnvFrom:
+        - secretRef:
+            name: mo-ob-loki-s3
       persistence:
         enableStatefulSetAutoDeletePVC: false
         # 【必须修改】没有合适的默认 StorageClass 时取消注释并填写实际名称。
@@ -165,6 +205,12 @@ mo-ruler-stack:
     # 【通常保持】两个副本通过 NodePort Service 负载均衡。
     # 真高可用必须配置下方共享外部数据库；本地 SQLite 不能用于多副本。
     replicas: 2
+    # 【通常保持】Grafana Web 用户名和密码位于 customer-secrets.yaml 中的
+    # mo-ob-grafana-admin Secret，不要直接写进 values。
+    admin:
+      existingSecret: mo-ob-grafana-admin
+      userKey: admin-user
+      passwordKey: admin-password
     podDisruptionBudget:
       minAvailable: 1
     affinity:

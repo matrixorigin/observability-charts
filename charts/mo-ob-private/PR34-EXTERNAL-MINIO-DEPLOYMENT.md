@@ -263,6 +263,69 @@ Loki 工作负载信任该 CA；不得为了规避证书错误而改用 HTTP 或
 
 ## 6. 创建 Namespace 和外部存储 Secret
 
+推荐直接使用 Chart 包内的统一客户凭据模板。这个文件已经把 Loki MinIO/S3、
+Grafana 登录账号和 Grafana 外部数据库的所有必填位置全部展开：
+
+```bash
+(
+set -euo pipefail
+
+OB_PACKAGE="/root/mo-work/ob-base/artifacts/mo-ob-private-1.0.5.tgz"
+WORK_DIR="$(mktemp -d)"
+SECRET_FILE="/root/mo-ob-customer-secrets.yaml"
+
+tar -xzf "${OB_PACKAGE}" -C "${WORK_DIR}"
+install -m 0600 \
+  "${WORK_DIR}/mo-ob-private/customer-secrets.yaml.example" \
+  "${SECRET_FILE}"
+
+echo "请编辑 ${SECRET_FILE}，替换所有 FILL_THIS_VALUE"
+)
+```
+
+打开 `/root/mo-ob-customer-secrets.yaml`，按照文件内注释填写：
+
+1. Loki 使用的 MinIO/S3 Endpoint、Bucket、AK、SK；
+2. Grafana Web 管理员用户名和密码；
+3. Grafana 高可用 PostgreSQL/MySQL 地址、数据库、用户和密码；
+4. 所有 Grafana 副本共用的 `GF_SECURITY_SECRET_KEY`。
+
+填写后一次性创建 Namespace 和三个 Secret：
+
+```bash
+(
+set -euo pipefail
+
+SECRET_FILE="/root/mo-ob-customer-secrets.yaml"
+
+if grep -n 'FILL_THIS_VALUE' "${SECRET_FILE}"; then
+  echo "错误：${SECRET_FILE} 中仍有未填写项"
+  exit 1
+fi
+
+test "$(stat -c '%a' "${SECRET_FILE}")" = "600"
+kubectl apply -f "${SECRET_FILE}"
+
+for SECRET_NAME in \
+  mo-ob-loki-s3 \
+  mo-ob-grafana-admin \
+  mo-ob-grafana-database; do
+
+  kubectl -n mo-ob get secret "${SECRET_NAME}" -o name
+done
+)
+```
+
+填写后的文件包含明文密码，只能保存在受控位置并保持权限 `0600`；不能作为
+Helm values 使用，也不能提交 Git、重新打进 Chart 或粘贴到工单、聊天和交付文档。
+
+当前底座只有 Loki 使用 MinIO/S3。Prometheus 和 Alertmanager 使用 PVC；Grafana
+使用 PVC 保存各 Pod 的插件/本地文件，并使用外部 PostgreSQL/MySQL 保存共享业务
+状态，不使用 MinIO AK/SK。
+
+下面的手工交互命令保留为可选替代方式。统一凭据模板已经成功创建三个 Secret 时，
+不需要再重复执行手工创建步骤。
+
 输入客户实际参数。命令不会显示 Secret Key：
 
 ```bash
@@ -366,6 +429,9 @@ LOKI_S3_INSECURE
 ```
 
 ## 7. 创建 Grafana 管理员和外部数据库 Secret
+
+如果第 6 节已经使用统一客户凭据模板成功创建 `mo-ob-grafana-admin` 和
+`mo-ob-grafana-database`，本节无需重复执行；下面仅作为手工替代方式保留。
 
 ### 7.1 Grafana 管理员 Secret
 

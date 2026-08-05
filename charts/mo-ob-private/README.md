@@ -122,6 +122,76 @@ only to the release-maintainer workflow above.
 
 ## Prepare Namespace-local Secrets
 
+The simplest customer workflow is to fill the packaged Secret manifest once.
+It contains every required credential location for this HA profile: Loki
+S3/MinIO, the Grafana Web administrator and the shared Grafana database.
+
+```bash
+(
+set -euo pipefail
+
+PACKAGE="./mo-ob-private-1.0.5.tgz"
+WORK_DIR="$(mktemp -d)"
+SECRET_FILE="/root/mo-ob-customer-secrets.yaml"
+
+tar -xzf "${PACKAGE}" -C "${WORK_DIR}"
+install -m 0600 \
+  "${WORK_DIR}/mo-ob-private/customer-secrets.yaml.example" \
+  "${SECRET_FILE}"
+
+printf 'Edit every FILL_THIS_VALUE in %s\n' "${SECRET_FILE}"
+)
+```
+
+Edit `/root/mo-ob-customer-secrets.yaml`. The comments identify exactly where
+to enter:
+
+- the Loki S3/MinIO Endpoint, Bucket, Access Key and Secret Key;
+- the Grafana administrator username and password;
+- the Grafana PostgreSQL/MySQL host, database, username and password;
+- the stable `GF_SECURITY_SECRET_KEY` shared by every Grafana replica.
+
+Then reject incomplete input and create the Namespace plus all three Secrets:
+
+```bash
+(
+set -euo pipefail
+
+SECRET_FILE="/root/mo-ob-customer-secrets.yaml"
+
+if grep -n 'FILL_THIS_VALUE' "${SECRET_FILE}"; then
+  echo "ERROR: ${SECRET_FILE} still contains unfilled values" >&2
+  exit 1
+fi
+
+test "$(stat -c '%a' "${SECRET_FILE}")" = "600"
+kubectl apply -f "${SECRET_FILE}"
+
+for SECRET_NAME in \
+  mo-ob-loki-s3 \
+  mo-ob-grafana-admin \
+  mo-ob-grafana-database; do
+
+  kubectl -n mo-ob get secret "${SECRET_NAME}" -o name
+done
+)
+```
+
+The filled manifest is plaintext. Keep mode `0600`; never pass it to Helm and
+never commit, package, upload or paste it into delivery records. The
+`.gitignore` protects the standard local filenames, but file permissions and
+operator handling remain required.
+
+Only Loki uses S3/MinIO in this monitoring base. Prometheus and Alertmanager
+use PVCs. Grafana uses PVCs for per-Pod local files and the shared external
+PostgreSQL/MySQL for HA application state; Grafana does not need the MinIO
+Access Key or Secret Key.
+
+### Optional interactive alternative
+
+The block below creates the same three Secrets without keeping a filled
+manifest. Use either workflow, not both during the same credential change.
+
 Create the Grafana administrator and external-database passwords plus one stable
 random Grafana security key in the customer password manager first. The block
 below creates `mo-ob-loki-s3`,
