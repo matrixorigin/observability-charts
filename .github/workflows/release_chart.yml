@@ -6,8 +6,7 @@ on:
     - main
     - private
     paths:
-    - 'charts/**/Chart.yaml'
-    - '.github/scripts/compare_chart_archives.py'
+    - 'charts/mo-ob-private/**'
     - '.github/workflows/release_chart.yml'
   workflow_dispatch:
 
@@ -15,12 +14,16 @@ concurrency:
   group: chart-publish-${{ github.repository }}
   cancel-in-progress: false
 
-permissions: read-all
+permissions:
+  contents: read
+
+env:
+  CHART_DIR: charts/mo-ob-private
+  HARBOR_REGISTRY: shanghai.idc.matrixorigin.cn:30019
+  HARBOR_CHART_PROJECT: mocloud-chart
 
 jobs:
   publish:
-    permissions:
-      contents: write # for helm/chart-releaser-action to push chart release and create a release
     runs-on: ubuntu-latest
 
     steps:
@@ -29,18 +32,58 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Configure Git
+      - name: Detect mo-ob-private changes
+        id: changes
+        shell: bash
         run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "changed=true" >>"${GITHUB_OUTPUT}"
+            echo "workflow_dispatch requested publishing"
+            exit 0
+          fi
+
+          BEFORE="${{ github.event.before }}"
+          AFTER="${{ github.sha }}"
+
+          if [[ -z "${BEFORE}" ||
+                "${BEFORE}" == "0000000000000000000000000000000000000000" ]]; then
+            CHANGED_FILES="$(
+              git diff-tree \
+                --no-commit-id \
+                --name-only \
+                -r "${AFTER}" \
+                -- "${CHART_DIR}"
+            )"
+          else
+            CHANGED_FILES="$(
+              git diff \
+                --name-only \
+                "${BEFORE}" \
+                "${AFTER}" \
+                -- "${CHART_DIR}"
+            )"
+          fi
+
+          if [[ -n "${CHANGED_FILES}" ]]; then
+            echo "changed=true" >>"${GITHUB_OUTPUT}"
+            echo "Changed chart files:"
+            printf '%s\n' "${CHANGED_FILES}"
+          else
+            echo "changed=false" >>"${GITHUB_OUTPUT}"
+            echo "No mo-ob-private chart changes detected; skip publish"
+          fi
 
       - name: Copy rules file for ob-opensource
+        if: steps.changes.outputs.changed == 'true'
         run: |
           set -euo pipefail
           rm -rf charts/mo-ob-opensource/rules
           cp -R charts/mo-ruler-stack/rules charts/mo-ob-opensource/rules
 
       - name: Configure Helm repositories
+        if: steps.changes.outputs.changed == 'true'
         run: |
           set -euo pipefail
           helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
@@ -48,686 +91,134 @@ jobs:
           helm repo add victoriametrics https://victoriametrics.github.io/helm-charts
           helm repo add fluent https://fluent.github.io/helm-charts
           helm repo add ckotzbauer https://ckotzbauer.github.io/helm-charts
+          helm repo add cnpg https://cloudnative-pg.github.io/charts
           helm repo update
 
-      - name: Build and lint Helm dependencies
+      - name: Build, lint and render mo-ob-private
+        if: steps.changes.outputs.changed == 'true'
+        shell: bash
         run: |
           set -euo pipefail
-          helm dependency update charts/mo-agent-stack
+
           helm dependency update charts/mo-ob-opensource
           helm dependency update charts/mo-ruler-stack
-          helm dependency update charts/mo-ob-private
-          helm lint charts/mo-agent-stack
-          helm lint charts/mo-ob-opensource
-          helm lint charts/mo-ruler-stack
-          helm lint charts/mo-ob-private
+          helm dependency update "${CHART_DIR}"
 
-          helm template mo-ob-private charts/mo-ob-private \
+          helm lint "${CHART_DIR}"
+
+          helm template mo-ob-private "${CHART_DIR}" \
             --namespace mo-ob \
             --kube-version 1.34.3 \
             --api-versions policy/v1/PodDisruptionBudget \
-            > /tmp/mo-ob-private-rendered.yaml
+            --values "${CHART_DIR}/values-customer-standard.yaml.example" \
+            --values "${CHART_DIR}/values-images-domestic.yaml" \
+            --set customerSizingApproved=true \
+            >"${RUNNER_TEMP}/mo-ob-private-standard.yaml"
 
-          test "$(grep -c '^kind: ServiceMonitor$' /tmp/mo-ob-private-rendered.yaml || true)" -eq 0
-          test "$(grep -c '^kind: PodMonitor$' /tmp/mo-ob-private-rendered.yaml || true)" -eq 0
-          test "$(grep -c '^kind: PrometheusRule$' /tmp/mo-ob-private-rendered.yaml || true)" -eq 0
+          helm template mo-ob-private "${CHART_DIR}" \
+            --namespace mo-ob \
+            --kube-version 1.34.3 \
+            --api-versions policy/v1/PodDisruptionBudget \
+            --values "${CHART_DIR}/values-customer-ha.yaml.example" \
+            --values "${CHART_DIR}/values-images-domestic.yaml" \
+            --set customerSizingApproved=true \
+            >"${RUNNER_TEMP}/mo-ob-private-ha.yaml"
 
-      - name: Run Artifact Hub lint
-        run: |
-          #curl -s https://api.github.com/repos/artifacthub/hub/releases/latest | grep -E 'browser_download_url' | grep linux_amd64.tar.gz\" | grep -Eo 'https://[^\"]*' | xargs wget -O - | tar -xz
-          echo "https://github.com/artifacthub/hub/releases/download/v1.16.0/ah_1.16.0_linux_amd64.tar.gz" | xargs wget -O - | tar -xz
-          ./ah lint -p charts || exit 1
-          rm -f ./ah
+          for RENDERED in \
+            "${RUNNER_TEMP}/mo-ob-private-standard.yaml" \
+            "${RUNNER_TEMP}/mo-ob-private-ha.yaml"; do
 
-      - name: Install chart-releaser
-        uses: helm/chart-releaser-action@be16258da8010256c6e82849661221415f031968 # tag=v1.5.0
-        with:
-          version: v1.5.0
-          install_only: "true"
-        env:
-          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            if grep -Eq \
+              "(^|[[:space:]=\"'])(docker\\.io|quay\\.io|ghcr\\.io|registry\\.k8s\\.io)/" \
+              "${RENDERED}"; then
 
-      - name: Package charts expected for release
+              echo "Domestic render contains a foreign upstream registry: ${RENDERED}"
+              exit 1
+            fi
+          done
+
+      - name: Package mo-ob-private
+        if: steps.changes.outputs.changed == 'true'
+        id: package
         shell: bash
         run: |
           set -euo pipefail
 
-          git fetch --tags --force
-
-          EXPECTED_PACKAGES="${RUNNER_TEMP}/expected-chart-packages.txt"
-          EXPECTED_TAG_COMMITS="${RUNNER_TEMP}/expected-chart-tag-commits.tsv"
-          PACKAGE_DIR=".cr-release-packages"
-          BUILD_REF="$(git rev-parse HEAD)"
-
-          : >"${EXPECTED_PACKAGES}"
-          : >"${EXPECTED_TAG_COMMITS}"
-          rm -rf "${PACKAGE_DIR}"
+          PACKAGE_DIR="${RUNNER_TEMP}/chart-packages"
           mkdir -p "${PACKAGE_DIR}"
 
-          for CHART_FILE in charts/*/Chart.yaml; do
-            CHART_DIR="${CHART_FILE%/Chart.yaml}"
-            CHART_METADATA="$(helm show chart "${CHART_DIR}")"
+          helm package "${CHART_DIR}" \
+            --dependency-update \
+            --destination "${PACKAGE_DIR}"
 
-            CHART_NAME="$(
-              awk '/^name:/ { print $2; exit }' \
-                <<<"${CHART_METADATA}"
-            )"
+          PACKAGE_PATH="$(
+            find "${PACKAGE_DIR}" \
+              -maxdepth 1 \
+              -type f \
+              -name 'mo-ob-private-*.tgz' \
+              -print \
+              -quit
+          )"
 
-            CHART_VERSION="$(
-              awk '/^version:/ { print $2; exit }' \
-                <<<"${CHART_METADATA}"
-            )"
+          test -s "${PACKAGE_PATH}"
+          tar -tzf "${PACKAGE_PATH}" >/dev/null
+          CHART_METADATA="$(helm show chart "${PACKAGE_PATH}")"
+          printf '%s\n' "${CHART_METADATA}"
 
-            PACKAGE_NAME="${CHART_NAME}-${CHART_VERSION}.tgz"
-            RELEASE_TAG="chart-${CHART_NAME}-${CHART_VERSION}"
-            TAG_COMMIT="$(
-              git rev-list -n 1 "refs/tags/${RELEASE_TAG}" 2>/dev/null ||
-                true
-            )"
+          CHART_VERSION="$(
+            awk '/^version:/ { print $2; exit }' \
+              <<<"${CHART_METADATA}"
+          )"
 
-            if [[ -n "${TAG_COMMIT}" && "${TAG_COMMIT}" != "${BUILD_REF}" ]]; then
-              if ! git diff --quiet "${TAG_COMMIT}" HEAD -- "${CHART_DIR}"; then
-                echo "${RELEASE_TAG} already points to ${TAG_COMMIT}"
-                echo "${CHART_DIR} changed without a Chart version increment"
-                exit 1
-              fi
-            fi
+          echo "package_path=${PACKAGE_PATH}" >>"${GITHUB_OUTPUT}"
+          echo "package_name=$(basename "${PACKAGE_PATH}")" >>"${GITHUB_OUTPUT}"
+          echo "chart_version=${CHART_VERSION}" >>"${GITHUB_OUTPUT}"
 
-            if [[ -z "${TAG_COMMIT}" ]]; then
-              EXPECTED_TAG_COMMIT="${BUILD_REF}"
-              echo "Packaging unpublished Chart: ${RELEASE_TAG}"
-            elif [[ "${TAG_COMMIT}" == "${BUILD_REF}" ]]; then
-              EXPECTED_TAG_COMMIT="${BUILD_REF}"
-              echo "Repackaging partial release from this commit: ${RELEASE_TAG}"
-            else
-              EXPECTED_TAG_COMMIT="${TAG_COMMIT}"
-              echo "Revalidating released Chart and index: ${RELEASE_TAG}"
-            fi
-
-            cr package \
-              "${CHART_DIR}" \
-              --package-path "${PACKAGE_DIR}"
-
-            test -s "${PACKAGE_DIR}/${PACKAGE_NAME}"
-            printf '%s\n' "${PACKAGE_NAME}" >>"${EXPECTED_PACKAGES}"
-            printf '%s\t%s\n' \
-              "${PACKAGE_NAME}" \
-              "${EXPECTED_TAG_COMMIT}" \
-              >>"${EXPECTED_TAG_COMMITS}"
-          done
-
-          sort -u -o "${EXPECTED_PACKAGES}" "${EXPECTED_PACKAGES}"
-          sort -u -o "${EXPECTED_TAG_COMMITS}" "${EXPECTED_TAG_COMMITS}"
-
-          echo "Charts expected for release at ${BUILD_REF}:"
-          if [[ -s "${EXPECTED_PACKAGES}" ]]; then
-            cat "${EXPECTED_PACKAGES}"
-          else
-            echo "No current Charts found"
-            exit 1
-          fi
-
-      - name: Reconcile existing release packages before indexing
-        shell: bash
+      - name: Login to Harbor OCI registry
+        if: steps.changes.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
+          HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
+          HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
         run: |
-          set -Eeuo pipefail
+          set -euo pipefail
 
-          BUILD_REF="$(git rev-parse HEAD)"
-          EXPECTED_TAG_COMMITS_FILE="${RUNNER_TEMP}/expected-chart-tag-commits.tsv"
-          PACKAGE_DIR=".cr-release-packages"
-          RECONCILE_ROOT="${RUNNER_TEMP}/chart-release-preflight"
-          REPLACEMENT_DIR="${RECONCILE_ROOT}/remote-packages"
+          if [[ -z "${HARBOR_USERNAME}" || -z "${HARBOR_PASSWORD}" ]]; then
+            echo "Missing HARBOR_USERNAME or HARBOR_PASSWORD repository secret"
+            exit 1
+          fi
 
-          rm -rf "${RECONCILE_ROOT}"
-          mkdir -p "${REPLACEMENT_DIR}"
+          printf '%s' "${HARBOR_PASSWORD}" |
+            helm registry login "${HARBOR_REGISTRY}" \
+              --username "${HARBOR_USERNAME}" \
+              --password-stdin
 
-          retry() {
-            local ATTEMPT
-
-            for ATTEMPT in 1 2 3 4 5; do
-              if "$@"; then
-                return 0
-              fi
-
-              sleep "$((ATTEMPT * 2))"
-            done
-
-            return 1
-          }
-
-          while IFS=$'\t' read -r PACKAGE_NAME EXPECTED_TAG_COMMIT; do
-            if [[ ! "${PACKAGE_NAME}" =~ ^[A-Za-z0-9][A-Za-z0-9._+-]*\.tgz$ ||
-                  ! "${EXPECTED_TAG_COMMIT}" =~ ^[0-9a-f]{40}$ ]]; then
-
-              echo "Invalid expected Chart tag record"
-              exit 1
-            fi
-
-            LOCAL_PACKAGE="${PACKAGE_DIR}/${PACKAGE_NAME}"
-            test -s "${LOCAL_PACKAGE}"
-
-            CHART_METADATA="$(helm show chart "${LOCAL_PACKAGE}")"
-            CHART_NAME="$(
-              awk '/^name:/ { print $2; exit }' <<<"${CHART_METADATA}"
-            )"
-            CHART_VERSION="$(
-              awk '/^version:/ { print $2; exit }' <<<"${CHART_METADATA}"
-            )"
-            EXPECTED_PACKAGE="${CHART_NAME}-${CHART_VERSION}.tgz"
-            RELEASE_TAG="chart-${CHART_NAME}-${CHART_VERSION}"
-
-            if [[ "${PACKAGE_NAME}" != "${EXPECTED_PACKAGE}" ]]; then
-              echo "Package name mismatch: ${PACKAGE_NAME} != ${EXPECTED_PACKAGE}"
-              exit 1
-            fi
-
-            TAG_COMMIT="$(
-              git rev-list -n 1 "refs/tags/${RELEASE_TAG}" 2>/dev/null || true
-            )"
-
-            if [[ -z "${TAG_COMMIT}" ]]; then
-              if [[ "${EXPECTED_TAG_COMMIT}" != "${BUILD_REF}" ]]; then
-                echo "Missing ${RELEASE_TAG}; expected ${EXPECTED_TAG_COMMIT}"
-                exit 1
-              fi
-
-              echo "Preflight: ${RELEASE_TAG} is a new release"
-              continue
-            fi
-
-            if [[ "${TAG_COMMIT}" != "${EXPECTED_TAG_COMMIT}" ]]; then
-              echo "Existing ${RELEASE_TAG} points to ${TAG_COMMIT}"
-              echo "Expected immutable commit ${EXPECTED_TAG_COMMIT}"
-              exit 1
-            fi
-
-            RELEASE_EXISTS=""
-            RELEASE_API_RESPONSE="${RECONCILE_ROOT}/${RELEASE_TAG}.api-response"
-            RELEASE_API_ERROR="${RECONCILE_ROOT}/${RELEASE_TAG}.api-error"
-
-            for ATTEMPT in 1 2 3 4 5; do
-              set +e
-              gh api \
-                --include \
-                "repos/${GH_REPO}/releases/tags/${RELEASE_TAG}" \
-                >"${RELEASE_API_RESPONSE}" \
-                2>"${RELEASE_API_ERROR}"
-              API_RESULT=$?
-              set -e
-
-              API_STATUS="$(
-                awk '/^HTTP\// { status = $2 } END { print status }' \
-                  "${RELEASE_API_RESPONSE}"
-              )"
-
-              if [[ "${API_RESULT}" -eq 0 && "${API_STATUS}" == "200" ]]; then
-                RELEASE_EXISTS="true"
-                break
-              fi
-
-              if [[ "${API_STATUS}" == "404" ]]; then
-                RELEASE_EXISTS="false"
-                break
-              fi
-
-              sleep "$((ATTEMPT * 2))"
-            done
-
-            if [[ -z "${RELEASE_EXISTS}" ]]; then
-              echo "Cannot determine whether ${RELEASE_TAG} has a release"
-              cat "${RELEASE_API_ERROR}"
-              exit 1
-            fi
-
-            if [[ "${RELEASE_EXISTS}" == "false" ]]; then
-              echo "Preflight: ${RELEASE_TAG} exists without a release; chart-releaser will create it"
-              continue
-            fi
-
-            RELEASE_STATE_FILE="${RECONCILE_ROOT}/${RELEASE_TAG}.state.tsv"
-            retry gh release view \
-              "${RELEASE_TAG}" \
-              --repo "${GH_REPO}" \
-              --json isDraft,isPrerelease,tagName \
-              --jq '[.tagName, .isDraft, .isPrerelease] | @tsv' \
-              >"${RELEASE_STATE_FILE}"
-
-            IFS=$'\t' read -r RELEASE_TAG_NAME IS_DRAFT IS_PRERELEASE \
-              <"${RELEASE_STATE_FILE}"
-
-            if [[ "${RELEASE_TAG_NAME}" != "${RELEASE_TAG}" ||
-                  "${IS_DRAFT}" != "false" ||
-                  "${IS_PRERELEASE}" != "false" ]]; then
-
-              echo "Existing release ${RELEASE_TAG} is draft, prerelease, or mismatched"
-              exit 1
-            fi
-
-            DOWNLOAD_DIR="${RECONCILE_ROOT}/${RELEASE_TAG}"
-            mkdir -p "${DOWNLOAD_DIR}"
-            retry gh release download \
-              "${RELEASE_TAG}" \
-              --repo "${GH_REPO}" \
-              --pattern "${PACKAGE_NAME}" \
-              --dir "${DOWNLOAD_DIR}" \
-              --clobber
-
-            REMOTE_PACKAGE="${DOWNLOAD_DIR}/${PACKAGE_NAME}"
-            test -s "${REMOTE_PACKAGE}"
-            python3 .github/scripts/compare_chart_archives.py \
-              "${LOCAL_PACKAGE}" \
-              "${REMOTE_PACKAGE}"
-
-            # cr index calculates the index digest from the local package.
-            # Preserve the already-published bytes so that digest matches the
-            # immutable release asset even when Helm gzip timestamps differ.
-            cp "${REMOTE_PACKAGE}" "${REPLACEMENT_DIR}/${PACKAGE_NAME}"
-          done <"${EXPECTED_TAG_COMMITS_FILE}"
-
-          for REMOTE_PACKAGE in "${REPLACEMENT_DIR}"/*.tgz; do
-            if [[ ! -e "${REMOTE_PACKAGE}" ]]; then
-              break
-            fi
-
-            cp "${REMOTE_PACKAGE}" "${PACKAGE_DIR}/$(basename "${REMOTE_PACKAGE}")"
-          done
-
-      - name: Run chart-releaser
-        uses: helm/chart-releaser-action@be16258da8010256c6e82849661221415f031968 # tag=v1.5.0
-        with:
-          charts_dir: charts
-          skip_packaging: "true"
-        env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          ## PS: multi charts NEED diff release tag
-          CR_RELEASE_NAME_TEMPLATE: "chart-{{ .Name }}-{{ .Version }}"
-          CR_SKIP_EXISTING: true
-
-      - name: Publish and verify release integrity assets
+      - name: Check Harbor chart version
+        if: steps.changes.outputs.changed == 'true'
         shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
         run: |
-          set -Eeuo pipefail
-          shopt -s nullglob
+          set -euo pipefail
 
-          BUILD_REF="$(git rev-parse HEAD)"
-          EXPECTED_PACKAGES_FILE="${RUNNER_TEMP}/expected-chart-packages.txt"
-          EXPECTED_TAG_COMMITS_FILE="${RUNNER_TEMP}/expected-chart-tag-commits.tsv"
-          PACKAGES=(.cr-release-packages/*.tgz)
+          set +e
+          helm show chart \
+            "oci://${HARBOR_REGISTRY}/${HARBOR_CHART_PROJECT}/mo-ob-private" \
+            --version "${{ steps.package.outputs.chart_version }}" \
+            >/tmp/existing-mo-ob-private-chart.yaml 2>/tmp/existing-mo-ob-private-chart.err
+          SHOW_RESULT=$?
+          set -e
 
-          if [[ ! "${BUILD_REF}" =~ ^[0-9a-f]{40}$ ]]; then
-            echo "Invalid build commit: ${BUILD_REF}"
+          if [[ "${SHOW_RESULT}" -eq 0 ]]; then
+            echo "mo-ob-private ${{ steps.package.outputs.chart_version }} already exists in Harbor."
+            echo "Please increment charts/mo-ob-private/Chart.yaml version before publishing changed chart content."
             exit 1
           fi
 
-          mapfile -t EXPECTED_PACKAGES <"${EXPECTED_PACKAGES_FILE}"
-
-          while IFS=$'\t' read -r PACKAGE_NAME EXPECTED_TAG_COMMIT; do
-            if [[ -z "${PACKAGE_NAME}" || \
-                  ! "${EXPECTED_TAG_COMMIT}" =~ ^[0-9a-f]{40}$ ]]; then
-
-              echo "Invalid expected Chart tag record"
-              exit 1
-            fi
-
-          done <"${EXPECTED_TAG_COMMITS_FILE}"
-
-          if (( ${#EXPECTED_PACKAGES[@]} == 0 )); then
-            if (( ${#PACKAGES[@]} != 0 )); then
-              echo "Unexpected Chart packages were generated"
-              printf '%s\n' "${PACKAGES[@]}"
-              exit 1
-            fi
-
-            echo "No changed charts to publish"
-            exit 0
-          fi
-
-          if (( ${#PACKAGES[@]} != ${#EXPECTED_PACKAGES[@]} )); then
-            echo "Expected ${#EXPECTED_PACKAGES[@]} packages, found ${#PACKAGES[@]}"
-            printf 'Expected: %s\n' "${EXPECTED_PACKAGES[@]}"
-            printf 'Found: %s\n' "${PACKAGES[@]}"
-            exit 1
-          fi
-
-          for EXPECTED_PACKAGE in "${EXPECTED_PACKAGES[@]}"; do
-            test -s ".cr-release-packages/${EXPECTED_PACKAGE}"
-          done
-
-          VERIFY_ROOT="${RUNNER_TEMP}/chart-release-verify"
-          MANIFEST="${VERIFY_ROOT}/released-charts.tsv"
-          mkdir -p "${VERIFY_ROOT}"
-          : >"${MANIFEST}"
-
-          retry() {
-            local ATTEMPT
-
-            for ATTEMPT in 1 2 3 4 5; do
-              if "$@"; then
-                return 0
-              fi
-
-              sleep "$((ATTEMPT * 2))"
-            done
-
-            return 1
-          }
-
-          for PACKAGE in "${PACKAGES[@]}"; do
-            PACKAGE_NAME="$(basename "${PACKAGE}")"
-            CHART_METADATA="$(helm show chart "${PACKAGE}")"
-
-            CHART_NAME="$(
-              awk '/^name:/ { print $2; exit }' \
-                <<<"${CHART_METADATA}"
-            )"
-
-            CHART_VERSION="$(
-              awk '/^version:/ { print $2; exit }' \
-                <<<"${CHART_METADATA}"
-            )"
-
-            if [[ ! "${CHART_NAME}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
-              echo "Invalid Chart name from ${PACKAGE_NAME}: ${CHART_NAME}"
-              exit 1
-            fi
-
-            if [[ ! "${CHART_VERSION}" =~ ^[A-Za-z0-9][A-Za-z0-9._+-]*$ ]]; then
-              echo "Invalid Chart version from ${PACKAGE_NAME}: ${CHART_VERSION}"
-              exit 1
-            fi
-
-            EXPECTED_PACKAGE="${CHART_NAME}-${CHART_VERSION}.tgz"
-            RELEASE_TAG="chart-${CHART_NAME}-${CHART_VERSION}"
-
-            if [[ "${PACKAGE_NAME}" != "${EXPECTED_PACKAGE}" ]]; then
-              echo "Package name mismatch: ${PACKAGE_NAME} != ${EXPECTED_PACKAGE}"
-              exit 1
-            fi
-
-            RELEASE_STATE_FILE="${VERIFY_ROOT}/${RELEASE_TAG}.state.tsv"
-            retry gh release view \
-              "${RELEASE_TAG}" \
-              --repo "${GH_REPO}" \
-              --json isDraft,isPrerelease,tagName \
-              --jq '[.tagName, .isDraft, .isPrerelease] | @tsv' \
-              >"${RELEASE_STATE_FILE}"
-
-            IFS=$'\t' read -r RELEASE_TAG_NAME IS_DRAFT IS_PRERELEASE \
-              <"${RELEASE_STATE_FILE}"
-
-            if [[ "${RELEASE_TAG_NAME}" != "${RELEASE_TAG}" ||
-                  "${IS_DRAFT}" != "false" ||
-                  "${IS_PRERELEASE}" != "false" ]]; then
-
-              echo "Release ${RELEASE_TAG} is draft, prerelease, or mismatched"
-              exit 1
-            fi
-
-            retry git fetch \
-              --quiet \
-              --no-tags \
-              --force \
-              origin \
-              "refs/tags/${RELEASE_TAG}:refs/tags/${RELEASE_TAG}"
-
-            TAG_COMMIT="$(git rev-list -n 1 "refs/tags/${RELEASE_TAG}")"
-            EXPECTED_TAG_COMMIT="$(
-              awk \
-                -F '\t' \
-                -v package="${PACKAGE_NAME}" \
-                '$1 == package { print $2; found = 1; exit }
-                 END { if (!found) exit 1 }' \
-                "${EXPECTED_TAG_COMMITS_FILE}"
-            )"
-
-            if [[ -z "${EXPECTED_TAG_COMMIT}" || \
-                  "${TAG_COMMIT}" != "${EXPECTED_TAG_COMMIT}" ]]; then
-
-              echo "Release ${RELEASE_TAG} points to ${TAG_COMMIT}"
-              echo "Expected immutable commit ${EXPECTED_TAG_COMMIT}"
-              echo "The Chart version must be incremented before publishing new content"
-              exit 1
-            fi
-
-            RELEASE_DIR="${VERIFY_ROOT}/${CHART_NAME}-${CHART_VERSION}"
-            mkdir -p "${RELEASE_DIR}"
-
-            retry gh release download \
-              "${RELEASE_TAG}" \
-              --repo "${GH_REPO}" \
-              --pattern "${PACKAGE_NAME}" \
-              --dir "${RELEASE_DIR}" \
-              --clobber
-
-            PUBLISHED_PACKAGE="${RELEASE_DIR}/${PACKAGE_NAME}"
-            PUBLISHED_METADATA="$(helm show chart "${PUBLISHED_PACKAGE}")"
-
-            grep -Fqx "name: ${CHART_NAME}" <<<"${PUBLISHED_METADATA}"
-            grep -Fqx "version: ${CHART_VERSION}" <<<"${PUBLISHED_METADATA}"
-            python3 .github/scripts/compare_chart_archives.py \
-              "${PACKAGE}" \
-              "${PUBLISHED_PACKAGE}"
-
-            CHECKSUM_FILE="${RELEASE_DIR}/${PACKAGE_NAME}.sha256"
-            RELEASE_REF_FILE="${RELEASE_DIR}/${PACKAGE_NAME%.tgz}.release-ref.txt"
-
-            (
-              cd "${RELEASE_DIR}"
-              sha256sum "${PACKAGE_NAME}" >"${PACKAGE_NAME}.sha256"
-            )
-
-            printf 'observability-charts-ref=%s\n' \
-              "${TAG_COMMIT}" \
-              >"${RELEASE_REF_FILE}"
-
-            ASSET_NAMES_FILE="${RELEASE_DIR}/asset-names.txt"
-            retry gh release view \
-              "${RELEASE_TAG}" \
-              --repo "${GH_REPO}" \
-              --json assets \
-              --jq '.assets[].name' \
-              >"${ASSET_NAMES_FILE}"
-
-            if [[ "$(grep -Fxc "${PACKAGE_NAME}" "${ASSET_NAMES_FILE}" || true)" -ne 1 ]]; then
-              echo "Release ${RELEASE_TAG} does not contain exactly one ${PACKAGE_NAME}"
-              exit 1
-            fi
-
-            EXISTING_ASSET_DIR="${RELEASE_DIR}/existing-integrity-assets"
-            mkdir -p "${EXISTING_ASSET_DIR}"
-
-            for INTEGRITY_ASSET in "${CHECKSUM_FILE}" "${RELEASE_REF_FILE}"; do
-              INTEGRITY_ASSET_NAME="$(basename "${INTEGRITY_ASSET}")"
-              INTEGRITY_ASSET_COUNT="$(
-                grep -Fxc "${INTEGRITY_ASSET_NAME}" "${ASSET_NAMES_FILE}" || true
-              )"
-
-              if [[ "${INTEGRITY_ASSET_COUNT}" -gt 1 ]]; then
-                echo "Release ${RELEASE_TAG} contains duplicate ${INTEGRITY_ASSET_NAME} assets"
-                exit 1
-              fi
-
-              if [[ "${INTEGRITY_ASSET_COUNT}" -eq 1 ]]; then
-                retry gh release download \
-                  "${RELEASE_TAG}" \
-                  --repo "${GH_REPO}" \
-                  --pattern "${INTEGRITY_ASSET_NAME}" \
-                  --dir "${EXISTING_ASSET_DIR}" \
-                  --clobber
-
-                if ! cmp --silent \
-                  "${INTEGRITY_ASSET}" \
-                  "${EXISTING_ASSET_DIR}/${INTEGRITY_ASSET_NAME}"; then
-
-                  echo "Existing ${INTEGRITY_ASSET_NAME} does not match the immutable release"
-                  exit 1
-                fi
-
-                continue
-              fi
-
-              # Upload only a missing integrity asset. Existing assets are
-              # immutable and are never overwritten with --clobber.
-              gh release upload \
-                "${RELEASE_TAG}" \
-                "${INTEGRITY_ASSET}" \
-                --repo "${GH_REPO}"
-            done
-
-            retry gh release view \
-              "${RELEASE_TAG}" \
-              --repo "${GH_REPO}" \
-              --json assets \
-              --jq '.assets[].name' \
-              >"${ASSET_NAMES_FILE}"
-
-            for REQUIRED_ASSET in \
-              "${PACKAGE_NAME}" \
-              "${PACKAGE_NAME}.sha256" \
-              "${PACKAGE_NAME%.tgz}.release-ref.txt"; do
-
-              if [[ "$(grep -Fxc "${REQUIRED_ASSET}" "${ASSET_NAMES_FILE}" || true)" -ne 1 ]]; then
-                echo "Release ${RELEASE_TAG} does not contain exactly one ${REQUIRED_ASSET}"
-                exit 1
-              fi
-            done
-
-            ASSET_VERIFY_DIR="${RELEASE_DIR}/downloaded-assets"
-            mkdir -p "${ASSET_VERIFY_DIR}"
-
-            retry gh release download \
-              "${RELEASE_TAG}" \
-              --repo "${GH_REPO}" \
-              --pattern "${PACKAGE_NAME}" \
-              --pattern "${PACKAGE_NAME}.sha256" \
-              --pattern "${PACKAGE_NAME%.tgz}.release-ref.txt" \
-              --dir "${ASSET_VERIFY_DIR}" \
-              --clobber
-
-            (
-              cd "${ASSET_VERIFY_DIR}"
-              sha256sum --check "${PACKAGE_NAME}.sha256"
-              grep -Fqx \
-                "observability-charts-ref=${TAG_COMMIT}" \
-                "${PACKAGE_NAME%.tgz}.release-ref.txt"
-            )
-
-            PUBLISHED_SHA256="$(sha256sum "${PUBLISHED_PACKAGE}" | awk '{ print $1 }')"
-
-            printf '%s\t%s\t%s\t%s\t%s\n' \
-              "${RELEASE_TAG}" \
-              "${PACKAGE_NAME}" \
-              "${CHART_NAME}" \
-              "${CHART_VERSION}" \
-              "${PUBLISHED_SHA256}" \
-              >>"${MANIFEST}"
-          done
-
-          INDEX_VERIFIED=false
-          INDEX_FILE="${VERIFY_ROOT}/index.yaml"
-
-          for ATTEMPT in 1 2 3 4 5; do
-            if git fetch \
-              --quiet \
-              --no-tags \
-              --force \
-              origin \
-              "refs/heads/gh-pages:refs/remotes/origin/gh-pages" &&
-              git show \
-                refs/remotes/origin/gh-pages:index.yaml \
-                >"${INDEX_FILE}"; then
-
-              INDEX_VERIFIED=true
-
-              while IFS=$'\t' read -r \
-                RELEASE_TAG PACKAGE_NAME CHART_NAME CHART_VERSION PUBLISHED_SHA256; do
-
-                INDEX_ASSET_URL="https://github.com/${GH_REPO}/releases/download/${RELEASE_TAG}/${PACKAGE_NAME}"
-
-                if [[ "$(grep -Fxc "    - ${INDEX_ASSET_URL}" "${INDEX_FILE}" || true)" -ne 1 ]]; then
-                  INDEX_VERIFIED=false
-                  break
-                fi
-              done <"${MANIFEST}"
-
-              if [[ "${INDEX_VERIFIED}" == true ]]; then
-                break
-              fi
-            fi
-
-            sleep "$((ATTEMPT * 2))"
-          done
-
-          if [[ "${INDEX_VERIFIED}" != true ]]; then
-            echo "gh-pages/index.yaml does not contain every published Chart"
-            cat "${MANIFEST}"
-            exit 1
-          fi
-
-          INDEX_REPO_DIR="${VERIFY_ROOT}/index-repository"
-          INDEX_PORT_FILE="${VERIFY_ROOT}/index-server.port"
-          INDEX_PULL_DIR="${VERIFY_ROOT}/index-pull"
-          mkdir -p "${INDEX_REPO_DIR}" "${INDEX_PULL_DIR}"
-          cp "${INDEX_FILE}" "${INDEX_REPO_DIR}/index.yaml"
-
-          python3 - "${INDEX_REPO_DIR}" "${INDEX_PORT_FILE}" <<'PY' &
-          import functools
-          import http.server
-          import pathlib
-          import socketserver
-          import sys
-
-          repository = pathlib.Path(sys.argv[1]).resolve()
-          port_file = pathlib.Path(sys.argv[2])
-          handler = functools.partial(
-              http.server.SimpleHTTPRequestHandler,
-              directory=str(repository),
-          )
-
-          with socketserver.TCPServer(("127.0.0.1", 0), handler) as server:
-              port_file.write_text(str(server.server_address[1]), encoding="utf-8")
-              server.serve_forever()
-          PY
-
-          INDEX_SERVER_PID=$!
-          trap 'kill "${INDEX_SERVER_PID}" 2>/dev/null || true' EXIT
-
-          for ATTEMPT in 1 2 3 4 5; do
-            if [[ -s "${INDEX_PORT_FILE}" ]]; then
-              break
-            fi
-
-            sleep 1
-          done
-
-          test -s "${INDEX_PORT_FILE}"
-          INDEX_PORT="$(cat "${INDEX_PORT_FILE}")"
-
-          while IFS=$'\t' read -r \
-            RELEASE_TAG PACKAGE_NAME CHART_NAME CHART_VERSION PUBLISHED_SHA256; do
-
-            CHART_PULL_DIR="${INDEX_PULL_DIR}/${CHART_NAME}-${CHART_VERSION}"
-            mkdir -p "${CHART_PULL_DIR}"
-
-            # `helm pull` verifies the archive against the digest recorded in
-            # index.yaml. A byte comparison then ties that entry to the exact
-            # release asset verified above.
-            helm pull "${CHART_NAME}" \
-              --repo "http://127.0.0.1:${INDEX_PORT}" \
-              --version "${CHART_VERSION}" \
-              --destination "${CHART_PULL_DIR}"
-
-            INDEX_PACKAGE="${CHART_PULL_DIR}/${PACKAGE_NAME}"
-            RELEASE_PACKAGE="${VERIFY_ROOT}/${CHART_NAME}-${CHART_VERSION}/downloaded-assets/${PACKAGE_NAME}"
-            test "$(sha256sum "${INDEX_PACKAGE}" | awk '{ print $1 }')" = "${PUBLISHED_SHA256}"
-            cmp --silent "${INDEX_PACKAGE}" "${RELEASE_PACKAGE}"
-          done <"${MANIFEST}"
-
-          echo "Release assets and gh-pages/index.yaml verified:"
-          cat "${MANIFEST}"
+      - name: Push mo-ob-private to Harbor Chart repository
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+
+          helm push \
+            "${{ steps.package.outputs.package_path }}" \
+            "oci://${HARBOR_REGISTRY}/${HARBOR_CHART_PROJECT}"
+
+          echo "Published ${{ steps.package.outputs.package_name }} to oci://${HARBOR_REGISTRY}/${HARBOR_CHART_PROJECT}"

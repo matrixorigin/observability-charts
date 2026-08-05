@@ -44,14 +44,6 @@ jobs:
           helm repo add cnpg https://cloudnative-pg.github.io/charts
           helm repo update
 
-      - name: Install chart-releaser
-        uses: helm/chart-releaser-action@be16258da8010256c6e82849661221415f031968 # tag=v1.5.0
-        with:
-          version: v1.5.0
-          install_only: "true"
-        env:
-          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Build and lint all Helm charts
         shell: bash
         run: |
@@ -639,7 +631,7 @@ jobs:
             grep -Eq "^  ${REQUIRED_KEY}:" "${CUSTOMER_SECRETS_TEMPLATE}"
           done
 
-      - name: Dry-run chart-releaser packaging
+      - name: Dry-run Helm packaging
         shell: bash
         run: |
           set -euo pipefail
@@ -669,9 +661,10 @@ jobs:
 
             EXPECTED_PACKAGE="${PACKAGE_DIR}/${CHART_NAME}-${CHART_VERSION}.tgz"
 
-            cr package \
+            helm package \
               "${CHART_DIR}" \
-              --package-path "${PACKAGE_DIR}"
+              --dependency-update \
+              --destination "${PACKAGE_DIR}"
 
             test -s "${EXPECTED_PACKAGE}"
             tar -tzf "${EXPECTED_PACKAGE}" >/dev/null
@@ -715,7 +708,7 @@ jobs:
             exit 1
           fi
 
-          echo "chart-releaser dry-run packages:"
+          echo "Helm dry-run packages:"
           find "${PACKAGE_DIR}" \
             -maxdepth 1 \
             -type f \
