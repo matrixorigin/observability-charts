@@ -14,7 +14,9 @@ postgresql:
   cluster:
     # Delivery default. Override consistently when the customer uses another
     # dynamic ReadWriteOnce provisioner.
-    storageClass: directpv-min-io
+    storage:
+      storageClass: directpv-min-io
+      size: 20Gi
     imageName: >-
       ghcr.m.daocloud.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c
     # Foreign upstream:
@@ -111,7 +113,7 @@ mo-ob-opensource:
         repository: grafana/loki
         tag: "3.2.0"
         # Foreign upstream: docker.io/grafana/loki:3.2.0
-      # disable log alert in paivate env
+      # disable log alert in private env
       rulerConfig: 
         storage: 
           type: ""

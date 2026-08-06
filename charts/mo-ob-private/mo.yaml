@@ -51,7 +51,7 @@ mo-ob-opensource:
         publishNotReadyAddresses: true
 
     loki:
-      # disable log alert in paivate env
+      # disable log alert in private env
       rulerConfig: 
         storage: 
           type: ""  

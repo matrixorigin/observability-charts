@@ -1047,12 +1047,16 @@
                   "storage": {
                     "type": "object",
                     "required": [
-                      "size"
+                      "size",
+                      "storageClass"
                     ],
                     "properties": {
                       "size": {
                         "type": "string",
                         "pattern": "^[1-9][0-9]*(Gi|Ti)$"
+                      },
+                      "storageClass": {
+                        "$ref": "#/definitions/dns1123Subdomain"
                       }
                     }
                   },
