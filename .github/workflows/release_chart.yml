@@ -7,7 +7,6 @@ on:
     - private
     paths:
     - 'charts/mo-ob-private/**'
-    - '.github/workflows/release_chart.yml'
   workflow_dispatch:
 
 concurrency:
