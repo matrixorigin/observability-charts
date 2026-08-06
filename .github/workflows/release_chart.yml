@@ -182,8 +182,33 @@ jobs:
         run: |
           set -euo pipefail
 
+          HARBOR_USERNAME="$(
+            printf '%s' "${HARBOR_USERNAME}" |
+              tr -d '\r\n'
+          )"
+          HARBOR_PASSWORD="$(
+            printf '%s' "${HARBOR_PASSWORD}" |
+              tr -d '\r\n'
+          )"
+
           if [[ -z "${HARBOR_USERNAME}" || -z "${HARBOR_PASSWORD}" ]]; then
             echo "Missing HARBOR_USERNAME or HARBOR_PASSWORD repository secret"
+            exit 1
+          fi
+
+          AUTH_CHECK_BODY="${RUNNER_TEMP}/harbor-auth-check.json"
+          AUTH_CHECK_CODE="$(
+            curl -sS \
+              -o "${AUTH_CHECK_BODY}" \
+              -w '%{http_code}' \
+              --user "${HARBOR_USERNAME}:${HARBOR_PASSWORD}" \
+              "https://${HARBOR_REGISTRY}/api/v2.0/users/current"
+          )"
+
+          if [[ "${AUTH_CHECK_CODE}" != "200" ]]; then
+            echo "Harbor credential check failed before Helm login; HTTP ${AUTH_CHECK_CODE}"
+            echo "Verify repository secrets HARBOR_USERNAME and HARBOR_PASSWORD."
+            cat "${AUTH_CHECK_BODY}"
             exit 1
           fi
 
@@ -200,6 +225,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+
+          HARBOR_USERNAME="$(
+            printf '%s' "${HARBOR_USERNAME}" |
+              tr -d '\r\n'
+          )"
+          HARBOR_PASSWORD="$(
+            printf '%s' "${HARBOR_PASSWORD}" |
+              tr -d '\r\n'
+          )"
 
           HTTP_BODY="${RUNNER_TEMP}/harbor-repository-check.json"
           HTTP_CODE="$(
