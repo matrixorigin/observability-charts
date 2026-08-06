@@ -290,7 +290,6 @@ loki:
   read:
     replicas: 1
     extraArgs:
-      - -common.compactor-grpc-address=
       - -config.expand-env=true
     extraEnvFrom:
       - secretRef:

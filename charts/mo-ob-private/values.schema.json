@@ -5,6 +5,8 @@
   "additionalProperties": true,
   "required": [
     "customerSizingApproved",
+    "imageSource",
+    "postgresql",
     "mo-ob-opensource",
     "mo-ruler-stack"
   ],
@@ -68,6 +70,27 @@
     "customerSizingApproved": {
       "const": true,
       "description": "Explicit acknowledgement that the customer resource and storage sizing has been reviewed."
+    },
+    "imageSource": {
+      "type": "string",
+      "enum": [
+        "domestic",
+        "upstream",
+        "private"
+      ],
+      "description": "Rendered image profile: verified domestic mirrors, foreign upstream registries, or a fully overridden private registry."
+    },
+    "postgresql": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "enabled"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      }
     },
     "mo-ob-opensource": {
       "type": "object",
@@ -472,22 +495,7 @@
               "$ref": "#/definitions/lokiCredentialConsumer"
             },
             "read": {
-              "allOf": [
-                {
-                  "$ref": "#/definitions/lokiCredentialConsumer"
-                },
-                {
-                  "type": "object",
-                  "properties": {
-                    "extraArgs": {
-                      "type": "array",
-                      "contains": {
-                        "const": "-common.compactor-grpc-address="
-                      }
-                    }
-                  }
-                }
-              ]
+              "$ref": "#/definitions/lokiCredentialConsumer"
             },
             "backend": {
               "$ref": "#/definitions/lokiCredentialConsumer"
@@ -669,9 +677,45 @@
             "sidecar": {
               "type": "object",
               "required": [
+                "dashboards",
                 "datasources"
               ],
               "properties": {
+                "dashboards": {
+                  "type": "object",
+                  "required": [
+                    "enabled",
+                    "label",
+                    "labelValue",
+                    "folderAnnotation",
+                    "provider"
+                  ],
+                  "properties": {
+                    "enabled": {
+                      "const": true
+                    },
+                    "label": {
+                      "const": "grafana_dashboard"
+                    },
+                    "labelValue": {
+                      "const": "1"
+                    },
+                    "folderAnnotation": {
+                      "const": "grafana_folder"
+                    },
+                    "provider": {
+                      "type": "object",
+                      "required": [
+                        "foldersFromFilesStructure"
+                      ],
+                      "properties": {
+                        "foldersFromFilesStructure": {
+                          "const": true
+                        }
+                      }
+                    }
+                  }
+                },
                 "datasources": {
                   "type": "object",
                   "properties": {
@@ -803,6 +847,514 @@
                 "required": [
                   "admin"
                 ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "mo-ruler-stack": {
+            "required": [
+              "grafana"
+            ],
+            "properties": {
+              "grafana": {
+                "required": [
+                  "env"
+                ],
+                "properties": {
+                  "env": {
+                    "required": [
+                      "GF_DATABASE_HOST"
+                    ],
+                    "properties": {
+                      "GF_DATABASE_HOST": {
+                        "const": "mo-ob-postgresql-rw:5432"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "mo-ruler-stack"
+        ]
+      },
+      "then": {
+        "properties": {
+          "postgresql": {
+            "required": [
+              "enabled"
+            ],
+            "properties": {
+              "enabled": {
+                "const": true
+              }
+            }
+          }
+        },
+        "required": [
+          "postgresql"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "postgresql": {
+            "type": "object",
+            "required": [
+              "enabled"
+            ],
+            "properties": {
+              "enabled": {
+                "const": true
+              }
+            }
+          }
+        },
+        "required": [
+          "postgresql"
+        ]
+      },
+      "then": {
+        "properties": {
+          "postgresql": {
+            "required": [
+              "cluster",
+              "backups"
+            ],
+            "properties": {
+              "cluster": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "annotations",
+                  "instances",
+                  "imageName",
+                  "imagePullPolicy",
+                  "imagePullSecrets",
+                  "enablePDB",
+                  "enableSuperuserAccess",
+                  "affinity",
+                  "initdb",
+                  "storage",
+                  "resources",
+                  "primaryUpdateMethod",
+                  "primaryUpdateStrategy",
+                  "postgresql"
+                ],
+                "properties": {
+                  "name": {
+                    "const": "mo-ob-postgresql"
+                  },
+                  "annotations": {
+                    "type": "object",
+                    "required": [
+                      "helm.sh/resource-policy"
+                    ],
+                    "properties": {
+                      "helm.sh/resource-policy": {
+                        "const": "keep"
+                      }
+                    }
+                  },
+                  "instances": {
+                    "const": 3
+                  },
+                  "imageName": {
+                    "type": "string",
+                    "pattern": "^[^\\s@]+:[^\\s@]+@sha256:[a-f0-9]{64}$"
+                  },
+                  "imagePullPolicy": {
+                    "enum": [
+                      "IfNotPresent",
+                      "Always",
+                      "Never"
+                    ]
+                  },
+                  "imagePullSecrets": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "name"
+                      ],
+                      "properties": {
+                        "name": {
+                          "$ref": "#/definitions/dns1123Subdomain"
+                        }
+                      }
+                    }
+                  },
+                  "enablePDB": {
+                    "const": true
+                  },
+                  "enableSuperuserAccess": {
+                    "const": false
+                  },
+                  "affinity": {
+                    "type": "object",
+                    "required": [
+                      "enablePodAntiAffinity",
+                      "podAntiAffinityType",
+                      "topologyKey"
+                    ],
+                    "properties": {
+                      "enablePodAntiAffinity": {
+                        "const": true
+                      },
+                      "podAntiAffinityType": {
+                        "const": "required"
+                      },
+                      "topologyKey": {
+                        "const": "kubernetes.io/hostname"
+                      }
+                    }
+                  },
+                  "initdb": {
+                    "type": "object",
+                    "required": [
+                      "database",
+                      "owner",
+                      "secret"
+                    ],
+                    "properties": {
+                      "database": {
+                        "const": "grafana"
+                      },
+                      "owner": {
+                        "const": "grafana"
+                      },
+                      "secret": {
+                        "type": "object",
+                        "required": [
+                          "name"
+                        ],
+                        "properties": {
+                          "name": {
+                            "const": "mo-ob-postgresql-app"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "storage": {
+                    "type": "object",
+                    "required": [
+                      "size",
+                      "storageClass"
+                    ],
+                    "properties": {
+                      "size": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*(Gi|Ti)$"
+                      },
+                      "storageClass": {
+                        "$ref": "#/definitions/dns1123Subdomain"
+                      }
+                    }
+                  },
+                  "resources": {
+                    "type": "object",
+                    "required": [
+                      "requests",
+                      "limits"
+                    ]
+                  },
+                  "primaryUpdateMethod": {
+                    "const": "switchover"
+                  },
+                  "primaryUpdateStrategy": {
+                    "const": "unsupervised"
+                  },
+                  "postgresql": {
+                    "type": "object",
+                    "required": [
+                      "synchronous",
+                      "parameters"
+                    ],
+                    "properties": {
+                      "synchronous": {
+                        "type": "object",
+                        "required": [
+                          "dataDurability",
+                          "method",
+                          "number"
+                        ],
+                        "properties": {
+                          "dataDurability": {
+                            "const": "required"
+                          },
+                          "method": {
+                            "enum": [
+                              "any",
+                              "first"
+                            ]
+                          },
+                          "number": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 2
+                          }
+                        }
+                      },
+                      "parameters": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              },
+              "backups": {
+                "type": "object",
+                "required": [
+                  "enabled",
+                  "method",
+                  "endpointURL",
+                  "destinationPath",
+                  "endpointCA",
+                  "secret",
+                  "scheduledBackups",
+                  "retentionPolicy",
+                  "wal",
+                  "data"
+                ],
+                "properties": {
+                  "enabled": {
+                    "const": true
+                  },
+                  "method": {
+                    "const": "barmanObjectStore"
+                  },
+                  "endpointURL": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "destinationPath": {
+                    "type": "string",
+                    "pattern": "^s3://.+"
+                  },
+                  "endpointCA": {
+                    "type": "object",
+                    "required": [
+                      "name",
+                      "key"
+                    ],
+                    "properties": {
+                      "name": {
+                        "anyOf": [
+                          {
+                            "const": ""
+                          },
+                          {
+                            "$ref": "#/definitions/dns1123Subdomain"
+                          }
+                        ]
+                      },
+                      "key": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  },
+                  "secret": {
+                    "type": "object",
+                    "required": [
+                      "name"
+                    ],
+                    "properties": {
+                      "name": {
+                        "const": "mo-ob-postgresql-backup-s3"
+                      }
+                    }
+                  },
+                  "scheduledBackups": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "name",
+                        "schedule",
+                        "backupOwnerReference",
+                        "method"
+                      ],
+                      "properties": {
+                        "name": {
+                          "$ref": "#/definitions/dns1123Subdomain"
+                        },
+                        "schedule": {
+                          "type": "string",
+                          "pattern": "^(\\S+\\s+){5}\\S+$"
+                        },
+                        "backupOwnerReference": {
+                          "enum": [
+                            "self",
+                            "cluster",
+                            "none"
+                          ]
+                        },
+                        "method": {
+                          "const": "barmanObjectStore"
+                        }
+                      }
+                    }
+                  },
+                  "retentionPolicy": {
+                    "type": "string",
+                    "pattern": "^[1-9][0-9]*[dwm]$"
+                  },
+                  "wal": {
+                    "type": "object",
+                    "required": [
+                      "compression",
+                      "maxParallel"
+                    ],
+                    "properties": {
+                      "compression": {
+                        "enum": [
+                          "bzip2",
+                          "gzip",
+                          "lz4",
+                          "snappy",
+                          "xz",
+                          "zstd"
+                        ]
+                      },
+                      "maxParallel": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    }
+                  },
+                  "data": {
+                    "type": "object",
+                    "required": [
+                      "compression",
+                      "jobs"
+                    ],
+                    "properties": {
+                      "compression": {
+                        "enum": [
+                          "bzip2",
+                          "gzip",
+                          "lz4",
+                          "snappy"
+                        ]
+                      },
+                      "jobs": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "mo-ruler-stack": {
+            "type": "object",
+            "properties": {
+              "grafana": {
+                "type": "object",
+                "required": [
+                  "env",
+                  "envValueFrom"
+                ],
+                "properties": {
+                  "env": {
+                    "type": "object",
+                    "required": [
+                      "GF_DATABASE_TYPE",
+                      "GF_DATABASE_HOST",
+                      "GF_DATABASE_NAME",
+                      "GF_DATABASE_USER",
+                      "GF_DATABASE_SSL_MODE"
+                    ],
+                    "properties": {
+                      "GF_DATABASE_TYPE": {
+                        "const": "postgres"
+                      },
+                      "GF_DATABASE_HOST": {
+                        "const": "mo-ob-postgresql-rw:5432"
+                      },
+                      "GF_DATABASE_NAME": {
+                        "const": "grafana"
+                      },
+                      "GF_DATABASE_USER": {
+                        "const": "grafana"
+                      },
+                      "GF_DATABASE_SSL_MODE": {
+                        "enum": [
+                          "require",
+                          "verify-ca",
+                          "verify-full"
+                        ]
+                      }
+                    }
+                  },
+                  "envValueFrom": {
+                    "type": "object",
+                    "required": [
+                      "GF_DATABASE_PASSWORD",
+                      "GF_SECURITY_SECRET_KEY"
+                    ],
+                    "properties": {
+                      "GF_DATABASE_PASSWORD": {
+                        "type": "object",
+                        "required": [
+                          "secretKeyRef"
+                        ],
+                        "properties": {
+                          "secretKeyRef": {
+                            "type": "object",
+                            "required": [
+                              "name",
+                              "key"
+                            ],
+                            "properties": {
+                              "name": {
+                                "const": "mo-ob-postgresql-app"
+                              },
+                              "key": {
+                                "const": "password"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "GF_SECURITY_SECRET_KEY": {
+                        "type": "object",
+                        "required": [
+                          "secretKeyRef"
+                        ],
+                        "properties": {
+                          "secretKeyRef": {
+                            "type": "object",
+                            "required": [
+                              "name",
+                              "key"
+                            ],
+                            "properties": {
+                              "name": {
+                                "const": "mo-ob-postgresql-app"
+                              },
+                              "key": {
+                                "const": "GF_SECURITY_SECRET_KEY"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }

@@ -1,5 +1,27 @@
 customerSizingApproved: true
 
+# Customer delivery defaults to the verified domestic mirror set. To use the
+# foreign upstream registries, apply values-images-upstream.yaml after this
+# file. Private registries must set imageSource=private and override every
+# rendered image.
+imageSource: domestic
+
+# The CloudNativePG Cluster is opt-in so upgrading an existing release never
+# creates a database unexpectedly. Install the operator as a separate release
+# and wait for it to become ready before enabling this block.
+postgresql:
+  enabled: false
+  cluster:
+    # Delivery default. Override consistently when the customer uses another
+    # dynamic ReadWriteOnce provisioner.
+    storage:
+      storageClass: directpv-min-io
+      size: 20Gi
+    imageName: >-
+      ghcr.m.daocloud.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c
+    # Foreign upstream:
+    # ghcr.io/cloudnative-pg/postgresql:17.10-202608030910-system-bookworm@sha256:8561d04754c2caf8ed203b52e96163a24ff045782ca726d01b01bbcb0649222c
+
 mo-ob-opensource:
   enabled: true
 
@@ -18,9 +40,10 @@ mo-ob-opensource:
     serviceMonitor:
       enabled: false
     image:
-      registry: "docker.io"
+      registry: "docker.m.daocloud.io"
       repository: grafana/alloy
       tag: v1.3.1
+      # Foreign upstream: docker.io/grafana/alloy:v1.3.1
     configReloader:
       enabled: false
     alloy:
@@ -35,9 +58,10 @@ mo-ob-opensource:
     serviceMonitor:
       enabled: false
     image:
-      registry: docker.io
+      registry: docker.m.daocloud.io
       repository: grafana/promtail
       tag: "2.8.4"
+      # Foreign upstream: docker.io/grafana/promtail:2.8.4
     enabled: true
     resources:
       limits:
@@ -47,16 +71,19 @@ mo-ob-opensource:
         cpu: "10m"
         memory: "20Mi"
   loki:
+    global:
+      # This is the kube-system Service name, not the DNS implementation name.
+      # Some Kubespray clusters use coredns instead of kube-dns.
+      dnsService: kube-dns
+      dnsNamespace: kube-system
+      clusterDomain: cluster.local
     lokiCanary:
       enabled: false
     sidecar: 
       image:
-        repository: kiwigrid/k8s-sidecar
+        repository: docker.m.daocloud.io/kiwigrid/k8s-sidecar
         tag: 1.27.5
-    image:
-      registry: docker.io
-      repository: grafana/loki
-      tag: "3.2.0"
+        # Foreign upstream: docker.io/kiwigrid/k8s-sidecar:1.27.5
     enabled: true
     monitoring:
       dashboards:
@@ -81,7 +108,12 @@ mo-ob-opensource:
     # singleBinary:
     #   replicas: 2
     loki:
-      # disable log alert in paivate env
+      image:
+        registry: docker.m.daocloud.io
+        repository: grafana/loki
+        tag: "3.2.0"
+        # Foreign upstream: docker.io/grafana/loki:3.2.0
+      # disable log alert in private env
       rulerConfig: 
         storage: 
           type: ""
@@ -137,6 +169,7 @@ mo-ob-opensource:
             name: mo-ob-loki-s3
       persistence:
         enableStatefulSetAutoDeletePVC: false
+        storageClass: directpv-min-io
         size: 10Gi
       resources:
         requests:
@@ -148,16 +181,14 @@ mo-ob-opensource:
 
     read:
       replicas: 1
-      # Loki 3.2.0 can return gRPC EOFs when the read target loads compactor
-      # cache generations. Use the configured HTTP compactor address instead.
       extraArgs:
-        - -common.compactor-grpc-address=
         - -config.expand-env=true
       extraEnvFrom:
         - secretRef:
             name: mo-ob-loki-s3
       persistence:
         enableStatefulSetAutoDeletePVC: true
+        storageClass: directpv-min-io
         size: 10Gi
       resources:
         requests:
@@ -180,6 +211,7 @@ mo-ob-opensource:
       extraVolumes: []
       persistence:
         enableStatefulSetAutoDeletePVC: true
+        storageClass: directpv-min-io
         size: 10Gi
       resources:
         requests:
@@ -192,9 +224,10 @@ mo-ob-opensource:
     # Configuration for the gateway
     gateway:
       image:
-        registry: docker.io
+        registry: docker.m.daocloud.io
         repository: nginxinc/nginx-unprivileged
         tag: 1.27-alpine
+        # Foreign upstream: docker.io/nginxinc/nginx-unprivileged:1.27-alpine
       enabled: true
       service:
         labels:
@@ -244,9 +277,10 @@ mo-ob-opensource:
 
     prometheus-node-exporter: 
       image:
-        registry: quay.io
+        registry: quay.m.daocloud.io
         repository: prometheus/node-exporter
         tag: v1.5.0
+        # Foreign upstream: quay.io/prometheus/node-exporter:v1.5.0
       enabled: true
       service:
         annotations:
@@ -266,15 +300,24 @@ mo-ob-opensource:
       serviceMonitor:
         selfMonitor: false
       image: 
-        registry: quay.io
+        registry: quay.m.daocloud.io
         repository: prometheus-operator/prometheus-operator
         tag: v0.63.0
+        # Foreign upstream: quay.io/prometheus-operator/prometheus-operator:v0.63.0
       prometheusConfigReloader: 
         image:
-          registry: quay.io
+          registry: quay.m.daocloud.io
           repository: prometheus-operator/prometheus-config-reloader
           # if not set appVersion field from Chart.yaml is used
           tag: v0.63.0
+          # Foreign upstream: quay.io/prometheus-operator/prometheus-config-reloader:v0.63.0
+      thanosImage:
+        # DaoCloud's quay mirror does not expose this tag; the verified
+        # Docker Hub mirror contains the same manifest digest as Quay.
+        registry: docker.m.daocloud.io
+        repository: thanosio/thanos
+        tag: v0.30.2
+        # Foreign upstream: quay.io/thanos/thanos:v0.30.2
       admissionWebhooks: 
         enabled: false
         patch: 
@@ -292,9 +335,10 @@ mo-ob-opensource:
         selfMonitor: false
       prometheusSpec:
         image:
-          registry: quay.io
+          registry: quay.m.daocloud.io
           repository: prometheus/prometheus
           tag: v2.42.0
+          # Foreign upstream: quay.io/prometheus/prometheus:v2.42.0
         retention: 21d
         # Monitoring content is managed by the companion ob-ops Chart and may
         # live in a different namespace without sharing this release label.
@@ -320,6 +364,7 @@ mo-ob-opensource:
         storageSpec:
           volumeClaimTemplate:
             spec:
+              storageClassName: directpv-min-io
               accessModes: ["ReadWriteOnce"]
               resources:
                 requests:
@@ -340,9 +385,10 @@ mo-ob-opensource:
     kube-state-metrics:
       enabled: true
       image:
-        registry: registry.k8s.io
-        repository: kube-state-metrics/kube-state-metrics
+        registry: m.daocloud.io
+        repository: registry.k8s.io/kube-state-metrics/kube-state-metrics
         tag: v2.8.2
+        # Foreign upstream: registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.8.2
       prometheus:
         monitor:
           enabled: false
@@ -370,14 +416,18 @@ mo-ruler-stack:
   alertmanagerWebhookAdapter:
     enabled: false
     image:
-      repository: ez4bruce3280/alertmanager-webhook-adapter
+      # DaoCloud does not expose this optional image. 1ms is a verified public
+      # accelerator; production/offline sites should mirror it to customer Harbor.
+      repository: docker.1ms.run/ez4bruce3280/alertmanager-webhook-adapter
       tag: v1.1.7
+      # Foreign upstream: docker.io/ez4bruce3280/alertmanager-webhook-adapter:v1.1.7
 
   alertmanager:
     image:
-      repository: quay.io/prometheus/alertmanager
+      repository: quay.m.daocloud.io/prometheus/alertmanager
       pullPolicy: IfNotPresent
       tag: v0.27.0
+      # Foreign upstream: quay.io/prometheus/alertmanager:v0.27.0
     enabled: true
     service:
       annotations:
@@ -387,6 +437,7 @@ mo-ruler-stack:
         prometheus.io/scrape: "false"
     persistence:
       enabled: false
+      storageClass: directpv-min-io
     livenessProbe:
       httpGet:
         httpHeaders: []
@@ -425,21 +476,28 @@ mo-ruler-stack:
     testFramework:
       enabled: false
     image:
-      repository: docker.io/grafana/grafana
+      repository: docker.m.daocloud.io/grafana/grafana
       tag: 10.1.6
+      # Foreign upstream: docker.io/grafana/grafana:10.1.6
     serviceMonitor:
       enabled: false
     extraSecretMounts: []
     initChownData: 
       enabled: false
       image:
-        repository: docker.io/library/busybox
+        repository: docker.m.daocloud.io/library/busybox
         tag: 1.31.1
+        # Foreign upstream: docker.io/library/busybox:1.31.1
     sidecar: 
       image:
-        repository: docker.io/kiwigrid/k8s-sidecar
+        repository: docker.m.daocloud.io/kiwigrid/k8s-sidecar
         tag: 2.8.1
+        # Foreign upstream: docker.io/kiwigrid/k8s-sidecar:2.8.1
       dashboards:
+        # Keep these fields aligned with the ob-ops Dashboard ConfigMaps.
+        enabled: true
+        label: grafana_dashboard
+        labelValue: "1"
         folderAnnotation: grafana_folder
         # k8s-sidecar 2.8.1 keeps the folder map during list reconciliation,
         # so bulk Helm deletes converge even if individual watch events are lost.
@@ -467,6 +525,7 @@ mo-ruler-stack:
     persistence: 
       enabled:          true
       type:             "statefulset"
+      storageClassName: directpv-min-io
       size:             "5Gi"
     
     admin:

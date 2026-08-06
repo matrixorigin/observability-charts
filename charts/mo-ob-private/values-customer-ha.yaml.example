@@ -1,10 +1,8 @@
-# 兼容文件：客户高可用容量规划示例。
-# 新文档请使用同内容、名称更明确的 values-customer-ha.yaml.example。
-# 本文件暂时保留，避免已有交付脚本和文档失效。
+# 客户高可用容量规划示例。
 #
 # 本文件只保存非敏感配置。MinIO/S3 AK/SK、Grafana 登录密码和内置
-# PostgreSQL 数据库密码统一填写到同目录的 customer-secrets.yaml.example 副本中：
-#   install -m 0600 customer-secrets.yaml.example /root/mo-ob-customer-secrets.yaml
+# PostgreSQL 数据库密码统一填写到同目录的 customer-secrets-ha.yaml.example 副本中：
+#   install -m 0600 customer-secrets-ha.yaml.example /root/mo-ob-customer-secrets.yaml
 # 填好所有 FILL_THIS_VALUE 后执行：
 #   kubectl apply -f /root/mo-ob-customer-secrets.yaml
 #
@@ -307,7 +305,7 @@ mo-ruler-stack:
   grafana:
     # 【通常保持】两个副本通过 NodePort Service 负载均衡，并共享内置 PostgreSQL。
     replicas: 2
-    # 【通常保持】Grafana Web 用户名和密码位于 customer-secrets.yaml 中的
+    # 【通常保持】Grafana Web 用户名和密码位于 customer-secrets-ha.yaml 中的
     # mo-ob-grafana-admin Secret，不要直接写进 values。
     admin:
       existingSecret: mo-ob-grafana-admin

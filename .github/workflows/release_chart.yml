@@ -6,18 +6,24 @@ on:
     - main
     - private
     paths:
-    - 'charts/**/Chart.yaml'
-  release:
-    types:
-    - published
+    - 'charts/mo-ob-private/**'
+    - '.github/workflows/release_chart.yml'
   workflow_dispatch:
 
-permissions: read-all
+concurrency:
+  group: chart-publish-${{ github.repository }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  CHART_DIR: charts/mo-ob-private
+  HARBOR_REGISTRY: shanghai.idc.matrixorigin.cn:30019
+  HARBOR_CHART_PROJECT: mocloud-charts
 
 jobs:
   publish:
-    permissions:
-      contents: write # for helm/chart-releaser-action to push chart release and create a release
     runs-on: ubuntu-latest
 
     steps:
@@ -26,47 +32,245 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Configure Git
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-
-      - name: Copy rules file for ob-opensource
-        run: |
-          cp -r ./charts/mo-ruler-stack/rules ./charts/mo-ob-opensource/rules
-
-      - name: Build and lint Helm dependencies
+      - name: Detect mo-ob-private changes
+        id: changes
+        shell: bash
         run: |
           set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "changed=true" >>"${GITHUB_OUTPUT}"
+            echo "workflow_dispatch requested publishing"
+            exit 0
+          fi
+
+          BEFORE="${{ github.event.before }}"
+          AFTER="${{ github.sha }}"
+
+          if [[ -z "${BEFORE}" ||
+                "${BEFORE}" == "0000000000000000000000000000000000000000" ]]; then
+            CHANGED_FILES="$(
+              git diff-tree \
+                --no-commit-id \
+                --name-only \
+                -r "${AFTER}" \
+                -- "${CHART_DIR}"
+            )"
+          else
+            CHANGED_FILES="$(
+              git diff \
+                --name-only \
+                "${BEFORE}" \
+                "${AFTER}" \
+                -- "${CHART_DIR}"
+            )"
+          fi
+
+          if [[ -n "${CHANGED_FILES}" ]]; then
+            echo "changed=true" >>"${GITHUB_OUTPUT}"
+            echo "Changed chart files:"
+            printf '%s\n' "${CHANGED_FILES}"
+          else
+            echo "changed=false" >>"${GITHUB_OUTPUT}"
+            echo "No mo-ob-private chart changes detected; skip publish"
+          fi
+
+      - name: Copy rules file for ob-opensource
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          rm -rf charts/mo-ob-opensource/rules
+          cp -R charts/mo-ruler-stack/rules charts/mo-ob-opensource/rules
+
+      - name: Configure Helm repositories
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo add grafana https://grafana.github.io/helm-charts
+          helm repo add victoriametrics https://victoriametrics.github.io/helm-charts
+          helm repo add fluent https://fluent.github.io/helm-charts
+          helm repo add ckotzbauer https://ckotzbauer.github.io/helm-charts
+          helm repo add cnpg https://cloudnative-pg.github.io/charts
+          helm repo update
+
+      - name: Build, lint and render mo-ob-private
+        if: steps.changes.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
           helm dependency update charts/mo-ob-opensource
           helm dependency update charts/mo-ruler-stack
-          helm dependency update charts/mo-ob-private
-          helm lint charts/mo-ob-opensource
-          helm lint charts/mo-ruler-stack
-          helm lint charts/mo-ob-private
+          helm dependency update "${CHART_DIR}"
 
-          helm template mo-ob-private charts/mo-ob-private \
+          helm lint "${CHART_DIR}"
+
+          helm template mo-ob-private "${CHART_DIR}" \
             --namespace mo-ob \
             --kube-version 1.34.3 \
-            > /tmp/mo-ob-private-rendered.yaml
+            --api-versions policy/v1/PodDisruptionBudget \
+            --values "${CHART_DIR}/values-customer-standard.yaml.example" \
+            --values "${CHART_DIR}/values-images-domestic.yaml" \
+            --set customerSizingApproved=true \
+            >"${RUNNER_TEMP}/mo-ob-private-standard.yaml"
 
-          test "$(grep -c '^kind: ServiceMonitor$' /tmp/mo-ob-private-rendered.yaml || true)" -eq 0
-          test "$(grep -c '^kind: PodMonitor$' /tmp/mo-ob-private-rendered.yaml || true)" -eq 0
-          test "$(grep -c '^kind: PrometheusRule$' /tmp/mo-ob-private-rendered.yaml || true)" -eq 0
+          helm template mo-ob-private "${CHART_DIR}" \
+            --namespace mo-ob \
+            --kube-version 1.34.3 \
+            --api-versions policy/v1/PodDisruptionBudget \
+            --values "${CHART_DIR}/values-customer-ha.yaml.example" \
+            --values "${CHART_DIR}/values-images-domestic.yaml" \
+            --set customerSizingApproved=true \
+            >"${RUNNER_TEMP}/mo-ob-private-ha.yaml"
 
-      - name: Run Artifact Hub lint
+          for RENDERED in \
+            "${RUNNER_TEMP}/mo-ob-private-standard.yaml" \
+            "${RUNNER_TEMP}/mo-ob-private-ha.yaml"; do
+
+            if grep -Eq \
+              "(^|[[:space:]=\"'])(docker\\.io|quay\\.io|ghcr\\.io|registry\\.k8s\\.io)/" \
+              "${RENDERED}"; then
+
+              echo "Domestic render contains a foreign upstream registry: ${RENDERED}"
+              exit 1
+            fi
+          done
+
+      - name: Package mo-ob-private
+        if: steps.changes.outputs.changed == 'true'
+        id: package
+        shell: bash
         run: |
-          #curl -s https://api.github.com/repos/artifacthub/hub/releases/latest | grep -E 'browser_download_url' | grep linux_amd64.tar.gz\" | grep -Eo 'https://[^\"]*' | xargs wget -O - | tar -xz
-          echo "https://github.com/artifacthub/hub/releases/download/v1.16.0/ah_1.16.0_linux_amd64.tar.gz" | xargs wget -O - | tar -xz
-          ./ah lint -p charts || exit 1
-          rm -f ./ah
+          set -euo pipefail
 
-      - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.5.0
-        with:
-          charts_dir: charts
+          PACKAGE_DIR="${RUNNER_TEMP}/chart-packages"
+          mkdir -p "${PACKAGE_DIR}"
+
+          helm package "${CHART_DIR}" \
+            --dependency-update \
+            --destination "${PACKAGE_DIR}"
+
+          PACKAGE_PATH="$(
+            find "${PACKAGE_DIR}" \
+              -maxdepth 1 \
+              -type f \
+              -name 'mo-ob-private-*.tgz' \
+              -print \
+              -quit
+          )"
+
+          test -s "${PACKAGE_PATH}"
+          tar -tzf "${PACKAGE_PATH}" >/dev/null
+          CHART_METADATA="$(helm show chart "${PACKAGE_PATH}")"
+          printf '%s\n' "${CHART_METADATA}"
+
+          CHART_VERSION="$(
+            awk '/^version:/ { print $2; exit }' \
+              <<<"${CHART_METADATA}"
+          )"
+
+          echo "package_path=${PACKAGE_PATH}" >>"${GITHUB_OUTPUT}"
+          echo "package_name=$(basename "${PACKAGE_PATH}")" >>"${GITHUB_OUTPUT}"
+          echo "chart_version=${CHART_VERSION}" >>"${GITHUB_OUTPUT}"
+
+      - name: Login to Harbor OCI registry
+        if: steps.changes.outputs.changed == 'true'
         env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          ## PS: multi charts NEED diff release tag
-          CR_RELEASE_NAME_TEMPLATE: "chart-{{ .Name }}-{{ .Version }}"
-          CR_SKIP_EXISTING: true
+          HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
+          HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${HARBOR_USERNAME}" || -z "${HARBOR_PASSWORD}" ]]; then
+            echo "Missing HARBOR_USERNAME or HARBOR_PASSWORD repository secret"
+            exit 1
+          fi
+
+          printf '%s' "${HARBOR_PASSWORD}" |
+            helm registry login "${HARBOR_REGISTRY}" \
+              --username "${HARBOR_USERNAME}" \
+              --password-stdin
+
+      - name: Verify Harbor chart project access
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
+          HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          HTTP_BODY="${RUNNER_TEMP}/harbor-repository-check.json"
+          HTTP_CODE="$(
+            curl -sS \
+              -o "${HTTP_BODY}" \
+              -w '%{http_code}' \
+              --user "${HARBOR_USERNAME}:${HARBOR_PASSWORD}" \
+              "https://${HARBOR_REGISTRY}/v2/${HARBOR_CHART_PROJECT}/mo-ob-private/tags/list"
+          )"
+
+          case "${HTTP_CODE}" in
+            200)
+              echo "Harbor chart repository is readable"
+              ;;
+            404)
+              echo "Harbor project is reachable; mo-ob-private repository does not exist yet"
+              ;;
+            *)
+              echo "Cannot access Harbor chart project ${HARBOR_CHART_PROJECT}; HTTP ${HTTP_CODE}"
+              cat "${HTTP_BODY}"
+              exit 1
+              ;;
+          esac
+
+      - name: Check Harbor chart version
+        if: steps.changes.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          set +e
+          helm show chart \
+            "oci://${HARBOR_REGISTRY}/${HARBOR_CHART_PROJECT}/mo-ob-private" \
+            --version "${{ steps.package.outputs.chart_version }}" \
+            >/tmp/existing-mo-ob-private-chart.yaml 2>/tmp/existing-mo-ob-private-chart.err
+          SHOW_RESULT=$?
+          set -e
+
+          if [[ "${SHOW_RESULT}" -eq 0 ]]; then
+            echo "mo-ob-private ${{ steps.package.outputs.chart_version }} already exists in Harbor."
+            echo "Please increment charts/mo-ob-private/Chart.yaml version before publishing changed chart content."
+            exit 1
+          fi
+
+          if grep -Eiq \
+            'unauthorized|forbidden|denied|authentication required|project .*not found' \
+            /tmp/existing-mo-ob-private-chart.err; then
+
+            echo "Cannot verify Harbor chart version because Harbor access failed:"
+            cat /tmp/existing-mo-ob-private-chart.err
+            exit 1
+          fi
+
+          if ! grep -Eiq \
+            'not found|manifest unknown|name unknown' \
+            /tmp/existing-mo-ob-private-chart.err; then
+
+            echo "Cannot determine whether mo-ob-private ${{ steps.package.outputs.chart_version }} exists:"
+            cat /tmp/existing-mo-ob-private-chart.err
+            exit 1
+          fi
+
+          echo "mo-ob-private ${{ steps.package.outputs.chart_version }} does not exist in Harbor; publishing may continue"
+
+      - name: Push mo-ob-private to Harbor Chart repository
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+
+          helm push \
+            "${{ steps.package.outputs.package_path }}" \
+            "oci://${HARBOR_REGISTRY}/${HARBOR_CHART_PROJECT}"
+
+          echo "Published ${{ steps.package.outputs.package_name }} to oci://${HARBOR_REGISTRY}/${HARBOR_CHART_PROJECT}"

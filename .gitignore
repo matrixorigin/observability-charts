@@ -23,3 +23,7 @@ Chart.lock
 charts/*/charts
 charts/mo-ob-opensource/rules
 /dist/
+
+# Customer-local plaintext Secret manifests. Only *.example templates are tracked.
+customer-secrets.yaml
+mo-ob-customer-secrets.yaml
